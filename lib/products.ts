@@ -4,6 +4,7 @@ export type Merchant = {
 };
 
 export type ProductVisual = "baby-socks" | "changing-mat" | "grooming-kit" | "stroller-organizer";
+export type ProductStatus = "draft" | "published";
 
 export type ProductImage = {
   src: string;
@@ -14,6 +15,7 @@ export type ProductImage = {
 export type Product = {
   id: string;
   slug: string;
+  status: ProductStatus;
   categorySlug: string;
   name: string;
   summary: string;
@@ -40,6 +42,7 @@ export const products: Product[] = [
   {
     id: "baby-grip-socks-slippers",
     slug: "baby-grip-socks-slippers",
+    status: "published",
     categorySlug: "safety-comfort",
     name: "Baby Grip Socks Slippers",
     summary: "Soft sock-style baby slippers with elastic straps and a playful fox design for comfortable indoor wear.",
@@ -55,6 +58,7 @@ export const products: Product[] = [
   {
     id: "portable-changing-mat",
     slug: "portable-changing-mat",
+    status: "draft",
     categorySlug: "baby-essentials",
     name: "Portable Changing Mat",
     summary: "A wipe-clean, foldable changing surface for calmer changes away from home.",
@@ -65,6 +69,7 @@ export const products: Product[] = [
   {
     id: "baby-grooming-kit",
     slug: "baby-grooming-kit",
+    status: "draft",
     categorySlug: "baby-essentials",
     name: "Baby Grooming Kit",
     summary: "A compact set for the small everyday care moments that quickly become routine.",
@@ -75,6 +80,7 @@ export const products: Product[] = [
   {
     id: "stroller-organizer",
     slug: "stroller-organizer",
+    status: "draft",
     categorySlug: "baby-essentials",
     name: "Stroller Organizer",
     summary: "Keeps bottles, wipes, and parent essentials easy to reach while you are out.",
@@ -107,12 +113,14 @@ export const offers: Offer[] = [
   { id: "stroller-organizer-aliexpress", productId: "stroller-organizer", merchantId: "aliexpress" },
 ];
 
+export const publishedProducts = products.filter((product) => product.status === "published");
+
 export function getProductsByCategory(categorySlug: string) {
-  return products.filter((product) => product.categorySlug === categorySlug);
+  return publishedProducts.filter((product) => product.categorySlug === categorySlug);
 }
 
 export function getProductBySlug(slug: string) {
-  return products.find((product) => product.slug === slug);
+  return publishedProducts.find((product) => product.slug === slug);
 }
 
 export function getOffersForProduct(productId: string) {

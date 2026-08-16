@@ -72,9 +72,9 @@ export default async function CategoryPage({ params }: PageProps<"/categories/[s
           <section className="bg-[#f7fcfe] px-5 py-14 sm:px-8 md:py-20">
             <div className="mx-auto max-w-6xl">
               <div className="max-w-2xl">
-                <p className="text-sm font-extrabold uppercase tracking-[0.14em] text-[#009dcc]">Product card preview</p>
-                <h2 className="mt-3 font-display text-4xl font-semibold tracking-[-0.045em] text-[#063f5b]">A first look at thoughtful finds.</h2>
-                <p className="mt-4 text-base leading-7 text-[#063f5b]/65">These sample products help us shape how recommendations and multiple merchant offers will appear.</p>
+                <p className="text-sm font-extrabold uppercase tracking-[0.14em] text-[#009dcc]">Featured picks</p>
+                <h2 className="mt-3 font-display text-4xl font-semibold tracking-[-0.045em] text-[#063f5b]">Thoughtful finds for this stage.</h2>
+                <p className="mt-4 text-base leading-7 text-[#063f5b]/65">Explore useful products and compare the merchant options currently available.</p>
               </div>
               <div className="mt-9 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                 {featuredProducts.map((product) => <ProductCard key={product.id} product={product} offers={getOffersForProduct(product.id)} />)}
@@ -86,7 +86,7 @@ export default async function CategoryPage({ params }: PageProps<"/categories/[s
         <section className="mx-auto max-w-6xl px-5 pb-16 sm:px-8 md:pb-22">
           <div className="flex flex-col items-start justify-between gap-6 rounded-[2rem] bg-[#063f5b] px-7 py-10 text-white sm:px-10 md:flex-row md:items-center">
             <div>
-              <p className="text-sm font-extrabold uppercase tracking-[0.14em] text-[#a8e8f5]">Category foundation</p>
+              <p className="text-sm font-extrabold uppercase tracking-[0.14em] text-[#a8e8f5]">Explore more</p>
               <h2 className="mt-2 font-display text-3xl font-semibold tracking-[-0.04em]">More thoughtful recommendations are on the way.</h2>
             </div>
             <Link href="/categories" className="shrink-0 rounded-full bg-white px-5 py-3 text-sm font-extrabold text-[#063f5b] transition hover:bg-[#e8f8fc]">View all categories</Link>

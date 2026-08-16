@@ -4,10 +4,10 @@ import { notFound } from "next/navigation";
 import { OfferComparison } from "../../components/offer-comparison";
 import { ProductImage } from "../../components/product-image";
 import { getCategory } from "../../categories/category-data";
-import { getOffersForProduct, getProductBySlug, products } from "@/lib/products";
+import { getOffersForProduct, getProductBySlug, publishedProducts } from "@/lib/products";
 
 export function generateStaticParams() {
-  return products.map((product) => ({ slug: product.slug }));
+  return publishedProducts.map((product) => ({ slug: product.slug }));
 }
 
 export async function generateMetadata({ params }: PageProps<"/products/[slug]">): Promise<Metadata> {
