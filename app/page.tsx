@@ -11,7 +11,6 @@ const values = [
 
 const featuredCategories = categories.slice(0, 3);
 const featuredProducts = publishedProducts.slice(0, 3);
-const featuredProductCategory = categories.find((category) => category.slug === featuredProducts[0]?.categorySlug);
 
 export default function Home() {
   return (
@@ -76,7 +75,7 @@ export default function Home() {
                 <p className="text-sm font-extrabold uppercase tracking-[0.14em] text-[#009dcc]">Featured picks</p>
                 <h2 className="mt-3 font-display text-4xl font-semibold tracking-[-0.045em] text-[#063f5b]">A few thoughtful places to start.</h2>
               </div>
-              {featuredProductCategory && <Link href={`/categories/${featuredProductCategory.slug}`} className="text-sm font-extrabold text-[#009dcc] transition-colors hover:text-[#0784b0]">Explore {featuredProductCategory.name} <span aria-hidden="true">→</span></Link>}
+              <Link href="/products" className="text-sm font-extrabold text-[#009dcc] transition-colors hover:text-[#0784b0]">View all products <span aria-hidden="true">→</span></Link>
             </div>
             <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {featuredProducts.map((product) => <ProductCard key={product.id} product={product} offers={getOffersForProduct(product.id)} />)}
