@@ -36,7 +36,7 @@ export default function GuidesPage() {
               </div>
               <h2 className="mt-5 font-display text-4xl font-semibold leading-tight tracking-[-0.045em] text-[#063f5b]">{featuredGuide.title}</h2>
               <p className="mt-4 max-w-xl text-base leading-7 text-[#063f5b]/65">{featuredGuide.description}</p>
-              <p className="mt-6 text-sm font-extrabold text-[#009dcc]">Full guide coming soon</p>
+              {featuredGuide.status === "published" && <Link href={`/guides/${featuredGuide.slug}`} className="mt-6 inline-flex items-center gap-2 text-sm font-extrabold text-[#009dcc] transition-colors hover:text-[#0784b0]">Read the guide <span aria-hidden="true">→</span></Link>}
             </div>
           </div>
         </section>
