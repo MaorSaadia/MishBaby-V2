@@ -25,13 +25,27 @@ export type Product = {
   badge?: string;
 };
 
-export type Offer = {
+type OfferBase = {
   id: string;
   productId: string;
   merchantId: string;
+};
+
+export type ActiveOffer = OfferBase & {
+  status: "active";
+  url: string;
+  affiliate: boolean;
+  lastVerifiedAt: string;
+};
+
+export type PausedOffer = OfferBase & {
+  status: "paused";
   url?: string;
   affiliate?: boolean;
+  lastVerifiedAt?: string;
 };
+
+export type Offer = ActiveOffer | PausedOffer;
 
 export const merchants: Merchant[] = [
   { id: "amazon", name: "Amazon" },
@@ -95,25 +109,30 @@ export const offers: Offer[] = [
     id: "baby-grip-socks-slippers-amazon",
     productId: "baby-grip-socks-slippers",
     merchantId: "amazon",
+    status: "active",
     url: "https://amzn.to/4pGSxof",
     affiliate: true,
+    lastVerifiedAt: "2026-08-16",
   },
   {
     id: "baby-grip-socks-slippers-aliexpress",
     productId: "baby-grip-socks-slippers",
     merchantId: "aliexpress",
+    status: "active",
     url: "https://s.click.aliexpress.com/e/_c3wy9QL9",
     affiliate: true,
+    lastVerifiedAt: "2026-08-16",
   },
-  { id: "portable-changing-mat-amazon", productId: "portable-changing-mat", merchantId: "amazon" },
-  { id: "portable-changing-mat-aliexpress", productId: "portable-changing-mat", merchantId: "aliexpress" },
-  { id: "baby-grooming-kit-amazon", productId: "baby-grooming-kit", merchantId: "amazon" },
-  { id: "baby-grooming-kit-aliexpress", productId: "baby-grooming-kit", merchantId: "aliexpress" },
-  { id: "stroller-organizer-amazon", productId: "stroller-organizer", merchantId: "amazon" },
-  { id: "stroller-organizer-aliexpress", productId: "stroller-organizer", merchantId: "aliexpress" },
+  { id: "portable-changing-mat-amazon", productId: "portable-changing-mat", merchantId: "amazon", status: "paused" },
+  { id: "portable-changing-mat-aliexpress", productId: "portable-changing-mat", merchantId: "aliexpress", status: "paused" },
+  { id: "baby-grooming-kit-amazon", productId: "baby-grooming-kit", merchantId: "amazon", status: "paused" },
+  { id: "baby-grooming-kit-aliexpress", productId: "baby-grooming-kit", merchantId: "aliexpress", status: "paused" },
+  { id: "stroller-organizer-amazon", productId: "stroller-organizer", merchantId: "amazon", status: "paused" },
+  { id: "stroller-organizer-aliexpress", productId: "stroller-organizer", merchantId: "aliexpress", status: "paused" },
 ];
 
 export const publishedProducts = products.filter((product) => product.status === "published");
+export const activeOffers = offers.filter((offer): offer is ActiveOffer => offer.status === "active");
 
 export function getProductsByCategory(categorySlug: string) {
   return publishedProducts.filter((product) => product.categorySlug === categorySlug);
@@ -124,7 +143,7 @@ export function getProductBySlug(slug: string) {
 }
 
 export function getOffersForProduct(productId: string) {
-  return offers.filter((offer) => offer.productId === productId);
+  return activeOffers.filter((offer) => offer.productId === productId);
 }
 
 export function getMerchant(merchantId: string) {
