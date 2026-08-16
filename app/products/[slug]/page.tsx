@@ -4,15 +4,16 @@ import { notFound } from "next/navigation";
 import { OfferComparison } from "../../components/offer-comparison";
 import { ProductImage } from "../../components/product-image";
 import { getCategory } from "../../categories/category-data";
-import { getOffersForProduct, getProductBySlug, publishedProducts } from "@/lib/products";
+import { getProductBySlug, getPublishedProducts } from "@/lib/products";
 
-export function generateStaticParams() {
-  return publishedProducts.map((product) => ({ slug: product.slug }));
+export async function generateStaticParams() {
+  const products = await getPublishedProducts();
+  return products.map((product) => ({ slug: product.slug }));
 }
 
 export async function generateMetadata({ params }: PageProps<"/products/[slug]">): Promise<Metadata> {
   const { slug } = await params;
-  const product = getProductBySlug(slug);
+  const product = await getProductBySlug(slug);
 
   if (!product) return {};
 
@@ -24,13 +25,11 @@ export async function generateMetadata({ params }: PageProps<"/products/[slug]">
 
 export default async function ProductPage({ params }: PageProps<"/products/[slug]">) {
   const { slug } = await params;
-  const product = getProductBySlug(slug);
+  const product = await getProductBySlug(slug);
 
   if (!product) notFound();
 
   const category = getCategory(product.categorySlug);
-  const productOffers = getOffersForProduct(product.id);
-
   if (!category) notFound();
 
   return (
@@ -76,7 +75,7 @@ export default async function ProductPage({ params }: PageProps<"/products/[slug
             <h2 className="mt-3 font-display text-4xl font-semibold tracking-[-0.045em] text-[#063f5b]">One product, multiple offers.</h2>
             <p className="mx-auto mt-4 max-w-xl text-base leading-7 text-[#063f5b]/65">This is the foundation for comparing merchant options while keeping the product itself independent.</p>
           </div>
-          <OfferComparison offers={productOffers} />
+          <OfferComparison offers={product.offers} />
         </section>
     </>
   );

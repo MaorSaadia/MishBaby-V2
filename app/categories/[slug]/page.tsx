@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ProductCard } from "../../components/product-card";
-import { getOffersForProduct, getProductsByCategory } from "@/lib/products";
+import { getProductsByCategory } from "@/lib/products";
 import { categories, getCategory } from "../category-data";
 
 export function generateStaticParams() {
@@ -27,7 +27,7 @@ export default async function CategoryPage({ params }: PageProps<"/categories/[s
 
   if (!category) notFound();
 
-  const featuredProducts = getProductsByCategory(category.slug);
+  const featuredProducts = await getProductsByCategory(category.slug);
 
   return (
     <>
@@ -77,7 +77,7 @@ export default async function CategoryPage({ params }: PageProps<"/categories/[s
                 <p className="mt-4 text-base leading-7 text-[#063f5b]/65">Explore useful products and compare the merchant options currently available.</p>
               </div>
               <div className="mt-9 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                {featuredProducts.map((product) => <ProductCard key={product.id} product={product} offers={getOffersForProduct(product.id)} />)}
+                {featuredProducts.map((product) => <ProductCard key={product.id} product={product} />)}
               </div>
             </div>
           </section>

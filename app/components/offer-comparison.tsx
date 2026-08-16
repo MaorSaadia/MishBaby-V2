@@ -1,5 +1,4 @@
 import type { ActiveOffer } from "@/lib/products";
-import { getMerchant } from "@/lib/products";
 
 type OfferComparisonProps = {
   offers: ActiveOffer[];
@@ -29,9 +28,7 @@ export function OfferComparison({ offers }: OfferComparisonProps) {
           </div>
         )}
         {offers.map((offer) => {
-          const merchant = getMerchant(offer.merchantId);
-
-          if (!merchant) return null;
+          const merchant = offer.merchant;
 
           return (
             <div key={offer.id} className="flex flex-col gap-4 px-6 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-8">

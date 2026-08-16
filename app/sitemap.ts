@@ -1,10 +1,11 @@
 import type { MetadataRoute } from "next";
 import { categories } from "./categories/category-data";
 import { publishedGuides } from "./guides/guide-data";
-import { publishedProducts } from "@/lib/products";
+import { getPublishedProducts } from "@/lib/products";
 import { siteConfig } from "@/lib/site";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const publishedProducts = await getPublishedProducts();
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: siteConfig.url, changeFrequency: "weekly", priority: 1 },
     { url: `${siteConfig.url}/products`, changeFrequency: "weekly", priority: 0.9 },

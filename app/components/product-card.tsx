@@ -1,18 +1,14 @@
 import Link from "next/link";
-import type { ActiveOffer, Product } from "@/lib/products";
-import { getMerchant } from "@/lib/products";
+import type { Product } from "@/lib/products";
 import { ProductImage } from "./product-image";
 
 type ProductCardProps = {
   product: Product;
-  offers: ActiveOffer[];
 };
 
-export function ProductCard({ product, offers }: ProductCardProps) {
-  const hasLiveOffers = offers.length > 0;
-  const merchantNames = offers
-    .map((offer) => getMerchant(offer.merchantId)?.name)
-    .filter((name): name is string => Boolean(name));
+export function ProductCard({ product }: ProductCardProps) {
+  const hasLiveOffers = product.offers.length > 0;
+  const merchantNames = product.offers.map((offer) => offer.merchant.name);
 
   return (
     <article className="group overflow-hidden rounded-[2rem] border border-[#063f5b]/8 bg-white shadow-[0_16px_36px_-28px_rgba(6,63,91,.45)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_42px_-26px_rgba(6,63,91,.35)]">

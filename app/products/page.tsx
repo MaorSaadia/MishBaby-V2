@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { categories } from "@/app/categories/category-data";
 import { ProductCard } from "@/app/components/product-card";
-import { getOffersForProduct, publishedProducts } from "@/lib/products";
+import { getPublishedProducts } from "@/lib/products";
 
 export const metadata: Metadata = {
   title: "Baby Products",
@@ -14,7 +14,8 @@ type ProductsPageProps = {
 };
 
 export default async function ProductsPage({ searchParams }: ProductsPageProps) {
-  const categoryParam = (await searchParams).category;
+  const [resolvedSearchParams, publishedProducts] = await Promise.all([searchParams, getPublishedProducts()]);
+  const categoryParam = resolvedSearchParams.category;
   const requestedCategory = Array.isArray(categoryParam) ? categoryParam[0] : categoryParam;
   const selectedCategory = categories.find((category) => category.slug === requestedCategory);
   const visibleProducts = selectedCategory
@@ -70,7 +71,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
         {visibleProducts.length > 0 ? (
           <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {visibleProducts.map((product) => (
-              <ProductCard key={product.id} product={product} offers={getOffersForProduct(product.id)} />
+              <ProductCard key={product.id} product={product} />
             ))}
           </div>
         ) : (

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { categories } from "./categories/category-data";
 import { ProductCard } from "./components/product-card";
-import { getOffersForProduct, publishedProducts } from "@/lib/products";
+import { getPublishedProducts } from "@/lib/products";
 
 const values = [
   ["✦", "Thoughtfully chosen", "A gentler place to start when everything feels like a decision."],
@@ -10,9 +10,10 @@ const values = [
 ];
 
 const featuredCategories = categories.slice(0, 3);
-const featuredProducts = publishedProducts.slice(0, 3);
 
-export default function Home() {
+export default async function Home() {
+  const featuredProducts = (await getPublishedProducts()).slice(0, 3);
+
   return (
     <div className="overflow-hidden">
         <section className="relative isolate overflow-hidden bg-[#f1fbfe]">
@@ -78,7 +79,7 @@ export default function Home() {
               <Link href="/products" className="text-sm font-extrabold text-[#009dcc] transition-colors hover:text-[#0784b0]">View all products <span aria-hidden="true">→</span></Link>
             </div>
             <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {featuredProducts.map((product) => <ProductCard key={product.id} product={product} offers={getOffersForProduct(product.id)} />)}
+              {featuredProducts.map((product) => <ProductCard key={product.id} product={product} />)}
             </div>
           </div>
         </section>
