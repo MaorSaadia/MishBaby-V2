@@ -50,6 +50,20 @@ function FallbackArtwork({ visual, variant }: { visual: ProductVisual; variant: 
     );
   }
 
+  if (visual === "frog-urinal") {
+    return (
+      <svg {...commonProps}>
+        <path d="M30 33c0-10 8-18 18-18s18 8 18 18v34c0 8-6 14-14 14h-8c-8 0-14-6-14-14V33Z" />
+        <circle cx="31" cy="25" r="9" />
+        <circle cx="65" cy="25" r="9" />
+        <circle cx="31" cy="25" r="2" fill="currentColor" />
+        <circle cx="65" cy="25" r="2" fill="currentColor" />
+        <path d="M36 45c7 4 17 4 24 0M48 48v21M42 60h12" />
+        <path d="M30 55c-7 2-11 7-12 13M66 55c7 2 11 7 12 13" />
+      </svg>
+    );
+  }
+
   return (
     <svg {...commonProps}>
       <path d="M28 21h19c11 0 20 9 20 20v13H36c-4 0-8-3-9-7l-6-20c-1-3 2-6 7-6Z" />

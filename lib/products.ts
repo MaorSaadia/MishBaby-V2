@@ -5,7 +5,7 @@ export type Merchant = {
   name: string;
 };
 
-export type ProductVisual = "baby-socks" | "changing-mat" | "grooming-kit" | "stroller-organizer";
+export type ProductVisual = "baby-socks" | "changing-mat" | "frog-urinal" | "grooming-kit" | "stroller-organizer";
 export type ProductStatus = "draft" | "published";
 
 export type ProductImage = {
@@ -72,6 +72,22 @@ export const products: Product[] = [
     badge: "Featured pick",
   },
   {
+    id: "frog-boy-urinal",
+    slug: "frog-boy-urinal",
+    status: "published",
+    categorySlug: "bath-care",
+    name: "Frog Boy Urinal",
+    summary: "A playful wall-mounted urinal designed to make potty-training practice more engaging and approachable for little boys.",
+    highlights: ["Wall-mounted design for child-height placement", "Playful frog shape with a spinning target", "Removable basin for easier emptying and cleaning"],
+    fallbackVisual: "frog-urinal",
+    image: {
+      src: "/products/frog-boy-urinal.jpg",
+      alt: "Three colorful frog-shaped potty-training urinals displayed in a bathroom",
+      fit: "cover",
+    },
+    badge: "Potty-training pick",
+  },
+  {
     id: "portable-changing-mat",
     slug: "portable-changing-mat",
     status: "draft",
@@ -122,6 +138,24 @@ export const offers: Offer[] = [
     merchantId: "aliexpress",
     status: "active",
     url: "https://s.click.aliexpress.com/e/_c3wy9QL9",
+    affiliate: true,
+    lastVerifiedAt: "2026-08-16",
+  },
+  {
+    id: "frog-boy-urinal-amazon",
+    productId: "frog-boy-urinal",
+    merchantId: "amazon",
+    status: "active",
+    url: "https://amzn.to/4bbzUpb",
+    affiliate: true,
+    lastVerifiedAt: "2026-08-16",
+  },
+  {
+    id: "frog-boy-urinal-aliexpress",
+    productId: "frog-boy-urinal",
+    merchantId: "aliexpress",
+    status: "active",
+    url: "https://s.click.aliexpress.com/e/_c3hkx8RN",
     affiliate: true,
     lastVerifiedAt: "2026-08-16",
   },
