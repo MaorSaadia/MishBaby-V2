@@ -1,15 +1,7 @@
 import Link from "next/link";
 import { Footer } from "../components/footer";
 import { Navbar } from "../components/navbar";
-
-const categories = [
-  { name: "Baby Essentials", description: "The everyday building blocks for those early days.", symbol: "✦", color: "bg-[#c7eff8]" },
-  { name: "Feeding & Mealtime", description: "Little rituals, growing appetites, and less mess.", symbol: "◌", color: "bg-[#d9f4ee]" },
-  { name: "Nursery & Sleep", description: "Gentle comforts for rest, routine, and sweet dreams.", symbol: "☾", color: "bg-[#dbe9fb]" },
-  { name: "Bath & Care", description: "Soft, simple moments of care from head to tiny toes.", symbol: "〰", color: "bg-[#dff4f8]" },
-  { name: "Safety & Comfort", description: "A little more peace of mind for every room and ride.", symbol: "♡", color: "bg-[#d8eee5]" },
-  { name: "Toys & Play", description: "Joyful discoveries made for curious little hands.", symbol: "☀", color: "bg-[#e2f2e8]" },
-];
+import { categories } from "./category-data";
 
 export default function CategoriesPage() {
   return (
@@ -28,7 +20,7 @@ export default function CategoriesPage() {
         <section className="mx-auto max-w-6xl px-5 py-14 sm:px-8 md:py-20">
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {categories.map((category) => (
-              <Link key={category.name} href="#" className="group relative min-h-70 overflow-hidden rounded-[2rem] border border-[#063f5b]/8 bg-white p-7 shadow-[0_16px_36px_-28px_rgba(6,63,91,.45)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_42px_-26px_rgba(6,63,91,.35)]">
+              <Link key={category.slug} href={`/categories/${category.slug}`} className="group relative min-h-70 overflow-hidden rounded-[2rem] border border-[#063f5b]/8 bg-white p-7 shadow-[0_16px_36px_-28px_rgba(6,63,91,.45)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_42px_-26px_rgba(6,63,91,.35)]">
                 <div className={`absolute -right-8 -top-8 grid size-36 place-items-center rounded-full ${category.color} text-5xl text-[#009dcc] transition-transform duration-300 group-hover:scale-110`} aria-hidden="true">{category.symbol}</div>
                 <div className="relative flex h-full flex-col justify-end">
                   <span className="text-xs font-extrabold uppercase tracking-[0.14em] text-[#009dcc]">Discover</span>
