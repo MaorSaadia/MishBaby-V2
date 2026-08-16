@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Footer } from "../../components/footer";
-import { Navbar } from "../../components/navbar";
 import { ProductCard } from "../../components/product-card";
 import { getOffersForProduct, getProductsByCategory } from "@/lib/products";
 import { categories, getCategory } from "../category-data";
@@ -32,9 +30,7 @@ export default async function CategoryPage({ params }: PageProps<"/categories/[s
   const featuredProducts = getProductsByCategory(category.slug);
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <Navbar />
-      <main className="flex-1">
+    <>
         <section className="relative isolate overflow-hidden bg-[#f1fbfe] px-5 py-12 sm:px-8 md:py-20">
           <div className={`absolute -right-20 -top-24 -z-10 size-96 rounded-full ${category.color} blur-2xl`} />
           <div className="mx-auto max-w-6xl">
@@ -96,8 +92,6 @@ export default async function CategoryPage({ params }: PageProps<"/categories/[s
             <Link href="/categories" className="shrink-0 rounded-full bg-white px-5 py-3 text-sm font-extrabold text-[#063f5b] transition hover:bg-[#e8f8fc]">View all categories</Link>
           </div>
         </section>
-      </main>
-      <Footer />
-    </div>
+    </>
   );
 }

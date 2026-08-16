@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Footer } from "../components/footer";
-import { Navbar } from "../components/navbar";
 import { guides } from "./guide-data";
 
 export const metadata: Metadata = {
@@ -13,9 +11,7 @@ export default function GuidesPage() {
   const [featuredGuide, ...moreGuides] = guides;
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <Navbar />
-      <main className="flex-1">
+    <>
         <section className="relative isolate overflow-hidden bg-[#f1fbfe] px-5 py-16 sm:px-8 md:py-22">
           <div className="absolute -right-20 -top-20 -z-10 size-96 rounded-full bg-[#a8e8f5]/70 blur-3xl" />
           <div className="absolute -bottom-24 -left-20 -z-10 size-72 rounded-full bg-[#d9f4ee]/70 blur-2xl" />
@@ -72,8 +68,6 @@ export default function GuidesPage() {
             <Link href="/categories" className="shrink-0 rounded-full bg-white px-5 py-3 text-sm font-extrabold text-[#063f5b] transition hover:bg-[#e8f8fc]">Explore categories</Link>
           </div>
         </section>
-      </main>
-      <Footer />
-    </div>
+    </>
   );
 }

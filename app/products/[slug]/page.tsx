@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Footer } from "../../components/footer";
-import { Navbar } from "../../components/navbar";
 import { OfferComparison } from "../../components/offer-comparison";
 import { ProductImage } from "../../components/product-image";
 import { getCategory } from "../../categories/category-data";
@@ -36,9 +34,7 @@ export default async function ProductPage({ params }: PageProps<"/products/[slug
   if (!category) notFound();
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <Navbar />
-      <main className="flex-1">
+    <>
         <section className="bg-[#f1fbfe] px-5 py-10 sm:px-8 md:py-16">
           <div className="mx-auto max-w-6xl">
             <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-2 text-sm font-bold text-[#063f5b]/55">
@@ -82,8 +78,6 @@ export default async function ProductPage({ params }: PageProps<"/products/[slug
           </div>
           <OfferComparison offers={productOffers} />
         </section>
-      </main>
-      <Footer />
-    </div>
+    </>
   );
 }

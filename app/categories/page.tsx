@@ -1,13 +1,9 @@
 import Link from "next/link";
-import { Footer } from "../components/footer";
-import { Navbar } from "../components/navbar";
 import { categories } from "./category-data";
 
 export default function CategoriesPage() {
   return (
-    <div className="flex min-h-screen flex-col">
-      <Navbar />
-      <main className="flex-1">
+    <>
         <section className="relative isolate overflow-hidden bg-[#f1fbfe] px-5 py-16 sm:px-8 md:py-22">
           <div className="absolute -right-16 -top-16 -z-10 size-80 rounded-full bg-[#a8e8f5]/65 blur-3xl" />
           <div className="mx-auto max-w-6xl">
@@ -40,8 +36,6 @@ export default function CategoriesPage() {
             <p className="mx-auto mt-4 max-w-xl text-sm leading-6 text-white/70">We’re building each category thoughtfully, so you can spend less time searching and more time with your little one.</p>
           </div>
         </section>
-      </main>
-      <Footer />
-    </div>
+    </>
   );
 }

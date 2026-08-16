@@ -1,7 +1,5 @@
 import Link from "next/link";
 import { categories } from "./categories/category-data";
-import { Footer } from "./components/footer";
-import { Navbar } from "./components/navbar";
 import { ProductCard } from "./components/product-card";
 import { getOffersForProduct, products } from "@/lib/products";
 
@@ -16,9 +14,7 @@ const featuredProducts = products.slice(0, 3);
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen flex-col overflow-hidden">
-      <Navbar />
-      <main className="flex-1">
+    <div className="overflow-hidden">
         <section className="relative isolate overflow-hidden bg-[#f1fbfe]">
           <div className="absolute -right-28 top-8 -z-10 size-96 rounded-full bg-[#a8e8f5]/65 blur-3xl" />
           <div className="absolute -bottom-20 -left-20 -z-10 size-72 rounded-full bg-[#c7eff8]/80 blur-2xl" />
@@ -111,8 +107,6 @@ export default function Home() {
             <Link href="/categories" className="mt-7 inline-flex rounded-full bg-white px-6 py-3 text-sm font-extrabold text-[#063f5b] transition hover:bg-[#e8f8fc]">Browse all categories</Link>
           </div>
         </section>
-      </main>
-      <Footer />
     </div>
   );
 }

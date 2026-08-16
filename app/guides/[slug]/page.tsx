@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Footer } from "../../components/footer";
-import { Navbar } from "../../components/navbar";
 import { getPublishedGuide, publishedGuides } from "../guide-data";
 
 export function generateStaticParams() {
@@ -28,9 +26,7 @@ export default async function GuidePage({ params }: PageProps<"/guides/[slug]">)
   if (!guide) notFound();
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <Navbar />
-      <main className="flex-1">
+    <>
         <header className="relative isolate overflow-hidden bg-[#f1fbfe] px-5 py-12 sm:px-8 md:py-20">
           <div className="absolute -right-20 -top-20 -z-10 size-96 rounded-full bg-[#a8e8f5]/70 blur-3xl" />
           <div className="mx-auto max-w-4xl">
@@ -82,8 +78,6 @@ export default async function GuidePage({ params }: PageProps<"/guides/[slug]">)
             <Link href={`/categories/${guide.relatedCategory.slug}`} className="mt-6 inline-flex rounded-full bg-white px-5 py-3 text-sm font-extrabold text-[#063f5b] transition hover:bg-[#e8f8fc]">Explore {guide.relatedCategory.label}</Link>
           </section>
         </article>
-      </main>
-      <Footer />
-    </div>
+    </>
   );
 }

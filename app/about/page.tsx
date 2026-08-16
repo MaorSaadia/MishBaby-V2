@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Footer } from "../components/footer";
-import { Navbar } from "../components/navbar";
 
 export const metadata: Metadata = {
   title: "About MishBaby | Our Approach",
@@ -33,9 +31,7 @@ const principles = [
 
 export default function AboutPage() {
   return (
-    <div className="flex min-h-screen flex-col">
-      <Navbar />
-      <main className="flex-1">
+    <>
         <section className="relative isolate overflow-hidden bg-[#f1fbfe] px-5 py-16 sm:px-8 md:py-24">
           <div className="absolute -right-24 -top-24 -z-10 size-96 rounded-full bg-[#a8e8f5]/70 blur-3xl" />
           <div className="absolute -bottom-24 -left-16 -z-10 size-72 rounded-full bg-[#d9f4ee]/75 blur-2xl" />
@@ -112,8 +108,6 @@ export default function AboutPage() {
             <Link href="/categories" className="shrink-0 rounded-full bg-[#009dcc] px-5 py-3 text-sm font-extrabold text-white transition hover:bg-[#0784b0]">Explore categories</Link>
           </div>
         </section>
-      </main>
-      <Footer />
-    </div>
+    </>
   );
 }
