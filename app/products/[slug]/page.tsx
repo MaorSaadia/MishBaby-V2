@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { Footer } from "../../components/footer";
 import { Navbar } from "../../components/navbar";
 import { OfferComparison } from "../../components/offer-comparison";
+import { ProductImage } from "../../components/product-image";
 import { getCategory } from "../../categories/category-data";
 import { getOffersForProduct, getProductBySlug, products } from "@/lib/products";
 
@@ -54,10 +55,7 @@ export default async function ProductPage({ params }: PageProps<"/products/[slug
               <div className="relative grid aspect-square max-w-xl place-items-center overflow-hidden rounded-[2.5rem] bg-[#dff4f8] shadow-[0_24px_55px_-38px_rgba(6,63,91,.45)]">
                 <div className="absolute -right-16 -top-16 size-64 rounded-full bg-[#a8e8f5]/80" />
                 <div className="absolute -bottom-20 -left-14 size-56 rounded-full bg-white/70" />
-                <svg viewBox="0 0 96 96" className="relative size-40 text-[#009dcc]" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M36 21h24v13c0 4 2 8 6 11l3 3c3 3 5 7 5 12v16c0 6-5 11-11 11H33c-6 0-11-5-11-11V60c0-5 2-9 5-12l3-3c4-3 6-7 6-11V21Z" />
-                  <path d="M34 13h28v8H34zM30 55h36M30 68h36M43 38h10" />
-                </svg>
+                <ProductImage product={product} variant="detail" priority />
               </div>
 
               <div>

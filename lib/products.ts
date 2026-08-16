@@ -3,6 +3,13 @@ export type Merchant = {
   name: string;
 };
 
+export type ProductVisual = "changing-mat" | "grooming-kit" | "stroller-organizer";
+
+export type ProductImage = {
+  src: string;
+  alt: string;
+};
+
 export type Product = {
   id: string;
   slug: string;
@@ -10,6 +17,8 @@ export type Product = {
   name: string;
   summary: string;
   highlights: string[];
+  fallbackVisual: ProductVisual;
+  image?: ProductImage;
   badge?: string;
 };
 
@@ -32,6 +41,7 @@ export const products: Product[] = [
     name: "Portable Changing Mat",
     summary: "A wipe-clean, foldable changing surface for calmer changes away from home.",
     highlights: ["Folds down for easier packing", "Wipe-clean everyday surface", "Useful for travel and quick outings"],
+    fallbackVisual: "changing-mat",
     badge: "On-the-go pick",
   },
   {
@@ -41,6 +51,7 @@ export const products: Product[] = [
     name: "Baby Grooming Kit",
     summary: "A compact set for the small everyday care moments that quickly become routine.",
     highlights: ["Keeps care tools together", "Compact storage for home or travel", "Designed around everyday grooming needs"],
+    fallbackVisual: "grooming-kit",
     badge: "Everyday helper",
   },
   {
@@ -50,6 +61,7 @@ export const products: Product[] = [
     name: "Stroller Organizer",
     summary: "Keeps bottles, wipes, and parent essentials easy to reach while you are out.",
     highlights: ["Quick access to daily essentials", "Flexible storage for short outings", "Helps keep the stroller area organized"],
+    fallbackVisual: "stroller-organizer",
     badge: "Parent favorite",
   },
 ];
