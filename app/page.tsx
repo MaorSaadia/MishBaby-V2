@@ -32,7 +32,7 @@ export default function Home() {
               <div className="rounded-[2.5rem] bg-[#a8e8f5] p-5 shadow-[0_24px_60px_-28px_rgba(6,63,91,.45)]">
                 <div className="flex aspect-[4/4.6] items-center justify-center rounded-[2rem] border border-white/65 bg-[#e8f8fc] p-8 text-center">
                   <div>
-                    <div className="mx-auto grid size-28 place-items-center rounded-full bg-[#009dcc] text-5xl text-white shadow-sm">♡</div>
+                    <div className="mx-auto grid size-28 place-items-center rounded-full bg-[#009dcc] text-5xl text-white shadow-sm" aria-hidden="true">♡</div>
                     <p className="mt-6 font-display text-3xl font-semibold leading-tight text-[#063f5b]">Every little thing, with love.</p>
                     <p className="mt-3 text-sm leading-6 text-[#063f5b]/65">A new home for easier, more confident choices.</p>
                   </div>
@@ -91,7 +91,7 @@ export default function Home() {
           <div className="mt-11 grid gap-5 md:grid-cols-3">
             {values.map(([icon, title, body]) => (
               <article key={title} className="rounded-3xl border border-[#063f5b]/8 bg-white p-7 shadow-[0_12px_30px_-24px_rgba(6,63,91,.45)]">
-                <span className="grid size-11 place-items-center rounded-2xl bg-[#e2f7fc] text-xl text-[#009dcc]">{icon}</span>
+                <span className="grid size-11 place-items-center rounded-2xl bg-[#e2f7fc] text-xl text-[#009dcc]" aria-hidden="true">{icon}</span>
                 <h3 className="mt-6 text-lg font-extrabold text-[#063f5b]">{title}</h3>
                 <p className="mt-2 text-sm leading-6 text-[#063f5b]/65">{body}</p>
               </article>

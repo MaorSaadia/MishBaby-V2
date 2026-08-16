@@ -44,7 +44,7 @@ export default function AboutPage() {
             <div className="rounded-[2.5rem] bg-[#a8e8f5] p-5 shadow-[0_24px_55px_-38px_rgba(6,63,91,.45)]">
               <div className="grid aspect-square place-items-center rounded-[2rem] border border-white/65 bg-[#e8f8fc] p-8 text-center">
                 <div>
-                  <span className="mx-auto grid size-24 place-items-center rounded-full bg-[#009dcc] text-4xl text-white">♡</span>
+                  <span className="mx-auto grid size-24 place-items-center rounded-full bg-[#009dcc] text-4xl text-white" aria-hidden="true">♡</span>
                   <p className="mt-6 font-display text-3xl font-semibold leading-tight text-[#063f5b]">Simple now. Thoughtful as we grow.</p>
                 </div>
               </div>

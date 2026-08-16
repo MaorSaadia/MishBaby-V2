@@ -34,8 +34,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className="h-full antialiased"
     >
       <body className="flex min-h-full flex-col">
+        <a href="#main-content" className="skip-link">Skip to main content</a>
         <Navbar />
-        <main className="flex-1">{children}</main>
+        <main id="main-content" className="flex-1">{children}</main>
         <Footer />
       </body>
     </html>
