@@ -20,6 +20,16 @@ function FallbackArtwork({ visual, variant }: { visual: ProductVisual; variant: 
     strokeLinejoin: "round" as const,
   };
 
+  if (visual === "baby-socks") {
+    return (
+      <svg {...commonProps}>
+        <path d="M28 18v31c0 8-3 13-8 20-4 6 0 14 8 14h15c7 0 12-5 12-12V52H41V18H28Z" />
+        <path d="M55 18v31c0 8 3 13 8 20 4 6 0 14-8 14H40c-7 0-12-5-12-12V52h14V18h13Z" />
+        <path d="M27 30h15M54 30H41" />
+      </svg>
+    );
+  }
+
   if (visual === "changing-mat") {
     return (
       <svg {...commonProps}>
@@ -53,6 +63,8 @@ function FallbackArtwork({ visual, variant }: { visual: ProductVisual; variant: 
 
 export function ProductImage({ product, variant = "card", priority = false }: ProductImageProps) {
   if (product.image) {
+    const isCover = product.image.fit === "cover";
+
     return (
       <Image
         src={product.image.src}
@@ -60,7 +72,7 @@ export function ProductImage({ product, variant = "card", priority = false }: Pr
         fill
         priority={priority}
         sizes={variant === "detail" ? "(max-width: 1024px) 100vw, 45vw" : "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"}
-        className={`object-contain ${variant === "detail" ? "p-10 sm:p-14" : "p-8"}`}
+        className={isCover ? "object-cover" : `object-contain ${variant === "detail" ? "p-10 sm:p-14" : "p-8"}`}
       />
     );
   }

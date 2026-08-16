@@ -9,6 +9,7 @@ type ProductCardProps = {
 };
 
 export function ProductCard({ product, offers }: ProductCardProps) {
+  const hasLiveOffers = offers.some((offer) => Boolean(offer.url));
   const merchantNames = offers
     .map((offer) => getMerchant(offer.merchantId)?.name)
     .filter((name): name is string => Boolean(name));
@@ -25,7 +26,7 @@ export function ProductCard({ product, offers }: ProductCardProps) {
         <h3 className="text-xl font-extrabold tracking-[-0.03em] text-[#063f5b]">{product.name}</h3>
         <p className="mt-2 min-h-18 text-sm leading-6 text-[#063f5b]/65">{product.summary}</p>
         <div className="mt-5 border-t border-[#063f5b]/8 pt-5">
-          <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-[#063f5b]/45">Offers expected from</p>
+          <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-[#063f5b]/45">{hasLiveOffers ? "Shop from" : "Offers expected from"}</p>
           <div className="mt-3 flex flex-wrap gap-2">
             {merchantNames.map((merchantName) => <span key={merchantName} className="rounded-full bg-[#f1fbfe] px-3 py-1.5 text-xs font-bold text-[#063f5b]">{merchantName}</span>)}
           </div>

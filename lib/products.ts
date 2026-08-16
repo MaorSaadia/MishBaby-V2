@@ -3,11 +3,12 @@ export type Merchant = {
   name: string;
 };
 
-export type ProductVisual = "changing-mat" | "grooming-kit" | "stroller-organizer";
+export type ProductVisual = "baby-socks" | "changing-mat" | "grooming-kit" | "stroller-organizer";
 
 export type ProductImage = {
   src: string;
   alt: string;
+  fit?: "cover" | "contain";
 };
 
 export type Product = {
@@ -26,6 +27,8 @@ export type Offer = {
   id: string;
   productId: string;
   merchantId: string;
+  url?: string;
+  affiliate?: boolean;
 };
 
 export const merchants: Merchant[] = [
@@ -34,6 +37,21 @@ export const merchants: Merchant[] = [
 ];
 
 export const products: Product[] = [
+  {
+    id: "baby-grip-socks-slippers",
+    slug: "baby-grip-socks-slippers",
+    categorySlug: "safety-comfort",
+    name: "Baby Grip Socks Slippers",
+    summary: "Soft sock-style baby slippers with elastic straps and a playful fox design for comfortable indoor wear.",
+    highlights: ["Flexible sock-like knit construction", "Elastic over-foot straps help keep them in place", "Lightweight design for indoor wear"],
+    fallbackVisual: "baby-socks",
+    image: {
+      src: "/products/baby-grip-socks-slippers.jpg",
+      alt: "Pink fox-pattern baby grip sock slippers worn on a baby's feet",
+      fit: "cover",
+    },
+    badge: "Featured pick",
+  },
   {
     id: "portable-changing-mat",
     slug: "portable-changing-mat",
@@ -67,6 +85,20 @@ export const products: Product[] = [
 ];
 
 export const offers: Offer[] = [
+  {
+    id: "baby-grip-socks-slippers-amazon",
+    productId: "baby-grip-socks-slippers",
+    merchantId: "amazon",
+    url: "https://amzn.to/4pGSxof",
+    affiliate: true,
+  },
+  {
+    id: "baby-grip-socks-slippers-aliexpress",
+    productId: "baby-grip-socks-slippers",
+    merchantId: "aliexpress",
+    url: "https://s.click.aliexpress.com/e/_c3wy9QL9",
+    affiliate: true,
+  },
   { id: "portable-changing-mat-amazon", productId: "portable-changing-mat", merchantId: "amazon" },
   { id: "portable-changing-mat-aliexpress", productId: "portable-changing-mat", merchantId: "aliexpress" },
   { id: "baby-grooming-kit-amazon", productId: "baby-grooming-kit", merchantId: "amazon" },
