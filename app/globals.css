@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 :root {
-  --background: #fffdf9;
-  --foreground: #25433a;
+  --background: #fbfeff;
+  --foreground: #063f5b;
 }
 
 @theme inline {
@@ -12,9 +12,7 @@
   --font-display: Georgia, "Times New Roman", serif;
 }
 
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
 body {
   background: var(--background);
@@ -22,7 +20,4 @@ body {
   font-family: ui-rounded, "Avenir Next", Avenir, "Segoe UI", sans-serif;
 }
 
-::selection {
-  background: #f6c9c0;
-  color: #25433a;
-}
+::selection { background: #a8e8f5; color: #063f5b; }
