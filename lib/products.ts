@@ -1,3 +1,5 @@
+import { validateCatalog } from "./catalog-validation";
+
 export type Merchant = {
   id: string;
   name: string;
@@ -130,6 +132,8 @@ export const offers: Offer[] = [
   { id: "stroller-organizer-amazon", productId: "stroller-organizer", merchantId: "amazon", status: "paused" },
   { id: "stroller-organizer-aliexpress", productId: "stroller-organizer", merchantId: "aliexpress", status: "paused" },
 ];
+
+validateCatalog({ merchants, products, offers });
 
 export const publishedProducts = products.filter((product) => product.status === "published");
 export const activeOffers = offers.filter((offer): offer is ActiveOffer => offer.status === "active");
