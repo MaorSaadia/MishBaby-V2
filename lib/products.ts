@@ -9,6 +9,7 @@ export type Product = {
   categorySlug: string;
   name: string;
   summary: string;
+  highlights: string[];
   badge?: string;
 };
 
@@ -30,6 +31,7 @@ export const products: Product[] = [
     categorySlug: "baby-essentials",
     name: "Portable Changing Mat",
     summary: "A wipe-clean, foldable changing surface for calmer changes away from home.",
+    highlights: ["Folds down for easier packing", "Wipe-clean everyday surface", "Useful for travel and quick outings"],
     badge: "On-the-go pick",
   },
   {
@@ -38,6 +40,7 @@ export const products: Product[] = [
     categorySlug: "baby-essentials",
     name: "Baby Grooming Kit",
     summary: "A compact set for the small everyday care moments that quickly become routine.",
+    highlights: ["Keeps care tools together", "Compact storage for home or travel", "Designed around everyday grooming needs"],
     badge: "Everyday helper",
   },
   {
@@ -46,6 +49,7 @@ export const products: Product[] = [
     categorySlug: "baby-essentials",
     name: "Stroller Organizer",
     summary: "Keeps bottles, wipes, and parent essentials easy to reach while you are out.",
+    highlights: ["Quick access to daily essentials", "Flexible storage for short outings", "Helps keep the stroller area organized"],
     badge: "Parent favorite",
   },
 ];
@@ -61,6 +65,10 @@ export const offers: Offer[] = [
 
 export function getProductsByCategory(categorySlug: string) {
   return products.filter((product) => product.categorySlug === categorySlug);
+}
+
+export function getProductBySlug(slug: string) {
+  return products.find((product) => product.slug === slug);
 }
 
 export function getOffersForProduct(productId: string) {

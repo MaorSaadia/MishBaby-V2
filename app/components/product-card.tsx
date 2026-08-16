@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { Offer, Product } from "@/lib/products";
 import { getMerchant } from "@/lib/products";
 
@@ -31,7 +32,7 @@ export function ProductCard({ product, offers }: ProductCardProps) {
           <div className="mt-3 flex flex-wrap gap-2">
             {merchantNames.map((merchantName) => <span key={merchantName} className="rounded-full bg-[#f1fbfe] px-3 py-1.5 text-xs font-bold text-[#063f5b]">{merchantName}</span>)}
           </div>
-          <p className="mt-4 text-sm font-extrabold text-[#009dcc]">Offer comparison coming soon</p>
+          <Link href={`/products/${product.slug}`} className="mt-5 inline-flex items-center gap-2 text-sm font-extrabold text-[#009dcc] transition-colors hover:text-[#0784b0]">View product <span aria-hidden="true">→</span></Link>
         </div>
       </div>
     </article>
