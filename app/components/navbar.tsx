@@ -7,7 +7,7 @@ import { Brand } from "./brand";
 const links = [
   { label: "Discover", href: "/categories" },
   { label: "Guides", href: "/guides" },
-  { label: "About", href: "#" },
+  { label: "About", href: "/about" },
 ];
 
 export function Navbar() {
