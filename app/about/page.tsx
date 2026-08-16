@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "About MishBaby | Our Approach",
+  title: "About & Our Approach",
   description: "Learn how MishBaby approaches product discovery, recommendations, and affiliate transparency.",
 };
 

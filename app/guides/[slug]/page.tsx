@@ -14,7 +14,7 @@ export async function generateMetadata({ params }: PageProps<"/guides/[slug]">):
   if (!guide) return {};
 
   return {
-    title: `${guide.title} | MishBaby`,
+    title: guide.title,
     description: guide.description,
   };
 }

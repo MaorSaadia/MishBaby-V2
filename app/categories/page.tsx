@@ -1,5 +1,11 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { categories } from "./category-data";
+
+export const metadata: Metadata = {
+  title: "Baby Product Categories",
+  description: "Explore baby essentials, feeding, nursery, care, safety, and play categories from MishBaby.",
+};
 
 export default function CategoriesPage() {
   return (

@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: PageProps<"/products/[slug]">
   if (!product) return {};
 
   return {
-    title: `${product.name} | MishBaby`,
+    title: product.name,
     description: product.summary,
   };
 }

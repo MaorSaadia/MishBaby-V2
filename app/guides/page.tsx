@@ -3,7 +3,7 @@ import Link from "next/link";
 import { guides } from "./guide-data";
 
 export const metadata: Metadata = {
-  title: "Parenting & Buying Guides | MishBaby",
+  title: "Parenting & Buying Guides",
   description: "Practical parenting guidance and thoughtful baby-product buying guides from MishBaby.",
 };
 
