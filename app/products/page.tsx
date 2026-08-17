@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { categories } from "@/app/categories/category-data";
 import { ProductCard } from "@/app/components/product-card";
+import { getPublishedCategories } from "@/lib/categories";
 import { getPublishedProducts } from "@/lib/products";
 
 export const metadata: Metadata = {
@@ -14,7 +14,11 @@ type ProductsPageProps = {
 };
 
 export default async function ProductsPage({ searchParams }: ProductsPageProps) {
-  const [resolvedSearchParams, publishedProducts] = await Promise.all([searchParams, getPublishedProducts()]);
+  const [resolvedSearchParams, categories, publishedProducts] = await Promise.all([
+    searchParams,
+    getPublishedCategories(),
+    getPublishedProducts(),
+  ]);
   const categoryParam = resolvedSearchParams.category;
   const requestedCategory = Array.isArray(categoryParam) ? categoryParam[0] : categoryParam;
   const selectedCategory = categories.find((category) => category.slug === requestedCategory);

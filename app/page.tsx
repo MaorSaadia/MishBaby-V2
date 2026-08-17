@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { categories } from "./categories/category-data";
 import { ProductCard } from "./components/product-card";
+import { getPublishedCategories } from "@/lib/categories";
+import { getCategoryThemeClass } from "@/lib/category-themes";
 import { getPublishedProducts } from "@/lib/products";
 
 const values = [
@@ -9,10 +10,10 @@ const values = [
   ["↗", "More ways to shop", "We’re building a clearer way to compare the best places to buy."],
 ];
 
-const featuredCategories = categories.slice(0, 3);
-
 export default async function Home() {
-  const featuredProducts = (await getPublishedProducts()).slice(0, 3);
+  const [categories, products] = await Promise.all([getPublishedCategories(), getPublishedProducts()]);
+  const featuredCategories = categories.slice(0, 3);
+  const featuredProducts = products.slice(0, 3);
 
   return (
     <div className="overflow-hidden">
@@ -58,7 +59,7 @@ export default async function Home() {
           <div className="mt-10 grid gap-5 md:grid-cols-3">
             {featuredCategories.map((category) => (
               <Link key={category.slug} href={`/categories/${category.slug}`} className="group relative min-h-56 overflow-hidden rounded-[2rem] border border-[#063f5b]/8 bg-white p-7 shadow-[0_16px_36px_-28px_rgba(6,63,91,.45)] transition duration-300 hover:-translate-y-1">
-                <div className={`absolute -right-8 -top-8 grid size-32 place-items-center rounded-full ${category.color} text-4xl text-[#009dcc] transition-transform duration-300 group-hover:scale-110`} aria-hidden="true">{category.symbol}</div>
+                <div className={`absolute -right-8 -top-8 grid size-32 place-items-center rounded-full ${getCategoryThemeClass(category.colorTheme)} text-4xl text-[#009dcc] transition-transform duration-300 group-hover:scale-110`} aria-hidden="true">{category.symbol}</div>
                 <div className="relative flex h-full max-w-[15rem] flex-col justify-end">
                   <h3 className="text-2xl font-extrabold tracking-[-0.035em] text-[#063f5b]">{category.name}</h3>
                   <p className="mt-2 text-sm leading-6 text-[#063f5b]/65">{category.description}</p>

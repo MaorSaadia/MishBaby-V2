@@ -1,11 +1,5 @@
 import { defineField, defineType } from "sanity";
-import { categories } from "../../app/categories/category-data";
 import { productOfferArrayMember } from "./product-offer";
-
-const categoryOptions = categories.map((category) => ({
-  title: category.name,
-  value: category.slug,
-}));
 
 export const productType = defineType({
   name: "product",
@@ -27,10 +21,10 @@ export const productType = defineType({
       validation: (rule) => rule.required(),
     }),
     defineField({
-      name: "categorySlug",
+      name: "category",
       title: "Category",
-      type: "string",
-      options: { list: categoryOptions, layout: "dropdown" },
+      type: "reference",
+      to: [{ type: "category" }],
       validation: (rule) => rule.required(),
     }),
     defineField({
@@ -99,7 +93,7 @@ export const productType = defineType({
   preview: {
     select: {
       title: "name",
-      subtitle: "categorySlug",
+      subtitle: "category.name",
       media: "image",
     },
   },

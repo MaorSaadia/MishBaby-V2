@@ -17,6 +17,7 @@ export default defineConfig({
           .title("Content")
           .items([
             structure.documentTypeListItem("product").title("Products"),
+            structure.documentTypeListItem("category").title("Categories"),
             structure.documentTypeListItem("merchant").title("Merchants"),
           ]),
     }),

@@ -2,16 +2,18 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ProductCard } from "../../components/product-card";
+import { getCategoryBySlug, getPublishedCategories } from "@/lib/categories";
+import { getCategoryThemeClass } from "@/lib/category-themes";
 import { getProductsByCategory } from "@/lib/products";
-import { categories, getCategory } from "../category-data";
 
-export function generateStaticParams() {
+export async function generateStaticParams() {
+  const categories = await getPublishedCategories();
   return categories.map((category) => ({ slug: category.slug }));
 }
 
 export async function generateMetadata({ params }: PageProps<"/categories/[slug]">): Promise<Metadata> {
   const { slug } = await params;
-  const category = getCategory(slug);
+  const category = await getCategoryBySlug(slug);
 
   if (!category) return {};
 
@@ -23,7 +25,7 @@ export async function generateMetadata({ params }: PageProps<"/categories/[slug]
 
 export default async function CategoryPage({ params }: PageProps<"/categories/[slug]">) {
   const { slug } = await params;
-  const category = getCategory(slug);
+  const category = await getCategoryBySlug(slug);
 
   if (!category) notFound();
 
@@ -32,7 +34,7 @@ export default async function CategoryPage({ params }: PageProps<"/categories/[s
   return (
     <>
         <section className="relative isolate overflow-hidden bg-[#f1fbfe] px-5 py-12 sm:px-8 md:py-20">
-          <div className={`absolute -right-20 -top-24 -z-10 size-96 rounded-full ${category.color} blur-2xl`} />
+          <div className={`absolute -right-20 -top-24 -z-10 size-96 rounded-full ${getCategoryThemeClass(category.colorTheme)} blur-2xl`} />
           <div className="mx-auto max-w-6xl">
             <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-sm font-bold text-[#063f5b]/55">
               <Link href="/" className="hover:text-[#009dcc]">Home</Link>
@@ -47,7 +49,7 @@ export default async function CategoryPage({ params }: PageProps<"/categories/[s
                 <h1 className="mt-3 max-w-3xl font-display text-5xl font-semibold leading-[1.05] tracking-[-0.055em] text-[#063f5b] sm:text-6xl">{category.name}</h1>
                 <p className="mt-5 max-w-2xl text-lg leading-8 text-[#063f5b]/70">{category.introduction}</p>
               </div>
-              <div className={`grid size-40 place-items-center rounded-[2.5rem] ${category.color} text-6xl text-[#009dcc] shadow-[0_20px_45px_-30px_rgba(6,63,91,.4)] sm:size-48`} aria-hidden="true">{category.symbol}</div>
+              <div className={`grid size-40 place-items-center rounded-[2.5rem] ${getCategoryThemeClass(category.colorTheme)} text-6xl text-[#009dcc] shadow-[0_20px_45px_-30px_rgba(6,63,91,.4)] sm:size-48`} aria-hidden="true">{category.symbol}</div>
             </div>
           </div>
         </section>

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { OfferComparison } from "../../components/offer-comparison";
 import { ProductImage } from "../../components/product-image";
-import { getCategory } from "../../categories/category-data";
+import { getCategoryBySlug } from "@/lib/categories";
 import { getProductBySlug, getPublishedProducts } from "@/lib/products";
 
 export async function generateStaticParams() {
@@ -29,7 +29,7 @@ export default async function ProductPage({ params }: PageProps<"/products/[slug
 
   if (!product) notFound();
 
-  const category = getCategory(product.categorySlug);
+  const category = await getCategoryBySlug(product.categorySlug);
   if (!category) notFound();
 
   return (

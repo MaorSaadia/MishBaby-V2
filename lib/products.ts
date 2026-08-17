@@ -37,13 +37,13 @@ const publishedProductsQuery = `
     _type == "product" &&
     defined(name) &&
     defined(slug.current) &&
-    defined(categorySlug) &&
+    defined(category->slug.current) &&
     defined(summary) &&
     defined(image.asset)
   ] | order(_createdAt desc) {
     "id": _id,
     "slug": slug.current,
-    categorySlug,
+    "categorySlug": category->slug.current,
     name,
     summary,
     "highlights": coalesce(highlights, []),

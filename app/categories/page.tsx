@@ -1,13 +1,16 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { categories } from "./category-data";
+import { getPublishedCategories } from "@/lib/categories";
+import { getCategoryThemeClass } from "@/lib/category-themes";
 
 export const metadata: Metadata = {
   title: "Baby Product Categories",
   description: "Explore baby essentials, feeding, nursery, care, safety, and play categories from MishBaby.",
 };
 
-export default function CategoriesPage() {
+export default async function CategoriesPage() {
+  const categories = await getPublishedCategories();
+
   return (
     <>
         <section className="relative isolate overflow-hidden bg-[#f1fbfe] px-5 py-16 sm:px-8 md:py-22">
@@ -23,7 +26,7 @@ export default function CategoriesPage() {
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {categories.map((category) => (
               <Link key={category.slug} href={`/categories/${category.slug}`} className="group relative min-h-70 overflow-hidden rounded-[2rem] border border-[#063f5b]/8 bg-white p-7 shadow-[0_16px_36px_-28px_rgba(6,63,91,.45)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_42px_-26px_rgba(6,63,91,.35)]">
-                <div className={`absolute -right-8 -top-8 grid size-36 place-items-center rounded-full ${category.color} text-5xl text-[#009dcc] transition-transform duration-300 group-hover:scale-110`} aria-hidden="true">{category.symbol}</div>
+                <div className={`absolute -right-8 -top-8 grid size-36 place-items-center rounded-full ${getCategoryThemeClass(category.colorTheme)} text-5xl text-[#009dcc] transition-transform duration-300 group-hover:scale-110`} aria-hidden="true">{category.symbol}</div>
                 <div className="relative flex h-full flex-col justify-end">
                   <span className="text-xs font-extrabold uppercase tracking-[0.14em] text-[#009dcc]">Discover</span>
                   <h2 className="mt-3 text-2xl font-extrabold tracking-[-0.035em] text-[#063f5b]">{category.name}</h2>
