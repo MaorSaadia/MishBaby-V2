@@ -1,5 +1,6 @@
 import { defineField, defineType } from "sanity";
 import { categories } from "../../app/categories/category-data";
+import { productOfferArrayMember } from "./product-offer";
 
 const categoryOptions = categories.map((category) => ({
   title: category.name,
@@ -76,6 +77,23 @@ export const productType = defineType({
         }),
       ],
       validation: (rule) => rule.required(),
+    }),
+    defineField({
+      name: "offers",
+      title: "Merchant offers",
+      type: "array",
+      description: "Add Amazon, AliExpress, and future merchant links for this product in one place.",
+      of: [productOfferArrayMember],
+      validation: (rule) =>
+        rule.custom((value) => {
+          if (!Array.isArray(value)) return true;
+
+          const merchantIds = value
+            .map((offer) => (offer as { merchant?: { _ref?: string } }).merchant?._ref)
+            .filter((merchantId): merchantId is string => Boolean(merchantId));
+
+          return new Set(merchantIds).size === merchantIds.length || "Each merchant can only appear once per product.";
+        }),
     }),
   ],
   preview: {

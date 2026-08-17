@@ -52,15 +52,13 @@ const publishedProductsQuery = `
       "src": image.asset->url,
       "alt": coalesce(image.alt, name)
     },
-    "offers": *[
-      _type == "affiliateOffer" &&
+    "offers": offers[
       status == "active" &&
-      product._ref == ^._id &&
       defined(url) &&
       defined(lastVerifiedAt) &&
       defined(merchant->slug.current)
     ] | order(merchant->name asc) {
-      "id": _id,
+      "id": _key,
       status,
       url,
       "affiliate": coalesce(affiliate, true),

@@ -9,6 +9,17 @@ export default defineConfig({
   projectId: studioProjectId,
   dataset: sanityDataset,
   basePath: "/studio",
-  plugins: [structureTool()],
+  plugins: [
+    structureTool({
+      structure: (structure) =>
+        structure
+          .list()
+          .title("Content")
+          .items([
+            structure.documentTypeListItem("product").title("Products"),
+            structure.documentTypeListItem("merchant").title("Merchants"),
+          ]),
+    }),
+  ],
   schema: { types: schemaTypes },
 });
