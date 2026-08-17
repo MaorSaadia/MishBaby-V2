@@ -1,5 +1,6 @@
 import { defineConfig } from "sanity";
 import { structureTool } from "sanity/structure";
+import { ProductAssistant } from "./sanity/product-assistant/product-assistant";
 import { sanityDataset, studioProjectId } from "./sanity/env";
 import { schemaTypes } from "./sanity/schemaTypes";
 
@@ -21,6 +22,13 @@ export default defineConfig({
             structure.documentTypeListItem("merchant").title("Merchants"),
           ]),
     }),
+  ],
+  tools: [
+    {
+      name: "product-assistant",
+      title: "Product Assistant",
+      component: ProductAssistant,
+    },
   ],
   schema: { types: schemaTypes },
 });
