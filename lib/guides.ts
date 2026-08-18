@@ -1,5 +1,6 @@
 import { cache } from "react";
 import type { CategoryTheme } from "@/lib/category-themes";
+import { getPublishedProducts, type Product } from "@/lib/products";
 import { sanityClient } from "@/sanity/lib/client";
 
 export type GuideSection = {
@@ -23,6 +24,7 @@ export type Guide = {
   readingMinutes?: number;
   introduction?: string;
   sections: GuideSection[];
+  relatedProductIds: string[];
   relatedCategory?: {
     slug: string;
     label: string;
@@ -39,7 +41,7 @@ const guidesQuery = `
     defined(description) &&
     defined(symbol) &&
     defined(colorTheme)
-  ] | order(featured desc, displayOrder asc, title asc) {
+  ] | order(featured desc, displayOrder asc, _createdAt asc, title asc) {
     "id": _id,
     "slug": slug.current,
     title,
@@ -58,6 +60,7 @@ const guidesQuery = `
       "paragraphs": coalesce(paragraphs, []),
       "items": coalesce(items, [])
     }, []),
+    "relatedProductIds": coalesce(relatedProducts[]._ref, []),
     "relatedCategory": relatedCategory->{
       "slug": slug.current,
       "label": name
@@ -75,6 +78,15 @@ export async function getPublishedGuides() {
 }
 
 export async function getPublishedGuideBySlug(slug: string) {
-  const guides = await getPublishedGuides();
-  return guides.find((guide) => guide.slug === slug);
+  const [guides, products] = await Promise.all([getPublishedGuides(), getPublishedProducts()]);
+  const guide = guides.find((item) => item.slug === slug);
+  if (!guide) return undefined;
+
+  const productsById = new Map<string, Product>(products.map((product) => [product.id, product]));
+  return {
+    ...guide,
+    relatedProducts: guide.relatedProductIds
+      .map((productId) => productsById.get(productId))
+      .filter((product): product is Product => Boolean(product)),
+  };
 }

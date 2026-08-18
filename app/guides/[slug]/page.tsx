@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ProductCard } from "@/app/components/product-card";
 import { getPublishedGuideBySlug, getPublishedGuides } from "@/lib/guides";
 
 export async function generateStaticParams() {
@@ -51,7 +52,7 @@ export default async function GuidePage({ params }: PageProps<"/guides/[slug]">)
           <p className="font-display text-2xl leading-10 text-[#063f5b]">{guide.introduction}</p>
 
           <aside className="mt-10 rounded-3xl border border-[#009dcc]/15 bg-[#e8f8fc] p-6 text-sm leading-6 text-[#063f5b]/70">
-            Every baby, caregiver, and outing is different. Use this as a starting point and adapt it to your baby’s needs, the weather, and the guidance you already follow.
+            Every baby, family, and home is different. Use this guide as a starting point, follow the product instructions and current safety guidance, and ask a qualified professional when you need advice for your baby’s specific needs.
           </aside>
 
           <div className="mt-14 grid gap-14">
@@ -73,9 +74,22 @@ export default async function GuidePage({ params }: PageProps<"/guides/[slug]">)
             ))}
           </div>
 
+          {guide.relatedProducts.length > 0 && (
+            <section className="mt-16 border-t border-[#063f5b]/10 pt-14">
+              <div>
+                <p className="text-sm font-extrabold uppercase tracking-[0.14em] text-[#009dcc]">Related products</p>
+                <h2 className="mt-3 font-display text-3xl font-semibold tracking-[-0.04em] text-[#063f5b]">Thoughtful finds for this guide.</h2>
+                <p className="mt-3 max-w-xl text-sm leading-6 text-[#063f5b]/65">Explore selected products and compare the active merchant offers currently available.</p>
+              </div>
+              <div className="mt-8 grid gap-5 sm:grid-cols-2">
+                {guide.relatedProducts.map((product) => <ProductCard key={product.id} product={product} />)}
+              </div>
+            </section>
+          )}
+
           <section className="mt-16 rounded-[2rem] bg-[#063f5b] px-7 py-9 text-white sm:px-9">
             <p className="text-sm font-extrabold uppercase tracking-[0.14em] text-[#a8e8f5]">Ready to explore?</p>
-            <h2 className="mt-2 font-display text-3xl font-semibold tracking-[-0.04em]">Find thoughtful essentials for everyday outings.</h2>
+            <h2 className="mt-2 font-display text-3xl font-semibold tracking-[-0.04em]">Find thoughtful products for your family’s routine.</h2>
             <Link href={`/categories/${guide.relatedCategory.slug}`} className="mt-6 inline-flex rounded-full bg-white px-5 py-3 text-sm font-extrabold text-[#063f5b] transition hover:bg-[#e8f8fc]">Explore {guide.relatedCategory.label}</Link>
           </section>
         </article>

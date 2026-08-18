@@ -145,6 +145,19 @@ export const guideType = defineType({
         ),
     }),
     defineField({
+      name: "relatedProducts",
+      title: "Recommended products",
+      type: "array",
+      description: "Choose up to six published products and drag them into the order shown near the end of the guide.",
+      of: [
+        defineArrayMember({
+          type: "reference",
+          to: [{ type: "product" }],
+        }),
+      ],
+      validation: (rule) => rule.max(6).unique(),
+    }),
+    defineField({
       name: "relatedCategory",
       title: "Related product category",
       type: "reference",
