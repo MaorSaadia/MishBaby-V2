@@ -12,6 +12,8 @@ export type GuideSection = {
 
 export type Guide = {
   id: string;
+  createdAt: string;
+  updatedAt: string;
   slug: string;
   title: string;
   status: "planned" | "published";
@@ -43,6 +45,8 @@ const guidesQuery = `
     defined(colorTheme)
   ] | order(featured desc, displayOrder asc, _createdAt asc, title asc) {
     "id": _id,
+    "createdAt": _createdAt,
+    "updatedAt": _updatedAt,
     "slug": slug.current,
     title,
     status,

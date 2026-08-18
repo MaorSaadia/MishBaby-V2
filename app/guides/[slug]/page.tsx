@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ProductCard } from "@/app/components/product-card";
 import { getPublishedGuideBySlug, getPublishedGuides } from "@/lib/guides";
+import { siteConfig } from "@/lib/site";
 
 export async function generateStaticParams() {
   const publishedGuides = await getPublishedGuides();
@@ -15,9 +16,26 @@ export async function generateMetadata({ params }: PageProps<"/guides/[slug]">):
 
   if (!guide) return {};
 
+  const guideUrl = `${siteConfig.url}/guides/${guide.slug}`;
+
   return {
     title: guide.title,
     description: guide.description,
+    alternates: {
+      canonical: guideUrl,
+    },
+    openGraph: {
+      type: "article",
+      url: guideUrl,
+      siteName: siteConfig.name,
+      title: guide.title,
+      description: guide.description,
+    },
+    twitter: {
+      card: "summary",
+      title: guide.title,
+      description: guide.description,
+    },
   };
 }
 
@@ -27,8 +45,67 @@ export default async function GuidePage({ params }: PageProps<"/guides/[slug]">)
 
   if (!guide?.introduction || !guide.readingMinutes || !guide.relatedCategory || guide.sections.length === 0) notFound();
 
+  const guideUrl = `${siteConfig.url}/guides/${guide.slug}`;
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Article",
+        "@id": `${guideUrl}#article`,
+        headline: guide.title,
+        description: guide.description,
+        articleSection: guide.categoryLabel,
+        dateCreated: guide.createdAt,
+        dateModified: guide.updatedAt,
+        timeRequired: `PT${guide.readingMinutes}M`,
+        inLanguage: "en-US",
+        mainEntityOfPage: guideUrl,
+        author: {
+          "@type": "Organization",
+          name: siteConfig.name,
+          url: `${siteConfig.url}/about`,
+        },
+        publisher: {
+          "@type": "Organization",
+          name: siteConfig.name,
+          url: siteConfig.url,
+        },
+      },
+      {
+        "@type": "BreadcrumbList",
+        "@id": `${guideUrl}#breadcrumb`,
+        itemListElement: [
+          {
+            "@type": "ListItem",
+            position: 1,
+            name: "Home",
+            item: siteConfig.url,
+          },
+          {
+            "@type": "ListItem",
+            position: 2,
+            name: "Guides",
+            item: `${siteConfig.url}/guides`,
+          },
+          {
+            "@type": "ListItem",
+            position: 3,
+            name: guide.title,
+            item: guideUrl,
+          },
+        ],
+      },
+    ],
+  };
+
   return (
     <>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(structuredData).replace(/</g, "\\u003c"),
+          }}
+        />
         <header className="relative isolate overflow-hidden bg-[#f1fbfe] px-5 py-12 sm:px-8 md:py-20">
           <div className="absolute -right-20 -top-20 -z-10 size-96 rounded-full bg-[#a8e8f5]/70 blur-3xl" />
           <div className="mx-auto max-w-4xl">
