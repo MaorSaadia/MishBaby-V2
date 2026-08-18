@@ -1,15 +1,16 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getPublishedGuide, publishedGuides } from "../guide-data";
+import { getPublishedGuideBySlug, getPublishedGuides } from "@/lib/guides";
 
-export function generateStaticParams() {
+export async function generateStaticParams() {
+  const publishedGuides = await getPublishedGuides();
   return publishedGuides.map((guide) => ({ slug: guide.slug }));
 }
 
 export async function generateMetadata({ params }: PageProps<"/guides/[slug]">): Promise<Metadata> {
   const { slug } = await params;
-  const guide = getPublishedGuide(slug);
+  const guide = await getPublishedGuideBySlug(slug);
 
   if (!guide) return {};
 
@@ -21,9 +22,9 @@ export async function generateMetadata({ params }: PageProps<"/guides/[slug]">):
 
 export default async function GuidePage({ params }: PageProps<"/guides/[slug]">) {
   const { slug } = await params;
-  const guide = getPublishedGuide(slug);
+  const guide = await getPublishedGuideBySlug(slug);
 
-  if (!guide) notFound();
+  if (!guide?.introduction || !guide.readingMinutes || !guide.relatedCategory || guide.sections.length === 0) notFound();
 
   return (
     <>
@@ -38,8 +39,8 @@ export default async function GuidePage({ params }: PageProps<"/guides/[slug]">)
               <span className="text-[#063f5b]">{guide.title}</span>
             </nav>
             <div className="mt-10 flex items-center gap-3 text-xs font-extrabold uppercase tracking-[0.12em]">
-              <span className="rounded-full bg-white px-3 py-1.5 text-[#009dcc] shadow-sm">{guide.category}</span>
-              <span className="text-[#063f5b]/45">{guide.readingTime}</span>
+              <span className="rounded-full bg-white px-3 py-1.5 text-[#009dcc] shadow-sm">{guide.categoryLabel}</span>
+              <span className="text-[#063f5b]/45">{guide.readingMinutes} min read</span>
             </div>
             <h1 className="mt-5 font-display text-5xl font-semibold leading-[1.05] tracking-[-0.055em] text-[#063f5b] sm:text-6xl">{guide.title}</h1>
             <p className="mt-6 max-w-3xl text-xl leading-8 text-[#063f5b]/70">{guide.description}</p>
@@ -55,7 +56,7 @@ export default async function GuidePage({ params }: PageProps<"/guides/[slug]">)
 
           <div className="mt-14 grid gap-14">
             {guide.sections.map((section, index) => (
-              <section key={section.heading}>
+              <section key={section.key || section.heading}>
                 <div className="flex items-start gap-4">
                   <span className="grid size-9 shrink-0 place-items-center rounded-full bg-[#e2f7fc] text-sm font-extrabold text-[#009dcc]">{index + 1}</span>
                   <h2 className="font-display text-3xl font-semibold leading-tight tracking-[-0.04em] text-[#063f5b]">{section.heading}</h2>

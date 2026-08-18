@@ -30,6 +30,7 @@ export default defineConfig({
             structure.divider(),
             structure.documentTypeListItem("product").title("Products"),
             structure.documentTypeListItem("category").title("Categories"),
+            structure.documentTypeListItem("guide").title("Guides"),
             structure.documentTypeListItem("merchant").title("Merchants"),
           ]),
     }),
