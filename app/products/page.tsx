@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 };
 
 type ProductsPageProps = {
-  searchParams: Promise<{ category?: string | string[]; q?: string | string[] }>;
+  searchParams: Promise<{ category?: string | string[]; q?: string | string[]; sort?: string | string[] }>;
 };
 
 export default async function ProductsPage({ searchParams }: ProductsPageProps) {
@@ -25,17 +25,24 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
   const requestedSearch = Array.isArray(searchParam) ? searchParam[0] : searchParam;
   const searchQuery = requestedSearch?.trim() ?? "";
   const normalizedSearch = searchQuery.toLocaleLowerCase();
+  const sortParam = resolvedSearchParams.sort;
+  const requestedSort = Array.isArray(sortParam) ? sortParam[0] : sortParam;
+  const selectedSort = requestedSort === "name" ? "name" : "newest";
   const selectedCategory = categories.find((category) => category.slug === requestedCategory);
   const categoryProducts = selectedCategory
     ? publishedProducts.filter((product) => product.categorySlug === selectedCategory.slug)
     : publishedProducts;
-  const visibleProducts = normalizedSearch
+  const matchingProducts = normalizedSearch
     ? categoryProducts.filter((product) =>
         [product.name, product.summary, ...product.highlights].some((value) =>
           value.toLocaleLowerCase().includes(normalizedSearch),
         ),
       )
     : categoryProducts;
+  const visibleProducts = selectedSort === "name"
+    ? [...matchingProducts].sort((firstProduct, secondProduct) => firstProduct.name.localeCompare(secondProduct.name))
+    : matchingProducts;
+  const selectedSortQuery = selectedSort === "name" ? { sort: "name" } : {};
 
   return (
     <>
@@ -56,7 +63,10 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
           </div>
           <nav className="flex flex-wrap gap-2" aria-label="Filter products by category">
             <Link
-              href={searchQuery ? { pathname: "/products", query: { q: searchQuery } } : "/products"}
+              href={{
+                pathname: "/products",
+                query: { ...(searchQuery ? { q: searchQuery } : {}), ...selectedSortQuery },
+              }}
               aria-current={!selectedCategory ? "page" : undefined}
               className={`rounded-full px-4 py-2.5 text-sm font-extrabold transition ${!selectedCategory ? "bg-[#009dcc] text-white" : "border border-[#063f5b]/10 bg-white text-[#063f5b]/70 hover:border-[#009dcc]/40 hover:text-[#009dcc]"}`}
             >
@@ -70,7 +80,11 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                   key={category.slug}
                   href={{
                     pathname: "/products",
-                    query: { category: category.slug, ...(searchQuery ? { q: searchQuery } : {}) },
+                    query: {
+                      category: category.slug,
+                      ...(searchQuery ? { q: searchQuery } : {}),
+                      ...selectedSortQuery,
+                    },
                   }}
                   aria-current={isSelected ? "page" : undefined}
                   className={`rounded-full px-4 py-2.5 text-sm font-extrabold transition ${isSelected ? "bg-[#009dcc] text-white" : "border border-[#063f5b]/10 bg-white text-[#063f5b]/70 hover:border-[#009dcc]/40 hover:text-[#009dcc]"}`}
@@ -82,20 +96,58 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
           </nav>
         </div>
 
-        <div className="mt-8 flex flex-wrap items-center justify-between gap-3">
+        <div className="mt-8 flex flex-wrap items-center justify-between gap-4">
           <p className="text-sm font-semibold text-[#063f5b]/55">
             {visibleProducts.length} {visibleProducts.length === 1 ? "product" : "products"}
             {selectedCategory ? ` in ${selectedCategory.name}` : ""}
             {searchQuery ? ` matching “${searchQuery}”` : ""}
           </p>
-          {searchQuery && (
-            <Link
-              href={selectedCategory ? { pathname: "/products", query: { category: selectedCategory.slug } } : "/products"}
-              className="text-sm font-extrabold text-[#009dcc] transition hover:text-[#0784b0]"
-            >
-              Clear search
-            </Link>
-          )}
+          <div className="flex flex-wrap items-center gap-4">
+            {searchQuery && (
+              <Link
+                href={{
+                  pathname: "/products",
+                  query: {
+                    ...(selectedCategory ? { category: selectedCategory.slug } : {}),
+                    ...selectedSortQuery,
+                  },
+                }}
+                className="text-sm font-extrabold text-[#009dcc] transition hover:text-[#0784b0]"
+              >
+                Clear search
+              </Link>
+            )}
+            <nav className="flex items-center gap-1 rounded-full border border-[#063f5b]/10 bg-white p-1" aria-label="Sort products">
+              <span className="px-2 text-xs font-extrabold uppercase tracking-[0.1em] text-[#063f5b]/40">Sort</span>
+              <Link
+                href={{
+                  pathname: "/products",
+                  query: {
+                    ...(selectedCategory ? { category: selectedCategory.slug } : {}),
+                    ...(searchQuery ? { q: searchQuery } : {}),
+                  },
+                }}
+                aria-current={selectedSort === "newest" ? "page" : undefined}
+                className={`rounded-full px-3 py-2 text-xs font-extrabold transition ${selectedSort === "newest" ? "bg-[#009dcc] text-white" : "text-[#063f5b]/60 hover:bg-[#e8f8fc] hover:text-[#009dcc]"}`}
+              >
+                Newest
+              </Link>
+              <Link
+                href={{
+                  pathname: "/products",
+                  query: {
+                    ...(selectedCategory ? { category: selectedCategory.slug } : {}),
+                    ...(searchQuery ? { q: searchQuery } : {}),
+                    sort: "name",
+                  },
+                }}
+                aria-current={selectedSort === "name" ? "page" : undefined}
+                className={`rounded-full px-3 py-2 text-xs font-extrabold transition ${selectedSort === "name" ? "bg-[#009dcc] text-white" : "text-[#063f5b]/60 hover:bg-[#e8f8fc] hover:text-[#009dcc]"}`}
+              >
+                A–Z
+              </Link>
+            </nav>
+          </div>
         </div>
 
         {visibleProducts.length > 0 ? (
@@ -115,7 +167,13 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                 : "We have not published products in this category yet. Explore the full collection while we carefully add more."}
             </p>
             <Link
-              href={selectedCategory && searchQuery ? { pathname: "/products", query: { category: selectedCategory.slug } } : "/products"}
+              href={{
+                pathname: "/products",
+                query: {
+                  ...(selectedCategory && searchQuery ? { category: selectedCategory.slug } : {}),
+                  ...selectedSortQuery,
+                },
+              }}
               className="mt-6 inline-flex rounded-full bg-[#009dcc] px-5 py-3 text-sm font-extrabold text-white transition hover:bg-[#0784b0]"
             >
               {searchQuery ? "Clear search" : "View all products"}
