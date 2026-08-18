@@ -17,6 +17,17 @@ export default defineConfig({
           .list()
           .title("Content")
           .items([
+            structure
+              .listItem()
+              .title("Homepage")
+              .child(
+                structure
+                  .document()
+                  .schemaType("homepageSettings")
+                  .documentId("homepageSettings")
+                  .title("Homepage Settings"),
+              ),
+            structure.divider(),
             structure.documentTypeListItem("product").title("Products"),
             structure.documentTypeListItem("category").title("Categories"),
             structure.documentTypeListItem("merchant").title("Merchants"),
@@ -30,5 +41,12 @@ export default defineConfig({
       component: ProductAssistant,
     },
   ],
+  document: {
+    newDocumentOptions: (previous) => previous.filter((item) => item.templateId !== "homepageSettings"),
+    actions: (previous, context) =>
+      context.schemaType === "homepageSettings"
+        ? previous.filter((action) => action.action !== "duplicate" && action.action !== "delete")
+        : previous,
+  },
   schema: { types: schemaTypes },
 });

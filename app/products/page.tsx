@@ -49,36 +49,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
       </section>
 
       <section className="mx-auto max-w-6xl px-5 py-14 sm:px-8 md:py-20">
-        <div className="flex flex-col gap-7 border-b border-[#063f5b]/10 pb-8">
-          <form action="/products" method="get" role="search" className="max-w-2xl">
-            {selectedCategory && <input type="hidden" name="category" value={selectedCategory.slug} />}
-            <label htmlFor="product-search" className="text-xs font-extrabold uppercase tracking-[0.14em] text-[#063f5b]/45">
-              Search products
-            </label>
-            <div className="mt-2 flex flex-col gap-2 sm:flex-row">
-              <input
-                id="product-search"
-                type="search"
-                name="q"
-                defaultValue={searchQuery}
-                maxLength={120}
-                placeholder="Search by product name or benefit..."
-                className="min-h-12 min-w-0 flex-1 rounded-full border border-[#063f5b]/12 bg-white px-5 text-sm text-[#063f5b] outline-none transition placeholder:text-[#063f5b]/40 focus:border-[#009dcc] focus:ring-3 focus:ring-[#009dcc]/15"
-              />
-              <button type="submit" className="min-h-12 rounded-full bg-[#009dcc] px-6 text-sm font-extrabold text-white transition hover:bg-[#0784b0]">
-                Search
-              </button>
-              {searchQuery && (
-                <Link
-                  href={selectedCategory ? { pathname: "/products", query: { category: selectedCategory.slug } } : "/products"}
-                  className="inline-flex min-h-12 items-center justify-center rounded-full border border-[#063f5b]/10 bg-white px-5 text-sm font-extrabold text-[#063f5b]/65 transition hover:border-[#009dcc]/40 hover:text-[#009dcc]"
-                >
-                  Clear
-                </Link>
-              )}
-            </div>
-          </form>
-
+        <div className="flex flex-col gap-5 border-b border-[#063f5b]/10 pb-8">
           <div>
             <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-[#063f5b]/45">Filter by category</p>
             <h2 className="mt-2 text-2xl font-extrabold tracking-[-0.035em] text-[#063f5b]">{selectedCategory?.name ?? "All products"}</h2>
@@ -111,11 +82,21 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
           </nav>
         </div>
 
-        <p className="mt-8 text-sm font-semibold text-[#063f5b]/55">
-          {visibleProducts.length} {visibleProducts.length === 1 ? "product" : "products"}
-          {selectedCategory ? ` in ${selectedCategory.name}` : ""}
-          {searchQuery ? ` matching “${searchQuery}”` : ""}
-        </p>
+        <div className="mt-8 flex flex-wrap items-center justify-between gap-3">
+          <p className="text-sm font-semibold text-[#063f5b]/55">
+            {visibleProducts.length} {visibleProducts.length === 1 ? "product" : "products"}
+            {selectedCategory ? ` in ${selectedCategory.name}` : ""}
+            {searchQuery ? ` matching “${searchQuery}”` : ""}
+          </p>
+          {searchQuery && (
+            <Link
+              href={selectedCategory ? { pathname: "/products", query: { category: selectedCategory.slug } } : "/products"}
+              className="text-sm font-extrabold text-[#009dcc] transition hover:text-[#0784b0]"
+            >
+              Clear search
+            </Link>
+          )}
+        </div>
 
         {visibleProducts.length > 0 ? (
           <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">

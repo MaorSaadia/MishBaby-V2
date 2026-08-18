@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ProductCard } from "./components/product-card";
 import { getPublishedCategories } from "@/lib/categories";
 import { getCategoryThemeClass } from "@/lib/category-themes";
-import { getPublishedProducts } from "@/lib/products";
+import { getHomepageFeaturedProducts } from "@/lib/homepage";
 
 const values = [
   ["✦", "Thoughtfully chosen", "A gentler place to start when everything feels like a decision."],
@@ -11,9 +11,8 @@ const values = [
 ];
 
 export default async function Home() {
-  const [categories, products] = await Promise.all([getPublishedCategories(), getPublishedProducts()]);
+  const [categories, featuredProducts] = await Promise.all([getPublishedCategories(), getHomepageFeaturedProducts()]);
   const featuredCategories = categories.slice(0, 3);
-  const featuredProducts = products.slice(0, 3);
 
   return (
     <div className="overflow-hidden">
@@ -79,8 +78,8 @@ export default async function Home() {
               </div>
               <Link href="/products" className="text-sm font-extrabold text-[#009dcc] transition-colors hover:text-[#0784b0]">View all products <span aria-hidden="true">→</span></Link>
             </div>
-            <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {featuredProducts.map((product) => <ProductCard key={product.id} product={product} />)}
+            <div className="mt-10 grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
+              {featuredProducts.map((product) => <ProductCard key={product.id} product={product} variant="compact" />)}
             </div>
           </div>
         </section>

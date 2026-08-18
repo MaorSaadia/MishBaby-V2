@@ -3,11 +3,11 @@ import type { Product } from "@/lib/products";
 
 type ProductImageProps = {
   product: Product;
-  variant?: "card" | "detail";
+  variant?: "card" | "featured" | "detail";
   priority?: boolean;
 };
 
-function FallbackArtwork({ variant }: { variant: "card" | "detail" }) {
+function FallbackArtwork({ variant }: { variant: "card" | "featured" | "detail" }) {
   return (
     <svg
       viewBox="0 0 96 96"
@@ -33,7 +33,13 @@ export function ProductImage({ product, variant = "card", priority = false }: Pr
         alt={product.image.alt}
         fill
         priority={priority}
-        sizes={variant === "detail" ? "(max-width: 1024px) 100vw, 45vw" : "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"}
+        sizes={
+          variant === "detail"
+            ? "(max-width: 1024px) 100vw, 45vw"
+            : variant === "featured"
+              ? "(max-width: 1024px) 50vw, 25vw"
+              : "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+        }
         className="object-cover"
       />
     );
