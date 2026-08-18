@@ -59,22 +59,6 @@ export default async function CategoryPage({ params }: PageProps<"/categories/[s
           </div>
         </section>
 
-        <section className="mx-auto max-w-6xl px-5 py-14 sm:px-8 md:py-20">
-          <div className="max-w-xl">
-            <p className="text-sm font-extrabold uppercase tracking-[0.14em] text-[#009dcc]">Inside this category</p>
-            <h2 className="mt-3 font-display text-4xl font-semibold tracking-[-0.045em] text-[#063f5b]">Start with what matters today.</h2>
-          </div>
-          <div className="mt-9 grid gap-4 md:grid-cols-3">
-            {category.topics.map((topic, index) => (
-              <article key={topic} className="rounded-3xl border border-[#063f5b]/8 bg-white p-6 shadow-[0_12px_30px_-25px_rgba(6,63,91,.35)]">
-                <span className="grid size-9 place-items-center rounded-full bg-[#e2f7fc] text-sm font-extrabold text-[#009dcc]">0{index + 1}</span>
-                <h3 className="mt-6 text-lg font-extrabold text-[#063f5b]">{topic}</h3>
-                <p className="mt-2 text-sm leading-6 text-[#063f5b]/60">Thoughtful recommendations and practical guidance will live here.</p>
-              </article>
-            ))}
-          </div>
-        </section>
-
         {featuredProducts.length > 0 && (
           <section className="bg-[#f7fcfe] px-5 py-14 sm:px-8 md:py-20">
             <div className="mx-auto max-w-6xl">
