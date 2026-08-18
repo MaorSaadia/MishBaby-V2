@@ -21,9 +21,31 @@ export async function generateMetadata({ params }: PageProps<"/products/[slug]">
 
   if (!product) return {};
 
+  const productUrl = `${siteConfig.url}/products/${product.slug}`;
+  const socialImages = product.image
+    ? [{ url: product.image.src, alt: product.image.alt }]
+    : undefined;
+
   return {
     title: product.name,
     description: product.summary,
+    alternates: {
+      canonical: productUrl,
+    },
+    openGraph: {
+      type: "website",
+      url: productUrl,
+      siteName: siteConfig.name,
+      title: product.name,
+      description: product.summary,
+      images: socialImages,
+    },
+    twitter: {
+      card: product.image ? "summary_large_image" : "summary",
+      title: product.name,
+      description: product.summary,
+      images: socialImages,
+    },
   };
 }
 
