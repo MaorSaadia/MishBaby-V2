@@ -21,6 +21,12 @@ type CategoryOption = {
   slug: string;
 };
 
+type ProductOption = {
+  id: string;
+  name: string;
+  categoryName: string;
+};
+
 type AssistantResponse = {
   suggestion?: GuideSuggestion;
   error?: string;
@@ -30,11 +36,13 @@ export function GuideAssistant() {
   const client = useClient({ apiVersion });
   const router = useRouter();
   const [categories, setCategories] = useState<CategoryOption[]>([]);
+  const [products, setProducts] = useState<ProductOption[]>([]);
   const [topic, setTopic] = useState("");
   const [audience, setAudience] = useState("");
   const [sourceNotes, setSourceNotes] = useState("");
   const [suggestion, setSuggestion] = useState<GuideSuggestion | null>(null);
   const [selectedCategorySlug, setSelectedCategorySlug] = useState("");
+  const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
   const [loadingOptions, setLoadingOptions] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [creating, setCreating] = useState(false);
@@ -44,19 +52,44 @@ export function GuideAssistant() {
   useEffect(() => {
     let active = true;
 
-    client
-      .fetch<CategoryOption[]>(`
-        *[_type == "category" && defined(name) && defined(slug.current)] | order(displayOrder asc, name asc) {
-          "id": _id,
-          name,
-          "slug": slug.current
-        }
-      `)
-      .then((categoryOptions) => {
-        if (active) setCategories(categoryOptions);
+    Promise.all([
+      client.fetch<CategoryOption[]>(
+        `
+          *[_type == "category" && defined(name) && defined(slug.current)] | order(displayOrder asc, name asc) {
+            "id": _id,
+            name,
+            "slug": slug.current
+          }
+        `,
+        {},
+        { perspective: "published" },
+      ),
+      client.fetch<ProductOption[]>(
+        `
+          *[
+            _type == "product" &&
+            defined(name) &&
+            defined(slug.current) &&
+            defined(category->slug.current) &&
+            defined(summary) &&
+            defined(image.asset)
+          ] | order(name asc) {
+            "id": _id,
+            name,
+            "categoryName": coalesce(category->name, "Uncategorized")
+          }
+        `,
+        {},
+        { perspective: "published" },
+      ),
+    ])
+      .then(([categoryOptions, productOptions]) => {
+        if (!active) return;
+        setCategories(categoryOptions);
+        setProducts(productOptions);
       })
       .catch(() => {
-        if (active) setError("Categories could not be loaded from Sanity.");
+        if (active) setError("Categories and products could not be loaded from Sanity.");
       })
       .finally(() => {
         if (active) setLoadingOptions(false);
@@ -115,6 +148,7 @@ export function GuideAssistant() {
 
       setSuggestion(result.suggestion);
       setSelectedCategorySlug(result.suggestion.suggestedCategorySlug);
+      setSelectedProductIds([]);
     } catch (caughtError) {
       setError(caughtError instanceof Error ? caughtError.message : "Guide content could not be generated.");
     } finally {
@@ -127,6 +161,19 @@ export function GuideAssistant() {
     const sections = [...suggestion.sections];
     sections[sectionIndex] = nextSection;
     setSuggestion({ ...suggestion, sections });
+  }
+
+  function toggleProduct(productId: string) {
+    setError("");
+    if (selectedProductIds.includes(productId)) {
+      setSelectedProductIds(selectedProductIds.filter((id) => id !== productId));
+      return;
+    }
+    if (selectedProductIds.length >= 6) {
+      setError("Choose no more than six recommended products.");
+      return;
+    }
+    setSelectedProductIds([...selectedProductIds, productId]);
   }
 
   async function copyImagePrompt() {
@@ -149,6 +196,10 @@ export function GuideAssistant() {
     );
     if (!confirmedSuggestion) return "Review the generated fields. One or more values are missing or outside the allowed length.";
     if (!categories.some((category) => category.slug === selectedCategorySlug)) return "Choose a related product category.";
+    if (selectedProductIds.length > 6) return "Choose no more than six recommended products.";
+    if (selectedProductIds.some((id) => !products.some((product) => product.id === id))) {
+      return "One or more selected products are no longer published.";
+    }
     return "";
   }
 
@@ -200,6 +251,15 @@ export function GuideAssistant() {
           ...(section.items.length > 0 ? { items: section.items } : {}),
         })),
         relatedCategory: { _type: "reference", _ref: category.id },
+        ...(selectedProductIds.length > 0
+          ? {
+              relatedProducts: selectedProductIds.map((productId) => ({
+                _key: crypto.randomUUID().replaceAll("-", ""),
+                _type: "reference",
+                _ref: productId,
+              })),
+            }
+          : {}),
         coverImagePrompt: confirmedSuggestion.coverImagePrompt,
       });
 
@@ -261,7 +321,7 @@ export function GuideAssistant() {
           </form>
 
           {loadingOptions && (
-            <Flex align="center" gap={2}><Spinner muted /><Text muted size={1}>Loading categories...</Text></Flex>
+            <Flex align="center" gap={2}><Spinner muted /><Text muted size={1}>Loading categories and products...</Text></Flex>
           )}
 
           {suggestion && (
@@ -362,6 +422,33 @@ export function GuideAssistant() {
                         </div>
                       </Card>
                     ))}
+                  </div>
+                </fieldset>
+
+                <fieldset className={styles.fieldset}>
+                  <legend>Recommended products</legend>
+                  <div className={styles.stack3}>
+                    <Text muted size={1}>Optional. Choose up to six published products in the order you want them displayed. {selectedProductIds.length}/6 selected.</Text>
+                    {products.length > 0 ? (
+                      <div className={styles.productChoices}>
+                        {products.map((product) => {
+                          const selectionIndex = selectedProductIds.indexOf(product.id);
+                          const selected = selectionIndex >= 0;
+                          return (
+                            <label className={`${styles.productChoice} ${selected ? styles.productChoiceSelected : ""}`} key={product.id}>
+                              <input type="checkbox" checked={selected} onChange={() => toggleProduct(product.id)} />
+                              <span className={styles.productChoiceText}>
+                                <strong>{product.name}</strong>
+                                <small>{product.categoryName}</small>
+                              </span>
+                              {selected && <span className={styles.productChoiceOrder} aria-label={`Selected position ${selectionIndex + 1}`}>{selectionIndex + 1}</span>}
+                            </label>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <Text muted size={1}>No published products are available yet. You can add recommendations later in the guide editor.</Text>
+                    )}
                   </div>
                 </fieldset>
 

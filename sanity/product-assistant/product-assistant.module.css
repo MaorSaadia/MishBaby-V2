@@ -117,6 +117,67 @@
   font-weight: 600;
 }
 
+.productChoices {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 0.75rem;
+}
+
+.productChoice {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.9rem;
+  border: 1px solid var(--card-border-color);
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: border-color 150ms ease, background-color 150ms ease;
+}
+
+.productChoice:hover,
+.productChoiceSelected {
+  border-color: #009dcc;
+  background: rgba(0, 157, 204, 0.07);
+}
+
+.productChoice input {
+  width: 1rem;
+  height: 1rem;
+  flex: 0 0 auto;
+  margin-top: 0.15rem;
+  accent-color: #009dcc;
+}
+
+.productChoiceText {
+  display: grid;
+  flex: 1;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.productChoiceText strong {
+  font-size: 0.875rem;
+  line-height: 1.35;
+}
+
+.productChoiceText small {
+  color: var(--card-muted-fg-color);
+  font-size: 0.75rem;
+}
+
+.productChoiceOrder {
+  display: grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: #009dcc;
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
 @media (max-width: 700px) {
   .offerRow {
     grid-template-columns: 1fr;
