@@ -8,6 +8,7 @@ import { getCategoryThemeClass } from "@/lib/category-themes";
 import { getCategoryBySlug } from "@/lib/categories";
 import { getPublishedGuidesByProductId } from "@/lib/guides";
 import { getProductBySlug, getPublishedProducts, getRelatedProducts } from "@/lib/products";
+import { siteConfig } from "@/lib/site";
 
 export async function generateStaticParams() {
   const products = await getPublishedProducts();
@@ -39,8 +40,62 @@ export default async function ProductPage({ params }: PageProps<"/products/[slug
   ]);
   if (!category) notFound();
 
+  const productUrl = `${siteConfig.url}/products/${product.slug}`;
+  const categoryUrl = `${siteConfig.url}/categories/${category.slug}`;
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Product",
+        "@id": `${productUrl}#product`,
+        name: product.name,
+        description: product.summary,
+        ...(product.image ? { image: [product.image.src] } : {}),
+        category: category.name,
+        url: productUrl,
+        mainEntityOfPage: productUrl,
+      },
+      {
+        "@type": "BreadcrumbList",
+        "@id": `${productUrl}#breadcrumb`,
+        itemListElement: [
+          {
+            "@type": "ListItem",
+            position: 1,
+            name: "Home",
+            item: siteConfig.url,
+          },
+          {
+            "@type": "ListItem",
+            position: 2,
+            name: "Categories",
+            item: `${siteConfig.url}/categories`,
+          },
+          {
+            "@type": "ListItem",
+            position: 3,
+            name: category.name,
+            item: categoryUrl,
+          },
+          {
+            "@type": "ListItem",
+            position: 4,
+            name: product.name,
+            item: productUrl,
+          },
+        ],
+      },
+    ],
+  };
+
   return (
     <>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(structuredData).replace(/</g, "\\u003c"),
+          }}
+        />
         <section className="bg-[#f1fbfe] px-5 py-10 sm:px-8 md:py-16">
           <div className="mx-auto max-w-6xl">
             <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-2 text-sm font-bold text-[#063f5b]/55">
