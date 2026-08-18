@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { GuideImage } from "../../components/guide-image";
 import { ProductCard } from "../../components/product-card";
 import { getCategoryBySlug, getPublishedCategories } from "@/lib/categories";
 import { getCategoryThemeClass } from "@/lib/category-themes";
+import { getPublishedGuidesByCategorySlug } from "@/lib/guides";
 import { getProductsByCategory } from "@/lib/products";
 
 export async function generateStaticParams() {
@@ -29,7 +31,10 @@ export default async function CategoryPage({ params }: PageProps<"/categories/[s
 
   if (!category) notFound();
 
-  const featuredProducts = await getProductsByCategory(category.slug);
+  const [featuredProducts, relatedGuides] = await Promise.all([
+    getProductsByCategory(category.slug),
+    getPublishedGuidesByCategorySlug(category.slug),
+  ]);
 
   return (
     <>
@@ -85,11 +90,41 @@ export default async function CategoryPage({ params }: PageProps<"/categories/[s
           </section>
         )}
 
+        {relatedGuides.length > 0 && (
+          <section className="mx-auto max-w-6xl px-5 py-14 sm:px-8 md:py-20">
+            <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+              <div className="max-w-2xl">
+                <p className="text-sm font-extrabold uppercase tracking-[0.14em] text-[#009dcc]">Helpful guides</p>
+                <h2 className="mt-3 font-display text-4xl font-semibold tracking-[-0.045em] text-[#063f5b]">Practical help for {category.name.toLowerCase()}.</h2>
+                <p className="mt-4 text-base leading-7 text-[#063f5b]/65">Explore clear, parent-friendly guidance related to this category.</p>
+              </div>
+              <Link href="/guides" className="shrink-0 text-sm font-extrabold text-[#009dcc] transition-colors hover:text-[#0784b0]">View all guides →</Link>
+            </div>
+
+            <div className="mt-9 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {relatedGuides.map((guide) => (
+                <article key={guide.id} className="overflow-hidden rounded-[2rem] border border-[#063f5b]/8 bg-white shadow-[0_16px_36px_-28px_rgba(6,63,91,.4)]">
+                  <GuideImage guide={guide} variant="card" />
+                  <div className="p-6">
+                    <div className="flex flex-wrap items-center gap-3 text-xs font-bold">
+                      <span className="uppercase tracking-[0.12em] text-[#009dcc]">{guide.categoryLabel}</span>
+                      {guide.readingMinutes && <span className="text-[#063f5b]/45">{guide.readingMinutes} min read</span>}
+                    </div>
+                    <h3 className="mt-3 text-xl font-extrabold leading-snug tracking-[-0.03em] text-[#063f5b]">{guide.title}</h3>
+                    <p className="mt-3 text-sm leading-6 text-[#063f5b]/65">{guide.description}</p>
+                    <Link href={`/guides/${guide.slug}`} className="mt-5 inline-flex items-center gap-2 text-xs font-extrabold text-[#009dcc] transition-colors hover:text-[#0784b0]">Read the guide <span aria-hidden="true">→</span></Link>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </section>
+        )}
+
         <section className="mx-auto max-w-6xl px-5 pb-16 sm:px-8 md:pb-22">
           <div className="flex flex-col items-start justify-between gap-6 rounded-[2rem] bg-[#063f5b] px-7 py-10 text-white sm:px-10 md:flex-row md:items-center">
             <div>
               <p className="text-sm font-extrabold uppercase tracking-[0.14em] text-[#a8e8f5]">Explore more</p>
-              <h2 className="mt-2 font-display text-3xl font-semibold tracking-[-0.04em]">More thoughtful recommendations are on the way.</h2>
+              <h2 className="mt-2 font-display text-3xl font-semibold tracking-[-0.04em]">Browse every little stage in one place.</h2>
             </div>
             <Link href="/categories" className="shrink-0 rounded-full bg-white px-5 py-3 text-sm font-extrabold text-[#063f5b] transition hover:bg-[#e8f8fc]">View all categories</Link>
           </div>

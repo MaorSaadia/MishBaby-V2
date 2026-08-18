@@ -96,6 +96,11 @@ export async function getPublishedGuidesByProductId(productId: string) {
   return guides.filter((guide) => guide.relatedProductIds.includes(productId));
 }
 
+export async function getPublishedGuidesByCategorySlug(categorySlug: string) {
+  const guides = await getPublishedGuides();
+  return guides.filter((guide) => guide.relatedCategory?.slug === categorySlug);
+}
+
 export async function getPublishedGuideBySlug(slug: string) {
   const [guides, products] = await Promise.all([getPublishedGuides(), getPublishedProducts()]);
   const guide = guides.find((item) => item.slug === slug);
