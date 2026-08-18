@@ -80,6 +80,13 @@ export async function getProductsByCategory(categorySlug: string) {
   return products.filter((product) => product.categorySlug === categorySlug);
 }
 
+export async function getRelatedProducts(product: Product, limit = 4) {
+  const categoryProducts = await getProductsByCategory(product.categorySlug);
+  return categoryProducts
+    .filter((categoryProduct) => categoryProduct.id !== product.id)
+    .slice(0, limit);
+}
+
 export async function getProductBySlug(slug: string) {
   const products = await getPublishedProducts();
   return products.find((product) => product.slug === slug);

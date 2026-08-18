@@ -2,11 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { OfferComparison } from "../../components/offer-comparison";
+import { ProductCard } from "../../components/product-card";
 import { ProductImage } from "../../components/product-image";
 import { getCategoryThemeClass } from "@/lib/category-themes";
 import { getCategoryBySlug } from "@/lib/categories";
 import { getPublishedGuidesByProductId } from "@/lib/guides";
-import { getProductBySlug, getPublishedProducts } from "@/lib/products";
+import { getProductBySlug, getPublishedProducts, getRelatedProducts } from "@/lib/products";
 
 export async function generateStaticParams() {
   const products = await getPublishedProducts();
@@ -31,9 +32,10 @@ export default async function ProductPage({ params }: PageProps<"/products/[slug
 
   if (!product) notFound();
 
-  const [category, relatedGuides] = await Promise.all([
+  const [category, relatedGuides, relatedProducts] = await Promise.all([
     getCategoryBySlug(product.categorySlug),
     getPublishedGuidesByProductId(product.id),
+    getRelatedProducts(product),
   ]);
   if (!category) notFound();
 
@@ -82,6 +84,27 @@ export default async function ProductPage({ params }: PageProps<"/products/[slug
           </div>
           <OfferComparison offers={product.offers} />
         </section>
+
+        {relatedProducts.length > 0 && (
+          <section className="border-y border-[#063f5b]/6 bg-[#f1fbfe] px-5 py-14 sm:px-8 md:py-20">
+            <div className="mx-auto max-w-6xl">
+              <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+                <div className="max-w-2xl">
+                  <p className="text-sm font-extrabold uppercase tracking-[0.14em] text-[#009dcc]">More to explore</p>
+                  <h2 className="mt-3 font-display text-4xl font-semibold tracking-[-0.045em] text-[#063f5b]">More from {category.name}.</h2>
+                  <p className="mt-4 text-base leading-7 text-[#063f5b]/65">Discover other useful products selected for the same stage or routine.</p>
+                </div>
+                <Link href={`/categories/${category.slug}`} className="shrink-0 text-sm font-extrabold text-[#009dcc] transition-colors hover:text-[#0784b0]">View all in {category.name} →</Link>
+              </div>
+
+              <div className="mt-9 grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
+                {relatedProducts.map((relatedProduct) => (
+                  <ProductCard key={relatedProduct.id} product={relatedProduct} variant="compact" />
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
 
         {relatedGuides.length > 0 && (
           <section className="bg-[#f7fcfe] px-5 py-14 sm:px-8 md:py-20">
