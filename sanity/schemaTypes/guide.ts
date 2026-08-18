@@ -71,6 +71,30 @@ export const guideType = defineType({
       validation: (rule) => rule.required(),
     }),
     defineField({
+      name: "coverImage",
+      title: "Cover image",
+      type: "image",
+      description: "Optional image used on guide cards, the article page, and social previews.",
+      options: { hotspot: true },
+      fields: [
+        defineField({
+          name: "alt",
+          title: "Alternative text",
+          type: "string",
+          description: "Describe the image for visitors using screen readers.",
+          validation: (rule) => rule.required().min(5).max(180),
+        }),
+      ],
+    }),
+    defineField({
+      name: "coverImagePrompt",
+      title: "Cover-image prompt",
+      type: "text",
+      rows: 8,
+      description: "Copy this prompt into ChatGPT image generation, then upload the approved result above.",
+      validation: (rule) => rule.max(1500),
+    }),
+    defineField({
       name: "featured",
       title: "Featured guide",
       type: "boolean",
@@ -178,10 +202,11 @@ export const guideType = defineType({
     },
   ],
   preview: {
-    select: { title: "title", status: "status", featured: "featured" },
-    prepare({ title, status, featured }) {
+    select: { title: "title", status: "status", featured: "featured", media: "coverImage" },
+    prepare({ title, status, featured, media }) {
       return {
         title,
+        media,
         subtitle: `${featured ? "Featured · " : ""}${status === "published" ? "Published article" : "Planned"}`,
       };
     },

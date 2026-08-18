@@ -21,6 +21,10 @@ export type Guide = {
   description: string;
   symbol: string;
   colorTheme: CategoryTheme;
+  coverImage?: {
+    src: string;
+    alt: string;
+  };
   featured: boolean;
   displayOrder: number;
   readingMinutes?: number;
@@ -54,6 +58,12 @@ const guidesQuery = `
     description,
     symbol,
     colorTheme,
+    "coverImage": select(
+      defined(coverImage.asset) => {
+        "src": coverImage.asset->url,
+        "alt": coalesce(coverImage.alt, title)
+      }
+    ),
     "featured": coalesce(featured, false),
     "displayOrder": coalesce(displayOrder, 100),
     readingMinutes,

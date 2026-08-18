@@ -1,5 +1,6 @@
 import { defineConfig } from "sanity";
 import { structureTool } from "sanity/structure";
+import { GuideAssistant } from "./sanity/guide-assistant/guide-assistant";
 import { ProductAssistant } from "./sanity/product-assistant/product-assistant";
 import { sanityDataset, studioProjectId } from "./sanity/env";
 import { schemaTypes } from "./sanity/schemaTypes";
@@ -40,6 +41,11 @@ export default defineConfig({
       name: "product-assistant",
       title: "Product Assistant",
       component: ProductAssistant,
+    },
+    {
+      name: "guide-assistant",
+      title: "Guide Assistant",
+      component: GuideAssistant,
     },
   ],
   document: {

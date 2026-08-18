@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getCategoryThemeClass } from "@/lib/category-themes";
+import { GuideImage } from "@/app/components/guide-image";
 import { getGuides } from "@/lib/guides";
 
 export const metadata: Metadata = {
@@ -27,7 +27,7 @@ export default async function GuidesPage() {
         <section className="mx-auto max-w-6xl px-5 py-14 sm:px-8 md:py-20">
           {featuredGuide ? (
             <div className="grid overflow-hidden rounded-[2rem] border border-[#063f5b]/8 bg-white shadow-[0_20px_48px_-34px_rgba(6,63,91,.4)] md:grid-cols-[.85fr_1.15fr]">
-              <div className={`grid min-h-72 place-items-center ${getCategoryThemeClass(featuredGuide.colorTheme)} text-7xl text-[#009dcc]`} aria-hidden="true">{featuredGuide.symbol}</div>
+              <GuideImage guide={featuredGuide} variant="featured" priority />
               <div className="flex flex-col justify-center p-7 sm:p-10">
                 <div className="flex flex-wrap items-center gap-3">
                   <span className="rounded-full bg-[#e8f8fc] px-3 py-1.5 text-xs font-extrabold uppercase tracking-[0.1em] text-[#009dcc]">Featured guide</span>
@@ -55,7 +55,7 @@ export default async function GuidesPage() {
             <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {moreGuides.map((guide) => (
                 <article key={guide.title} className="overflow-hidden rounded-[2rem] border border-[#063f5b]/8 bg-white shadow-[0_16px_36px_-28px_rgba(6,63,91,.4)]">
-                  <div className={`grid h-36 place-items-center ${getCategoryThemeClass(guide.colorTheme)} text-4xl text-[#009dcc]`} aria-hidden="true">{guide.symbol}</div>
+                  <GuideImage guide={guide} variant="card" />
                   <div className="p-6">
                     <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-[#009dcc]">{guide.categoryLabel}</p>
                     <h3 className="mt-3 text-xl font-extrabold leading-snug tracking-[-0.03em] text-[#063f5b]">{guide.title}</h3>

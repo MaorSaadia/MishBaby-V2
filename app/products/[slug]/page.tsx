@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { GuideImage } from "../../components/guide-image";
 import { OfferComparison } from "../../components/offer-comparison";
 import { ProductCard } from "../../components/product-card";
 import { ProductImage } from "../../components/product-image";
-import { getCategoryThemeClass } from "@/lib/category-themes";
 import { getCategoryBySlug } from "@/lib/categories";
 import { getPublishedGuidesByProductId } from "@/lib/guides";
 import { getProductBySlug, getPublishedProducts, getRelatedProducts } from "@/lib/products";
@@ -195,7 +195,7 @@ export default async function ProductPage({ params }: PageProps<"/products/[slug
               <div className="mt-9 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                 {relatedGuides.map((guide) => (
                   <article key={guide.id} className="overflow-hidden rounded-[2rem] border border-[#063f5b]/8 bg-white shadow-[0_16px_36px_-28px_rgba(6,63,91,.4)]">
-                    <div className={`grid h-32 place-items-center ${getCategoryThemeClass(guide.colorTheme)} text-4xl text-[#009dcc]`} aria-hidden="true">{guide.symbol}</div>
+                    <GuideImage guide={guide} variant="related" />
                     <div className="p-6">
                       <div className="flex flex-wrap items-center gap-3 text-xs font-bold">
                         <span className="uppercase tracking-[0.12em] text-[#009dcc]">{guide.categoryLabel}</span>
