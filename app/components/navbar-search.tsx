@@ -1,10 +1,13 @@
 "use client";
 
+import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import type { ProductSearchItem } from "@/lib/products";
 
 const recentSearchesKey = "mishbaby-recent-product-searches";
 const recentSearchLimit = 5;
+const suggestionLimit = 5;
 
 function readRecentSearches() {
   try {
@@ -27,13 +30,37 @@ function saveRecentSearches(searches: string[]) {
   }
 }
 
-export function NavbarSearch() {
+export function NavbarSearch({ products }: { products: ProductSearchItem[] }) {
   const router = useRouter();
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [query, setQuery] = useState("");
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [isOpen, setIsOpen] = useState(false);
+  const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(-1);
+  const normalizedQuery = query.trim().toLocaleLowerCase();
+  const suggestions = useMemo(() => {
+    if (normalizedQuery.length < 2) return [];
+
+    return products
+      .map((product) => {
+        const normalizedName = product.name.toLocaleLowerCase();
+        const normalizedSummary = product.summary.toLocaleLowerCase();
+        const rank = normalizedName.startsWith(normalizedQuery)
+          ? 0
+          : normalizedName.includes(normalizedQuery)
+            ? 1
+            : normalizedSummary.includes(normalizedQuery)
+              ? 2
+              : 3;
+
+        return { product, rank };
+      })
+      .filter(({ rank }) => rank < 3)
+      .sort((first, second) => first.rank - second.rank || first.product.name.localeCompare(second.product.name))
+      .slice(0, suggestionLimit)
+      .map(({ product }) => product);
+  }, [normalizedQuery, products]);
 
   useEffect(() => {
     function handleShortcut(event: KeyboardEvent) {
@@ -58,9 +85,23 @@ export function NavbarSearch() {
     };
   }, []);
 
-  function openRecentSearches() {
+  function openSearch() {
     setRecentSearches(readRecentSearches());
     setIsOpen(true);
+    setActiveSuggestionIndex(-1);
+  }
+
+  function rememberSearch(value: string) {
+    const trimmedQuery = value.trim();
+    if (!trimmedQuery) return;
+
+    const nextRecentSearches = [
+      trimmedQuery,
+      ...recentSearches.filter((search) => search.toLocaleLowerCase() !== trimmedQuery.toLocaleLowerCase()),
+    ].slice(0, recentSearchLimit);
+
+    setRecentSearches(nextRecentSearches);
+    saveRecentSearches(nextRecentSearches);
   }
 
   function runSearch(value: string) {
@@ -70,16 +111,17 @@ export function NavbarSearch() {
       return;
     }
 
-    const nextRecentSearches = [
-      trimmedQuery,
-      ...recentSearches.filter((search) => search.toLocaleLowerCase() !== trimmedQuery.toLocaleLowerCase()),
-    ].slice(0, recentSearchLimit);
-
     setQuery(trimmedQuery);
-    setRecentSearches(nextRecentSearches);
-    saveRecentSearches(nextRecentSearches);
+    rememberSearch(trimmedQuery);
     setIsOpen(false);
     router.push(`/products?q=${encodeURIComponent(trimmedQuery)}`);
+  }
+
+  function openSuggestion(product: ProductSearchItem) {
+    rememberSearch(query || product.name);
+    setIsOpen(false);
+    setActiveSuggestionIndex(-1);
+    router.push(`/products/${product.slug}`);
   }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -93,7 +135,9 @@ export function NavbarSearch() {
     inputRef.current?.focus();
   }
 
-  const showRecentSearches = isOpen && recentSearches.length > 0;
+  const showSuggestions = isOpen && normalizedQuery.length >= 2;
+  const showRecentSearches = isOpen && normalizedQuery.length === 0 && recentSearches.length > 0;
+  const suggestionsId = "navbar-product-suggestions";
 
   return (
     <div ref={containerRef} className="relative w-full">
@@ -109,14 +153,32 @@ export function NavbarSearch() {
             id="navbar-product-search"
             type="search"
             value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            onFocus={openRecentSearches}
+            onChange={(event) => {
+              setQuery(event.target.value);
+              setIsOpen(true);
+              setActiveSuggestionIndex(-1);
+            }}
+            onFocus={openSearch}
             onKeyDown={(event) => {
               if (event.key === "Escape") {
                 setIsOpen(false);
                 inputRef.current?.blur();
+              } else if (showSuggestions && suggestions.length > 0 && event.key === "ArrowDown") {
+                event.preventDefault();
+                setActiveSuggestionIndex((current) => Math.min(current + 1, suggestions.length - 1));
+              } else if (showSuggestions && suggestions.length > 0 && event.key === "ArrowUp") {
+                event.preventDefault();
+                setActiveSuggestionIndex((current) => Math.max(current - 1, 0));
+              } else if (event.key === "Enter" && activeSuggestionIndex >= 0) {
+                event.preventDefault();
+                openSuggestion(suggestions[activeSuggestionIndex]);
               }
             }}
+            role="combobox"
+            aria-autocomplete="list"
+            aria-expanded={showSuggestions}
+            aria-controls={showSuggestions ? suggestionsId : undefined}
+            aria-activedescendant={activeSuggestionIndex >= 0 ? `navbar-product-suggestion-${activeSuggestionIndex}` : undefined}
             autoComplete="off"
             maxLength={120}
             placeholder="Search products..."
@@ -127,6 +189,45 @@ export function NavbarSearch() {
           </kbd>
         </div>
       </form>
+
+      {showSuggestions && (
+        <div id={suggestionsId} className="absolute left-0 right-0 top-[calc(100%+.5rem)] z-50 overflow-hidden rounded-2xl border border-[#063f5b]/10 bg-white shadow-[0_20px_45px_-24px_rgba(6,63,91,.45)]">
+          <div className="border-b border-[#063f5b]/8 px-4 py-3">
+            <p className="text-xs font-extrabold uppercase tracking-[0.1em] text-[#063f5b]/60">Product suggestions</p>
+          </div>
+          {suggestions.length > 0 ? (
+            <ul role="listbox" aria-label="Product suggestions" className="p-2">
+              {suggestions.map((product, index) => (
+                <li key={product.slug} role="presentation">
+                  <button
+                    id={`navbar-product-suggestion-${index}`}
+                    type="button"
+                    role="option"
+                    aria-selected={activeSuggestionIndex === index}
+                    onMouseEnter={() => setActiveSuggestionIndex(index)}
+                    onClick={() => openSuggestion(product)}
+                    className={`flex w-full items-center gap-3 rounded-xl p-2 text-left transition ${activeSuggestionIndex === index ? "bg-[#e8f8fc]" : "hover:bg-[#f1fbfe]"}`}
+                  >
+                    <span className="relative size-12 shrink-0 overflow-hidden rounded-xl bg-[#e8f8fc]">
+                      {product.image && <Image src={product.image.src} alt="" fill sizes="48px" className="object-cover" />}
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block truncate text-sm font-extrabold text-[#063f5b]">{product.name}</span>
+                      <span className="mt-0.5 block truncate text-xs text-[#063f5b]/55">{product.summary}</span>
+                    </span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="px-4 py-5 text-sm font-semibold text-[#063f5b]/55">No matching products found.</p>
+          )}
+          <button type="button" onClick={() => runSearch(query)} className="flex w-full items-center justify-between border-t border-[#063f5b]/8 px-4 py-3 text-left text-xs font-extrabold text-[#009dcc] transition hover:bg-[#f1fbfe]">
+            <span className="truncate">See all results for “{query.trim()}”</span>
+            <span aria-hidden="true">→</span>
+          </button>
+        </div>
+      )}
 
       {showRecentSearches && (
         <div id="navbar-recent-searches" className="absolute left-0 right-0 top-[calc(100%+.5rem)] z-50 overflow-hidden rounded-2xl border border-[#063f5b]/10 bg-white shadow-[0_20px_45px_-24px_rgba(6,63,91,.45)]">

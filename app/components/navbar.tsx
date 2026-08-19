@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useRef, useState } from "react";
 import { Brand } from "./brand";
 import { NavbarSearch } from "./navbar-search";
+import type { ProductSearchItem } from "@/lib/products";
 
 const links = [
   { label: "Products", href: "/products" },
@@ -13,7 +14,7 @@ const links = [
   { label: "About", href: "/about" },
 ];
 
-export function Navbar() {
+export function Navbar({ products }: { products: ProductSearchItem[] }) {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
   const menuButtonRef = useRef<HTMLButtonElement>(null);
@@ -34,7 +35,7 @@ export function Navbar() {
       <div className="mx-auto flex min-h-18 max-w-6xl flex-wrap items-center gap-x-5 gap-y-3 px-5 py-3 sm:flex-nowrap sm:px-8 sm:py-0">
         <Brand />
         <div className="order-3 w-full sm:order-none sm:ml-auto sm:max-w-sm lg:ml-0 lg:max-w-md">
-          <NavbarSearch />
+          <NavbarSearch products={products} />
         </div>
         <nav className="ml-auto hidden shrink-0 items-center gap-6 text-sm font-bold text-[#063f5b]/75 lg:flex" aria-label="Primary navigation">
           {links.map((link) => {

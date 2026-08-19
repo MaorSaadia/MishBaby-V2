@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Footer } from "./components/footer";
 import { Navbar } from "./components/navbar";
+import { getProductSearchItems } from "@/lib/products";
 import { siteConfig } from "@/lib/site";
 import "./globals.css";
 
@@ -27,7 +28,9 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  const productSearchItems = await getProductSearchItems();
+
   return (
     <html
       lang="en"
@@ -35,7 +38,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="flex min-h-full flex-col">
         <a href="#main-content" className="skip-link">Skip to main content</a>
-        <Navbar />
+        <Navbar products={productSearchItems} />
         <main id="main-content" className="flex-1">{children}</main>
         <Footer />
       </body>

@@ -32,6 +32,8 @@ export type Product = {
   offers: ActiveOffer[];
 };
 
+export type ProductSearchItem = Pick<Product, "slug" | "name" | "summary" | "image">;
+
 const publishedProductsQuery = `
   *[
     _type == "product" &&
@@ -73,6 +75,28 @@ const publishedProductsQuery = `
 
 export const getPublishedProducts = cache(async () => {
   return sanityClient.fetch<Product[]>(publishedProductsQuery, {}, { next: { revalidate: 60 } });
+});
+
+const productSearchItemsQuery = `
+  *[
+    _type == "product" &&
+    defined(name) &&
+    defined(slug.current) &&
+    defined(summary) &&
+    defined(image.asset)
+  ] | order(name asc) {
+    "slug": slug.current,
+    name,
+    summary,
+    "image": {
+      "src": image.asset->url,
+      "alt": coalesce(image.alt, name)
+    }
+  }
+`;
+
+export const getProductSearchItems = cache(async () => {
+  return sanityClient.fetch<ProductSearchItem[]>(productSearchItemsQuery, {}, { next: { revalidate: 60 } });
 });
 
 export async function getProductsByCategory(categorySlug: string) {
