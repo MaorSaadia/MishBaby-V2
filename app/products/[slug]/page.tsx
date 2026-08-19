@@ -5,6 +5,7 @@ import { GuideImage } from "../../components/guide-image";
 import { OfferComparison } from "../../components/offer-comparison";
 import { ProductCard } from "../../components/product-card";
 import { ProductImage } from "../../components/product-image";
+import { RecentlyViewedProducts } from "../../components/recently-viewed-products";
 import { getCategoryBySlug } from "@/lib/categories";
 import { getPublishedGuidesByProductId } from "@/lib/guides";
 import { getProductBySlug, getPublishedProducts, getRelatedProducts } from "@/lib/products";
@@ -211,6 +212,15 @@ export default async function ProductPage({ params }: PageProps<"/products/[slug
             </div>
           </section>
         )}
+
+        <RecentlyViewedProducts
+          product={{
+            slug: product.slug,
+            name: product.name,
+            summary: product.summary,
+            image: product.image,
+          }}
+        />
     </>
   );
 }

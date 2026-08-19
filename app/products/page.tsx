@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ProductCard } from "@/app/components/product-card";
+import { ProductResults } from "@/app/products/product-results";
 import { getPublishedCategories } from "@/lib/categories";
 import { getPublishedProducts } from "@/lib/products";
 
@@ -151,11 +151,10 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
         </div>
 
         {visibleProducts.length > 0 ? (
-          <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {visibleProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
+          <ProductResults
+            key={`${selectedCategory?.slug ?? "all"}:${searchQuery}:${selectedSort}`}
+            products={visibleProducts}
+          />
         ) : (
           <div className="mt-6 rounded-[2rem] border border-[#063f5b]/8 bg-[#f7fcfe] px-6 py-12 text-center sm:px-10">
             <h2 className="text-2xl font-extrabold tracking-[-0.035em] text-[#063f5b]">
