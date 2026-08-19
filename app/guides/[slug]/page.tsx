@@ -8,6 +8,17 @@ import { ShareControls } from "@/app/components/share-controls";
 import { getPublishedGuideBySlug, getPublishedGuides } from "@/lib/guides";
 import { siteConfig } from "@/lib/site";
 
+function createSectionId(heading: string, index: number) {
+  const headingSlug = heading
+    .normalize("NFKD")
+    .toLocaleLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "")
+    .slice(0, 64);
+
+  return `guide-section-${index + 1}-${headingSlug || "topic"}`;
+}
+
 export async function generateStaticParams() {
   const publishedGuides = await getPublishedGuides();
   return publishedGuides.map((guide) => ({ slug: guide.slug }));
@@ -148,9 +159,24 @@ export default async function GuidePage({ params }: PageProps<"/guides/[slug]">)
             Every baby, family, and home is different. Use this guide as a starting point, follow the product instructions and current safety guidance, and ask a qualified professional when you need advice for your baby’s specific needs.
           </aside>
 
+          <nav id="guide-contents" aria-labelledby="guide-contents-heading" className="mt-10 rounded-[2rem] border border-[#063f5b]/8 bg-[#f7fcfe] p-6 sm:p-8">
+            <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-[#009dcc]">In this guide</p>
+            <h2 id="guide-contents-heading" className="mt-2 font-display text-3xl font-semibold tracking-[-0.04em] text-[#063f5b]">Jump to a section.</h2>
+            <ol className="mt-6 grid gap-2 sm:grid-cols-2">
+              {guide.sections.map((section, index) => (
+                <li key={section.key || section.heading}>
+                  <a href={`#${createSectionId(section.heading, index)}`} className="group flex h-full items-start gap-3 rounded-2xl bg-white px-4 py-3.5 text-sm font-extrabold leading-5 text-[#063f5b]/75 transition hover:text-[#009dcc]">
+                    <span className="grid size-6 shrink-0 place-items-center rounded-full bg-[#e2f7fc] text-[11px] text-[#009dcc] transition group-hover:bg-[#009dcc] group-hover:text-white">{index + 1}</span>
+                    <span>{section.heading}</span>
+                  </a>
+                </li>
+              ))}
+            </ol>
+          </nav>
+
           <div className="mt-14 grid gap-14">
             {guide.sections.map((section, index) => (
-              <section key={section.key || section.heading}>
+              <section id={createSectionId(section.heading, index)} key={section.key || section.heading} className="scroll-mt-8">
                 <div className="flex items-start gap-4">
                   <span className="grid size-9 shrink-0 place-items-center rounded-full bg-[#e2f7fc] text-sm font-extrabold text-[#009dcc]">{index + 1}</span>
                   <h2 className="font-display text-3xl font-semibold leading-tight tracking-[-0.04em] text-[#063f5b]">{section.heading}</h2>
@@ -163,6 +189,9 @@ export default async function GuidePage({ params }: PageProps<"/guides/[slug]">)
                     {section.items.map((item) => <li key={item} className="flex gap-3 text-sm leading-6 text-[#063f5b]/70"><span className="mt-2 grid size-4 shrink-0 place-items-center rounded-full bg-[#009dcc] text-[9px] font-black text-white">✓</span>{item}</li>)}
                   </ul>
                 )}
+                <a href="#guide-contents" className="mt-6 inline-flex items-center gap-2 text-xs font-extrabold text-[#063f5b]/45 transition hover:text-[#009dcc]">
+                  Back to contents <span aria-hidden="true">↑</span>
+                </a>
               </section>
             ))}
           </div>
