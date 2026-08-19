@@ -3,11 +3,14 @@ import Link from "next/link";
 import { getPublishedCategories } from "@/lib/categories";
 import { getCategoryThemeClass } from "@/lib/category-themes";
 import { siteConfig } from "@/lib/site";
-import { createItemListStructuredData, serializeStructuredData } from "@/lib/structured-data";
+import { createBreadcrumbStructuredData, createItemListStructuredData, serializeStructuredData } from "@/lib/structured-data";
 
 export const metadata: Metadata = {
   title: "Baby Product Categories",
   description: "Explore baby essentials, feeding, nursery, care, safety, and play categories from MishBaby.",
+  alternates: {
+    canonical: "/categories",
+  },
 };
 
 export default async function CategoriesPage() {
@@ -25,9 +28,20 @@ export default async function CategoriesPage() {
         })),
       })
     : undefined;
+  const breadcrumbStructuredData = createBreadcrumbStructuredData(
+    `${siteConfig.url}/categories#breadcrumb`,
+    [
+      { name: "Home", url: siteConfig.url },
+      { name: "Categories", url: `${siteConfig.url}/categories` },
+    ],
+  );
 
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: serializeStructuredData(breadcrumbStructuredData) }}
+      />
       {structuredData && (
         <script
           type="application/ld+json"

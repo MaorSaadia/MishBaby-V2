@@ -8,7 +8,7 @@ import { getCategoryThemeClass } from "@/lib/category-themes";
 import { getPublishedGuidesByCategorySlug } from "@/lib/guides";
 import { getProductsByCategory } from "@/lib/products";
 import { siteConfig } from "@/lib/site";
-import { createItemListStructuredData, serializeStructuredData } from "@/lib/structured-data";
+import { createBreadcrumbStructuredData, createItemListStructuredData, serializeStructuredData } from "@/lib/structured-data";
 
 export async function generateStaticParams() {
   const categories = await getPublishedCategories();
@@ -21,9 +21,14 @@ export async function generateMetadata({ params }: PageProps<"/categories/[slug]
 
   if (!category) return {};
 
+  const categoryUrl = `${siteConfig.url}/categories/${category.slug}`;
+
   return {
     title: category.name,
     description: category.introduction,
+    alternates: {
+      canonical: categoryUrl,
+    },
   };
 }
 
@@ -38,6 +43,14 @@ export default async function CategoryPage({ params }: PageProps<"/categories/[s
     getPublishedGuidesByCategorySlug(category.slug),
   ]);
   const categoryUrl = `${siteConfig.url}/categories/${category.slug}`;
+  const breadcrumbStructuredData = createBreadcrumbStructuredData(
+    `${categoryUrl}#breadcrumb`,
+    [
+      { name: "Home", url: siteConfig.url },
+      { name: "Categories", url: `${siteConfig.url}/categories` },
+      { name: category.name, url: categoryUrl },
+    ],
+  );
   const productListStructuredData = featuredProducts.length > 0
     ? createItemListStructuredData({
         id: `${categoryUrl}#product-list`,
@@ -69,6 +82,10 @@ export default async function CategoryPage({ params }: PageProps<"/categories/[s
 
   return (
     <>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: serializeStructuredData(breadcrumbStructuredData) }}
+        />
         {productListStructuredData && (
           <script
             type="application/ld+json"

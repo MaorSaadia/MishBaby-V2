@@ -13,6 +13,11 @@ type ItemListOptions = {
   items: ItemListEntry[];
 };
 
+type BreadcrumbEntry = {
+  name: string;
+  url: string;
+};
+
 export function createItemListStructuredData({ id, name, url, items }: ItemListOptions) {
   return {
     "@context": "https://schema.org",
@@ -32,6 +37,20 @@ export function createItemListStructuredData({ id, name, url, items }: ItemListO
         ...(item.description ? { description: item.description } : {}),
         ...(item.image ? { image: item.image } : {}),
       },
+    })),
+  };
+}
+
+export function createBreadcrumbStructuredData(id: string, items: BreadcrumbEntry[]) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "@id": id,
+    itemListElement: items.map((item, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      name: item.name,
+      item: item.url,
     })),
   };
 }
