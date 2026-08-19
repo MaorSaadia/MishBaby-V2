@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getPublishedCategories } from "@/lib/categories";
 import { getCategoryThemeClass } from "@/lib/category-themes";
+import { siteConfig } from "@/lib/site";
+import { createItemListStructuredData, serializeStructuredData } from "@/lib/structured-data";
 
 export const metadata: Metadata = {
   title: "Baby Product Categories",
@@ -10,9 +12,28 @@ export const metadata: Metadata = {
 
 export default async function CategoriesPage() {
   const categories = await getPublishedCategories();
+  const structuredData = categories.length > 0
+    ? createItemListStructuredData({
+        id: `${siteConfig.url}/categories#category-list`,
+        name: "MishBaby baby product categories",
+        url: `${siteConfig.url}/categories`,
+        items: categories.map((category) => ({
+          type: "CollectionPage",
+          name: category.name,
+          description: category.description,
+          url: `${siteConfig.url}/categories/${category.slug}`,
+        })),
+      })
+    : undefined;
 
   return (
     <>
+      {structuredData && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: serializeStructuredData(structuredData) }}
+        />
+      )}
         <section className="relative isolate overflow-hidden bg-[#f1fbfe] px-5 py-16 sm:px-8 md:py-22">
           <div className="absolute -right-16 -top-16 -z-10 size-80 rounded-full bg-[#a8e8f5]/65 blur-3xl" />
           <div className="mx-auto max-w-6xl">

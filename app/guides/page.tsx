@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { GuideImage } from "@/app/components/guide-image";
 import { getGuides, type Guide } from "@/lib/guides";
+import { siteConfig } from "@/lib/site";
+import { createItemListStructuredData, serializeStructuredData } from "@/lib/structured-data";
 
 const guidesMetadata: Metadata = {
   title: "Parenting & Buying Guides",
@@ -60,6 +62,9 @@ export default async function GuidesPage({ searchParams }: GuidesPageProps) {
   const searchParam = resolvedSearchParams.q;
   const requestedSearch = Array.isArray(searchParam) ? searchParam[0] : searchParam;
   const searchQuery = requestedSearch?.trim() ?? "";
+  const hasCatalogParams = ["category", "q"].some((key) =>
+    Object.prototype.hasOwnProperty.call(resolvedSearchParams, key),
+  );
   const normalizedSearch = searchQuery.toLocaleLowerCase();
   const categoryLabels = [...new Set(guides.map((guide) => guide.categoryLabel))]
     .sort((first, second) => first.localeCompare(second));
@@ -83,9 +88,30 @@ export default async function GuidesPage({ searchParams }: GuidesPageProps) {
   const hasActiveFilters = Boolean(selectedCategory || searchQuery);
   const featuredGuide = hasActiveFilters ? undefined : guides[0];
   const moreGuides = hasActiveFilters ? matchingGuides : guides.slice(1);
+  const publishedGuides = guides.filter((guide) => guide.status === "published");
+  const structuredData = !hasCatalogParams && publishedGuides.length > 0
+    ? createItemListStructuredData({
+        id: `${siteConfig.url}/guides#guide-list`,
+        name: "MishBaby parenting and buying guides",
+        url: `${siteConfig.url}/guides`,
+        items: publishedGuides.map((guide) => ({
+          type: "Article",
+          name: guide.title,
+          description: guide.description,
+          url: `${siteConfig.url}/guides/${guide.slug}`,
+          image: guide.coverImage?.src,
+        })),
+      })
+    : undefined;
 
   return (
     <>
+      {structuredData && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: serializeStructuredData(structuredData) }}
+        />
+      )}
       <section className="relative isolate overflow-hidden bg-[#f1fbfe] px-5 py-16 sm:px-8 md:py-22">
         <div className="absolute -right-20 -top-20 -z-10 size-96 rounded-full bg-[#a8e8f5]/70 blur-3xl" />
         <div className="absolute -bottom-24 -left-20 -z-10 size-72 rounded-full bg-[#d9f4ee]/70 blur-2xl" />

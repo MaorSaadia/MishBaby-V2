@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ProductResults } from "@/app/products/product-results";
+import { productsPerBatch } from "@/lib/catalog-display";
 import { getPublishedCategories } from "@/lib/categories";
 import { getPublishedProducts } from "@/lib/products";
+import { siteConfig } from "@/lib/site";
+import { createItemListStructuredData, serializeStructuredData } from "@/lib/structured-data";
 
 const productsMetadata: Metadata = {
   title: "Baby Products",
@@ -46,6 +49,9 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
   const sortParam = resolvedSearchParams.sort;
   const requestedSort = Array.isArray(sortParam) ? sortParam[0] : sortParam;
   const selectedSort = requestedSort === "name" ? "name" : "newest";
+  const hasCatalogParams = ["category", "q", "sort"].some((key) =>
+    Object.prototype.hasOwnProperty.call(resolvedSearchParams, key),
+  );
   const selectedCategory = categories.find((category) => category.slug === requestedCategory);
   const categoryProducts = selectedCategory
     ? publishedProducts.filter((product) => product.categorySlug === selectedCategory.slug)
@@ -61,9 +67,29 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
     ? [...matchingProducts].sort((firstProduct, secondProduct) => firstProduct.name.localeCompare(secondProduct.name))
     : matchingProducts;
   const selectedSortQuery = selectedSort === "name" ? { sort: "name" } : {};
+  const structuredData = !hasCatalogParams && visibleProducts.length > 0
+    ? createItemListStructuredData({
+        id: `${siteConfig.url}/products#product-list`,
+        name: "MishBaby baby products",
+        url: `${siteConfig.url}/products`,
+        items: visibleProducts.slice(0, productsPerBatch).map((product) => ({
+          type: "Product",
+          name: product.name,
+          description: product.summary,
+          url: `${siteConfig.url}/products/${product.slug}`,
+          image: product.image?.src,
+        })),
+      })
+    : undefined;
 
   return (
     <>
+      {structuredData && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: serializeStructuredData(structuredData) }}
+        />
+      )}
       <section className="relative isolate overflow-hidden bg-[#f1fbfe] px-5 py-16 sm:px-8 md:py-22">
         <div className="absolute -right-16 -top-16 -z-10 size-80 rounded-full bg-[#a8e8f5]/65 blur-3xl" />
         <div className="mx-auto max-w-6xl">

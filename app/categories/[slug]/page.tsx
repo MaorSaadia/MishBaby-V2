@@ -7,6 +7,8 @@ import { getCategoryBySlug, getPublishedCategories } from "@/lib/categories";
 import { getCategoryThemeClass } from "@/lib/category-themes";
 import { getPublishedGuidesByCategorySlug } from "@/lib/guides";
 import { getProductsByCategory } from "@/lib/products";
+import { siteConfig } from "@/lib/site";
+import { createItemListStructuredData, serializeStructuredData } from "@/lib/structured-data";
 
 export async function generateStaticParams() {
   const categories = await getPublishedCategories();
@@ -35,9 +37,50 @@ export default async function CategoryPage({ params }: PageProps<"/categories/[s
     getProductsByCategory(category.slug),
     getPublishedGuidesByCategorySlug(category.slug),
   ]);
+  const categoryUrl = `${siteConfig.url}/categories/${category.slug}`;
+  const productListStructuredData = featuredProducts.length > 0
+    ? createItemListStructuredData({
+        id: `${categoryUrl}#product-list`,
+        name: `${category.name} products`,
+        url: categoryUrl,
+        items: featuredProducts.map((product) => ({
+          type: "Product",
+          name: product.name,
+          description: product.summary,
+          url: `${siteConfig.url}/products/${product.slug}`,
+          image: product.image?.src,
+        })),
+      })
+    : undefined;
+  const guideListStructuredData = relatedGuides.length > 0
+    ? createItemListStructuredData({
+        id: `${categoryUrl}#guide-list`,
+        name: `${category.name} guides`,
+        url: categoryUrl,
+        items: relatedGuides.map((guide) => ({
+          type: "Article",
+          name: guide.title,
+          description: guide.description,
+          url: `${siteConfig.url}/guides/${guide.slug}`,
+          image: guide.coverImage?.src,
+        })),
+      })
+    : undefined;
 
   return (
     <>
+        {productListStructuredData && (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: serializeStructuredData(productListStructuredData) }}
+          />
+        )}
+        {guideListStructuredData && (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: serializeStructuredData(guideListStructuredData) }}
+          />
+        )}
         <section className="relative isolate overflow-hidden bg-[#f1fbfe] px-5 py-12 sm:px-8 md:py-20">
           <div className={`absolute -right-20 -top-24 -z-10 size-96 rounded-full ${getCategoryThemeClass(category.colorTheme)} blur-2xl`} />
           <div className="mx-auto max-w-6xl">

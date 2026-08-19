@@ -2,9 +2,8 @@
 
 import { useState } from "react";
 import { ProductCard } from "@/app/components/product-card";
+import { productsPerBatch } from "@/lib/catalog-display";
 import type { Product } from "@/lib/products";
-
-const productsPerBatch = 9;
 
 type ProductResultsProps = {
   products: Product[];
