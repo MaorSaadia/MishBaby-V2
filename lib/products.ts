@@ -62,7 +62,7 @@ const publishedProductsQuery = `
       defined(url) &&
       defined(lastVerifiedAt) &&
       defined(merchant->slug.current)
-    ] | order(merchant->name asc) {
+    ] | order(coalesce(merchant->displayOrder, 100) asc, merchant->name asc) {
       "id": _key,
       status,
       url,

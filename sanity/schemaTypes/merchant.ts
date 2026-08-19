@@ -25,8 +25,33 @@ export const merchantType = defineType({
       type: "image",
       description: "Optional merchant logo shown beside offers. A transparent PNG or WebP works best.",
     }),
+    defineField({
+      name: "displayOrder",
+      title: "Display order",
+      type: "number",
+      description: "Lower numbers appear first in offer comparisons and merchant selectors.",
+      initialValue: 100,
+      validation: (rule) => rule.required().integer().min(0),
+    }),
+  ],
+  orderings: [
+    {
+      title: "Display order",
+      name: "displayOrderAsc",
+      by: [
+        { field: "displayOrder", direction: "asc" },
+        { field: "name", direction: "asc" },
+      ],
+    },
   ],
   preview: {
-    select: { title: "name", subtitle: "slug.current", media: "logo" },
+    select: { title: "name", slug: "slug.current", displayOrder: "displayOrder", media: "logo" },
+    prepare({ title, slug, displayOrder, media }) {
+      return {
+        title,
+        media,
+        subtitle: `Order ${displayOrder ?? 100} · ${slug ?? "No slug"}`,
+      };
+    },
   },
 });

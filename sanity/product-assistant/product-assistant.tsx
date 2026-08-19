@@ -85,7 +85,7 @@ export function ProductAssistant() {
         }
       `),
       client.fetch<MerchantOption[]>(`
-        *[_type == "merchant" && defined(name) && defined(slug.current)] | order(name asc) {
+        *[_type == "merchant" && defined(name) && defined(slug.current)] | order(coalesce(displayOrder, 100) asc, name asc) {
           "id": _id,
           name
         }
