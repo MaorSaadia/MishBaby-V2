@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { GuideImage } from "@/app/components/guide-image";
 import { ProductCard } from "@/app/components/product-card";
 import { RecentlyViewedGuides } from "@/app/components/recently-viewed-guides";
+import { ShareControls } from "@/app/components/share-controls";
 import { getPublishedGuideBySlug, getPublishedGuides } from "@/lib/guides";
 import { siteConfig } from "@/lib/site";
 
@@ -130,6 +131,12 @@ export default async function GuidePage({ params }: PageProps<"/guides/[slug]">)
             </div>
             <h1 className="mt-5 font-display text-5xl font-semibold leading-[1.05] tracking-[-0.055em] text-[#063f5b] sm:text-6xl">{guide.title}</h1>
             <p className="mt-6 max-w-3xl text-xl leading-8 text-[#063f5b]/70">{guide.description}</p>
+            <ShareControls
+              url={guideUrl}
+              title={guide.title}
+              text={guide.description}
+              label={`Share ${guide.title}`}
+            />
             <GuideImage guide={guide} variant="detail" priority />
           </div>
         </header>

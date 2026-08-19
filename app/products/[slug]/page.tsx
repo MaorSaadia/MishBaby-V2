@@ -6,6 +6,7 @@ import { OfferComparison } from "../../components/offer-comparison";
 import { ProductCard } from "../../components/product-card";
 import { ProductImage } from "../../components/product-image";
 import { RecentlyViewedProducts } from "../../components/recently-viewed-products";
+import { ShareControls } from "../../components/share-controls";
 import { getCategoryBySlug } from "@/lib/categories";
 import { getPublishedGuidesByProductId } from "@/lib/guides";
 import { getProductBySlug, getPublishedProducts, getRelatedProducts } from "@/lib/products";
@@ -143,6 +144,12 @@ export default async function ProductPage({ params }: PageProps<"/products/[slug
                 <p className="mt-6 text-sm font-extrabold uppercase tracking-[0.14em] text-[#009dcc]">{category.name}</p>
                 <h1 className="mt-3 font-display text-5xl font-semibold leading-[1.05] tracking-[-0.055em] text-[#063f5b] sm:text-6xl">{product.name}</h1>
                 <p className="mt-5 max-w-2xl text-lg leading-8 text-[#063f5b]/70">{product.summary}</p>
+                <ShareControls
+                  url={productUrl}
+                  title={product.name}
+                  text={product.summary}
+                  label={`Share ${product.name}`}
+                />
                 <div className="mt-8 rounded-3xl border border-[#063f5b]/8 bg-white/75 p-6">
                   <h2 className="font-extrabold text-[#063f5b]">Why it may be useful</h2>
                   <ul className="mt-4 grid gap-3">
