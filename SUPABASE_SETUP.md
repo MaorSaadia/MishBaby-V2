@@ -77,3 +77,7 @@ The Privacy Policy and Terms are working foundations and should receive owner/le
 Run [`supabase/migrations/20260819000000_create_product_favorites.sql`](./supabase/migrations/20260819000000_create_product_favorites.sql) once in the Supabase SQL Editor (or apply it through the Supabase CLI if the project is linked). This creates only the product-favorites table and its Row Level Security policies.
 
 After applying it, verify with two separate accounts that each account can see and remove only its own saved products. Deleting an Auth user automatically deletes that user’s favorites.
+
+## 8. Enable guide favorites
+
+Run [`supabase/migrations/20260819001000_create_guide_favorites.sql`](./supabase/migrations/20260819001000_create_guide_favorites.sql) once in the Supabase SQL Editor (or apply it through the Supabase CLI). Verify with two accounts that saved guides remain private to their owner and are removed when the Auth user is deleted.

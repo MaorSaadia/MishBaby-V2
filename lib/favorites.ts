@@ -15,3 +15,17 @@ export async function getFavoriteProductIds(userId: string) {
     error: Boolean(error),
   };
 }
+
+export async function getFavoriteGuideIds(userId: string) {
+  const supabase = await createServerSupabaseClient();
+  const { data, error } = await supabase
+    .from("guide_favorites")
+    .select("guide_id")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false });
+
+  return {
+    guideIds: data?.map((favorite) => favorite.guide_id as string) ?? [],
+    error: Boolean(error),
+  };
+}
