@@ -1,5 +1,8 @@
 import { defineArrayMember, defineField, defineType } from "sanity";
 
+const offerFreshnessWarningDays = 30;
+const millisecondsPerDay = 24 * 60 * 60 * 1000;
+
 function activeOfferRequired(value: unknown, context: unknown, message: string) {
   const validationContext = context as {
     document?: Record<string, unknown>;
@@ -7,6 +10,34 @@ function activeOfferRequired(value: unknown, context: unknown, message: string) 
   };
   const offer = validationContext.parent ?? validationContext.document;
   return offer?.status !== "active" || Boolean(value) || message;
+}
+
+function offerFreshnessWarning(value: unknown, context: unknown) {
+  const validationContext = context as {
+    document?: Record<string, unknown>;
+    parent?: Record<string, unknown>;
+  };
+  const offer = validationContext.parent ?? validationContext.document;
+  if (offer?.status !== "active" || typeof value !== "string") return true;
+
+  const verifiedTimestamp = Date.parse(`${value}T00:00:00Z`);
+  const todayTimestamp = Date.parse(`${new Date().toISOString().slice(0, 10)}T00:00:00Z`);
+  if (Number.isNaN(verifiedTimestamp)) return true;
+
+  const daysSinceVerification = Math.floor((todayTimestamp - verifiedTimestamp) / millisecondsPerDay);
+  return daysSinceVerification > offerFreshnessWarningDays
+    ? `This active offer was verified ${daysSinceVerification} days ago. Recheck the link and update this date.`
+    : true;
+}
+
+function isVerificationStale(value: unknown) {
+  if (typeof value !== "string") return false;
+
+  const verifiedTimestamp = Date.parse(`${value}T00:00:00Z`);
+  const todayTimestamp = Date.parse(`${new Date().toISOString().slice(0, 10)}T00:00:00Z`);
+  if (Number.isNaN(verifiedTimestamp)) return false;
+
+  return Math.floor((todayTimestamp - verifiedTimestamp) / millisecondsPerDay) > offerFreshnessWarningDays;
 }
 
 export const offerFields = [
@@ -53,11 +84,13 @@ export const offerFields = [
     name: "lastVerifiedAt",
     title: "Last verified",
     type: "date",
-    description: "The date you last confirmed that the affiliate link works.",
+    description: "The date you last confirmed that the affiliate link works. Active offers show a warning after 30 days.",
     options: { dateFormat: "YYYY-MM-DD" },
     initialValue: () => new Date().toISOString().slice(0, 10),
-    validation: (rule) =>
+    validation: (rule) => [
       rule.custom((value, context) => activeOfferRequired(value, context, "An active offer requires a verification date.")),
+      rule.custom(offerFreshnessWarning).warning(),
+    ],
   }),
 ];
 
@@ -79,11 +112,18 @@ export const productOfferType = defineType({
     select: {
       merchantName: "merchant.name",
       status: "status",
+      lastVerifiedAt: "lastVerifiedAt",
     },
-    prepare({ merchantName, status }) {
+    prepare({ merchantName, status, lastVerifiedAt }) {
+      const subtitle = status === "paused"
+        ? "Paused"
+        : isVerificationStale(lastVerifiedAt)
+          ? "Active · Recheck link"
+          : "Active · Link current";
+
       return {
         title: merchantName ?? "Choose a merchant",
-        subtitle: status === "paused" ? "Paused" : "Active",
+        subtitle,
       };
     },
   },
