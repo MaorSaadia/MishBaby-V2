@@ -189,7 +189,7 @@ export default async function GuidesPage({ searchParams }: GuidesPageProps) {
 
         {featuredGuide && (
           <div className="grid overflow-hidden rounded-[2rem] border border-[#063f5b]/8 bg-white shadow-[0_20px_48px_-34px_rgba(6,63,91,.4)] md:grid-cols-[.85fr_1.15fr]">
-            <GuideImage guide={featuredGuide} variant="featured" priority />
+            <GuideImage guide={featuredGuide} variant="featured" preload />
             <div className="flex flex-col justify-center p-7 sm:p-10">
               <div className="flex flex-wrap items-center gap-3">
                 <span className="rounded-full bg-[#e8f8fc] px-3 py-1.5 text-xs font-extrabold uppercase tracking-[0.1em] text-[#009dcc]">Featured guide</span>

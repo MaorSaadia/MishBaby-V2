@@ -16,6 +16,7 @@ export type RecentlyViewedProduct = {
   image?: {
     src: string;
     alt: string;
+    blurDataURL?: string;
   };
 };
 
@@ -27,7 +28,8 @@ function isRecentlyViewedProduct(value: unknown): value is RecentlyViewedProduct
     typeof product.image === "object" &&
     product.image !== null &&
     typeof product.image.src === "string" &&
-    typeof product.image.alt === "string"
+    typeof product.image.alt === "string" &&
+    (product.image.blurDataURL === undefined || typeof product.image.blurDataURL === "string")
   );
 
   return (
@@ -135,7 +137,9 @@ export function RecentlyViewedProducts({ product }: { product: RecentlyViewedPro
                       src={historyProduct.image.src}
                       alt={historyProduct.image.alt}
                       fill
-                      sizes="(max-width: 1024px) 50vw, 25vw"
+                      placeholder={historyProduct.image.blurDataURL ? "blur" : "empty"}
+                      blurDataURL={historyProduct.image.blurDataURL}
+                      sizes="(max-width: 1024px) 50vw, 272px"
                       className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
                     />
                   ) : (

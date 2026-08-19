@@ -149,7 +149,7 @@ export default async function GuidePage({ params }: PageProps<"/guides/[slug]">)
               text={guide.description}
               label={`Share ${guide.title}`}
             />
-            <GuideImage guide={guide} variant="detail" priority />
+            <GuideImage guide={guide} variant="detail" preload />
           </div>
         </header>
 

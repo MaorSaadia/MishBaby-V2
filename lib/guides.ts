@@ -24,6 +24,7 @@ export type Guide = {
   coverImage?: {
     src: string;
     alt: string;
+    blurDataURL?: string;
   };
   featured: boolean;
   displayOrder: number;
@@ -61,7 +62,8 @@ const guidesQuery = `
     "coverImage": select(
       defined(coverImage.asset) => {
         "src": coverImage.asset->url,
-        "alt": coalesce(coverImage.alt, title)
+        "alt": coalesce(coverImage.alt, title),
+        "blurDataURL": coverImage.asset->metadata.lqip
       }
     ),
     "featured": coalesce(featured, false),

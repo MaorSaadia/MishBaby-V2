@@ -5,7 +5,7 @@ import type { Guide } from "@/lib/guides";
 type GuideImageProps = {
   guide: Guide;
   variant: "featured" | "card" | "related" | "detail";
-  priority?: boolean;
+  preload?: boolean;
 };
 
 const variantClasses = {
@@ -17,12 +17,12 @@ const variantClasses = {
 
 const variantSizes = {
   featured: "(max-width: 768px) 100vw, 42vw",
-  card: "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw",
-  related: "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw",
+  card: "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 352px",
+  related: "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 352px",
   detail: "(max-width: 896px) 100vw, 896px",
 };
 
-export function GuideImage({ guide, variant, priority = false }: GuideImageProps) {
+export function GuideImage({ guide, variant, preload = false }: GuideImageProps) {
   if (!guide.coverImage && variant === "detail") return null;
 
   return (
@@ -32,7 +32,9 @@ export function GuideImage({ guide, variant, priority = false }: GuideImageProps
           src={guide.coverImage.src}
           alt={guide.coverImage.alt}
           fill
-          priority={priority}
+          preload={preload}
+          placeholder={guide.coverImage.blurDataURL ? "blur" : "empty"}
+          blurDataURL={guide.coverImage.blurDataURL}
           sizes={variantSizes[variant]}
           className="object-cover"
         />

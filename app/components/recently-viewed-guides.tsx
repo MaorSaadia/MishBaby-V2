@@ -21,6 +21,7 @@ export type RecentlyViewedGuide = {
   coverImage?: {
     src: string;
     alt: string;
+    blurDataURL?: string;
   };
 };
 
@@ -32,7 +33,8 @@ function isRecentlyViewedGuide(value: unknown): value is RecentlyViewedGuide {
     typeof guide.coverImage === "object" &&
     guide.coverImage !== null &&
     typeof guide.coverImage.src === "string" &&
-    typeof guide.coverImage.alt === "string"
+    typeof guide.coverImage.alt === "string" &&
+    (guide.coverImage.blurDataURL === undefined || typeof guide.coverImage.blurDataURL === "string")
   );
   const hasValidTheme = categoryThemeOptions.some((option) => option.value === guide.colorTheme);
 
@@ -141,7 +143,9 @@ export function RecentlyViewedGuides({ guide }: { guide: RecentlyViewedGuide }) 
                       src={historyGuide.coverImage.src}
                       alt={historyGuide.coverImage.alt}
                       fill
-                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      placeholder={historyGuide.coverImage.blurDataURL ? "blur" : "empty"}
+                      blurDataURL={historyGuide.coverImage.blurDataURL}
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 352px"
                       className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
                     />
                   ) : (

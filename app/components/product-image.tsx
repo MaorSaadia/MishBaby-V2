@@ -4,7 +4,7 @@ import type { Product } from "@/lib/products";
 type ProductImageProps = {
   product: Product;
   variant?: "card" | "featured" | "detail";
-  priority?: boolean;
+  preload?: boolean;
 };
 
 function FallbackArtwork({ variant }: { variant: "card" | "featured" | "detail" }) {
@@ -25,20 +25,22 @@ function FallbackArtwork({ variant }: { variant: "card" | "featured" | "detail" 
   );
 }
 
-export function ProductImage({ product, variant = "card", priority = false }: ProductImageProps) {
+export function ProductImage({ product, variant = "card", preload = false }: ProductImageProps) {
   if (product.image) {
     return (
       <Image
         src={product.image.src}
         alt={product.image.alt}
         fill
-        priority={priority}
+        preload={preload}
+        placeholder={product.image.blurDataURL ? "blur" : "empty"}
+        blurDataURL={product.image.blurDataURL}
         sizes={
           variant === "detail"
-            ? "(max-width: 1024px) 100vw, 45vw"
+            ? "(max-width: 1024px) 100vw, 528px"
             : variant === "featured"
-              ? "(max-width: 1024px) 50vw, 25vw"
-              : "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              ? "(max-width: 1024px) 50vw, 272px"
+              : "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 352px"
         }
         className="object-cover"
       />

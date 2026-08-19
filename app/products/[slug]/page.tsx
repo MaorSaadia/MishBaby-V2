@@ -136,7 +136,7 @@ export default async function ProductPage({ params }: PageProps<"/products/[slug
               <div className="relative grid aspect-square max-w-xl place-items-center overflow-hidden rounded-[2.5rem] bg-[#dff4f8] shadow-[0_24px_55px_-38px_rgba(6,63,91,.45)]">
                 <div className="absolute -right-16 -top-16 size-64 rounded-full bg-[#a8e8f5]/80" />
                 <div className="absolute -bottom-20 -left-14 size-56 rounded-full bg-white/70" />
-                <ProductImage product={product} variant="detail" priority />
+                <ProductImage product={product} variant="detail" preload />
               </div>
 
               <div>

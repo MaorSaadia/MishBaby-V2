@@ -12,6 +12,7 @@ export type Merchant = {
 export type ProductImage = {
   src: string;
   alt: string;
+  blurDataURL?: string;
 };
 
 export type ActiveOffer = {
@@ -55,7 +56,8 @@ const publishedProductsQuery = `
     badge,
     "image": {
       "src": image.asset->url,
-      "alt": coalesce(image.alt, name)
+      "alt": coalesce(image.alt, name),
+      "blurDataURL": image.asset->metadata.lqip
     },
     "offers": offers[
       status == "active" &&
