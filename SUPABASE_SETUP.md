@@ -71,3 +71,9 @@ Password recovery:
 Test locally and on Vercel: Google signup/sign-in, email confirmation, email/password sign-in, password recovery/update, local sign-out, and permanent account deletion. Test invalid, expired, reused, and malformed email links. Confirm Google and password login for the same verified address resolve to one Supabase user.
 
 The Privacy Policy and Terms are working foundations and should receive owner/legal review before they are treated as final legal advice.
+
+## 7. Enable product favorites
+
+Run [`supabase/migrations/20260819000000_create_product_favorites.sql`](./supabase/migrations/20260819000000_create_product_favorites.sql) once in the Supabase SQL Editor (or apply it through the Supabase CLI if the project is linked). This creates only the product-favorites table and its Row Level Security policies.
+
+After applying it, verify with two separate accounts that each account can see and remove only its own saved products. Deleting an Auth user automatically deletes that user’s favorites.
