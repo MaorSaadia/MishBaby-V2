@@ -101,6 +101,15 @@ export async function getPublishedGuidesByCategorySlug(categorySlug: string) {
   return guides.filter((guide) => guide.relatedCategory?.slug === categorySlug);
 }
 
+export async function getRelatedGuides(guide: Guide, limit = 3) {
+  if (!guide.relatedCategory) return [];
+
+  const categoryGuides = await getPublishedGuidesByCategorySlug(guide.relatedCategory.slug);
+  return categoryGuides
+    .filter((categoryGuide) => categoryGuide.id !== guide.id)
+    .slice(0, limit);
+}
+
 export async function getPublishedGuideBySlug(slug: string) {
   const [guides, products] = await Promise.all([getPublishedGuides(), getPublishedProducts()]);
   const guide = guides.find((item) => item.slug === slug);

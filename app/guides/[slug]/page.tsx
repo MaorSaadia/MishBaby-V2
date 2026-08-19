@@ -5,7 +5,7 @@ import { GuideImage } from "@/app/components/guide-image";
 import { ProductCard } from "@/app/components/product-card";
 import { RecentlyViewedGuides } from "@/app/components/recently-viewed-guides";
 import { ShareControls } from "@/app/components/share-controls";
-import { getPublishedGuideBySlug, getPublishedGuides } from "@/lib/guides";
+import { getPublishedGuideBySlug, getPublishedGuides, getRelatedGuides } from "@/lib/guides";
 import { siteConfig } from "@/lib/site";
 
 function createSectionId(heading: string, index: number) {
@@ -64,6 +64,7 @@ export default async function GuidePage({ params }: PageProps<"/guides/[slug]">)
 
   if (!guide?.introduction || !guide.readingMinutes || !guide.relatedCategory || guide.sections.length === 0) notFound();
 
+  const relatedGuides = await getRelatedGuides(guide);
   const guideUrl = `${siteConfig.url}/guides/${guide.slug}`;
   const structuredData = {
     "@context": "https://schema.org",
@@ -215,6 +216,44 @@ export default async function GuidePage({ params }: PageProps<"/guides/[slug]">)
             <Link href={`/categories/${guide.relatedCategory.slug}`} className="mt-6 inline-flex rounded-full bg-white px-5 py-3 text-sm font-extrabold text-[#063f5b] transition hover:bg-[#e8f8fc]">Explore {guide.relatedCategory.label}</Link>
           </section>
         </article>
+
+        {relatedGuides.length > 0 && (
+          <section className="border-t border-[#063f5b]/6 bg-white px-5 py-14 sm:px-8 md:py-20">
+            <div className="mx-auto max-w-6xl">
+              <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+                <div className="max-w-2xl">
+                  <p className="text-sm font-extrabold uppercase tracking-[0.14em] text-[#009dcc]">Keep learning</p>
+                  <h2 className="mt-3 font-display text-4xl font-semibold tracking-[-0.045em] text-[#063f5b]">More guides for {guide.relatedCategory.label}.</h2>
+                  <p className="mt-4 text-base leading-7 text-[#063f5b]/65">Continue with practical, parent-friendly guidance related to the same stage or routine.</p>
+                </div>
+                <Link href="/guides" className="shrink-0 text-sm font-extrabold text-[#009dcc] transition-colors hover:text-[#0784b0]">Browse all guides →</Link>
+              </div>
+
+              <div className="mt-9 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                {relatedGuides.map((relatedGuide) => (
+                  <article key={relatedGuide.id} className="group overflow-hidden rounded-[2rem] border border-[#063f5b]/8 bg-[#fbfeff] shadow-[0_16px_36px_-28px_rgba(6,63,91,.4)]">
+                    <Link href={`/guides/${relatedGuide.slug}`} className="block focus-visible:outline-offset-[-3px]">
+                      <div className="overflow-hidden">
+                        <GuideImage guide={relatedGuide} variant="related" />
+                      </div>
+                      <div className="p-6">
+                        <div className="flex flex-wrap items-center gap-3">
+                          <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-[#009dcc]">{relatedGuide.categoryLabel}</p>
+                          {relatedGuide.readingMinutes && <span className="text-xs font-bold text-[#063f5b]/40">{relatedGuide.readingMinutes} min read</span>}
+                        </div>
+                        <h3 className="mt-3 text-xl font-extrabold leading-snug tracking-[-0.03em] text-[#063f5b]">{relatedGuide.title}</h3>
+                        <p className="mt-3 line-clamp-2 text-sm leading-6 text-[#063f5b]/65">{relatedGuide.description}</p>
+                        <span className="mt-5 inline-flex items-center gap-2 text-xs font-extrabold text-[#009dcc]">
+                          Read the guide <span aria-hidden="true">→</span>
+                        </span>
+                      </div>
+                    </Link>
+                  </article>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
 
         <RecentlyViewedGuides
           guide={{
