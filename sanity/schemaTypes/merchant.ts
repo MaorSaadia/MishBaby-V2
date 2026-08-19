@@ -19,8 +19,14 @@ export const merchantType = defineType({
       options: { source: "name", maxLength: 80 },
       validation: (rule) => rule.required(),
     }),
+    defineField({
+      name: "logo",
+      title: "Logo",
+      type: "image",
+      description: "Optional merchant logo shown beside offers. A transparent PNG or WebP works best.",
+    }),
   ],
   preview: {
-    select: { title: "name", subtitle: "slug.current" },
+    select: { title: "name", subtitle: "slug.current", media: "logo" },
   },
 });

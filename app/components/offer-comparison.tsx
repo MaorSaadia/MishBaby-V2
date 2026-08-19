@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import type { ActiveOffer } from "@/lib/products";
 
@@ -34,7 +35,13 @@ export function OfferComparison({ offers }: OfferComparisonProps) {
           return (
             <div key={offer.id} className="flex flex-col gap-4 px-6 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-8">
               <div className="flex items-center gap-4">
-                <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[#e2f7fc] text-sm font-black text-[#009dcc]">{merchant.name.charAt(0)}</span>
+                <span className={`relative grid h-12 w-20 shrink-0 place-items-center overflow-hidden rounded-2xl border text-sm font-black ${merchant.logo ? "border-[#063f5b]/8 bg-white" : "border-transparent bg-[#e2f7fc] text-[#009dcc]"}`}>
+                  {merchant.logo ? (
+                    <Image src={merchant.logo.src} alt="" fill sizes="80px" className="object-contain p-2" />
+                  ) : (
+                    merchant.name.charAt(0)
+                  )}
+                </span>
                 <div>
                   <h3 className="font-extrabold text-[#063f5b]">{merchant.name}</h3>
                   <p className="mt-1 text-sm text-[#063f5b]/55">Check the merchant for current price, availability, and delivery details.</p>

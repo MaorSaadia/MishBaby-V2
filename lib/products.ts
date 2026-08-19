@@ -4,6 +4,9 @@ import { sanityClient } from "@/sanity/lib/client";
 export type Merchant = {
   id: string;
   name: string;
+  logo?: {
+    src: string;
+  } | null;
 };
 
 export type ProductImage = {
@@ -67,7 +70,12 @@ const publishedProductsQuery = `
       lastVerifiedAt,
       "merchant": merchant->{
         "id": slug.current,
-        name
+        name,
+        "logo": select(
+          defined(logo.asset) => {
+            "src": logo.asset->url
+          }
+        )
       }
     }
   }
