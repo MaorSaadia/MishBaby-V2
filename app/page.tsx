@@ -1,7 +1,9 @@
 import Link from "next/link";
+import { GuideImage } from "./components/guide-image";
 import { ProductCard } from "./components/product-card";
 import { getPublishedCategories } from "@/lib/categories";
 import { getCategoryThemeClass } from "@/lib/category-themes";
+import { getPublishedGuides } from "@/lib/guides";
 import { getHomepageFeaturedProducts } from "@/lib/homepage";
 
 const values = [
@@ -11,8 +13,13 @@ const values = [
 ];
 
 export default async function Home() {
-  const [categories, featuredProducts] = await Promise.all([getPublishedCategories(), getHomepageFeaturedProducts()]);
+  const [categories, featuredProducts, publishedGuides] = await Promise.all([
+    getPublishedCategories(),
+    getHomepageFeaturedProducts(),
+    getPublishedGuides(),
+  ]);
   const featuredCategories = categories.slice(0, 3);
+  const homepageGuides = publishedGuides.slice(0, 3);
 
   return (
     <div className="overflow-hidden">
@@ -83,6 +90,36 @@ export default async function Home() {
             </div>
           </div>
         </section>
+
+        {homepageGuides.length > 0 && (
+          <section className="mx-auto max-w-6xl px-5 py-18 sm:px-8 md:py-24">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+              <div className="max-w-2xl">
+                <p className="text-sm font-extrabold uppercase tracking-[0.14em] text-[#009dcc]">Helpful guides</p>
+                <h2 className="mt-3 font-display text-4xl font-semibold tracking-[-0.045em] text-[#063f5b]">A little clarity for the choices ahead.</h2>
+                <p className="mt-4 text-base leading-7 text-[#063f5b]/65">Practical, parent-friendly reads to help you feel more informed and prepared.</p>
+              </div>
+              <Link href="/guides" className="text-sm font-extrabold text-[#009dcc] transition-colors hover:text-[#0784b0]">View all guides <span aria-hidden="true">→</span></Link>
+            </div>
+
+            <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {homepageGuides.map((guide) => (
+                <article key={guide.id} className="overflow-hidden rounded-[2rem] border border-[#063f5b]/8 bg-white shadow-[0_16px_36px_-28px_rgba(6,63,91,.4)]">
+                  <GuideImage guide={guide} variant="card" />
+                  <div className="p-6">
+                    <div className="flex flex-wrap items-center gap-3 text-xs font-bold">
+                      <span className="uppercase tracking-[0.12em] text-[#009dcc]">{guide.categoryLabel}</span>
+                      {guide.readingMinutes && <span className="text-[#063f5b]/45">{guide.readingMinutes} min read</span>}
+                    </div>
+                    <h3 className="mt-3 text-xl font-extrabold leading-snug tracking-[-0.03em] text-[#063f5b]">{guide.title}</h3>
+                    <p className="mt-3 text-sm leading-6 text-[#063f5b]/65">{guide.description}</p>
+                    <Link href={`/guides/${guide.slug}`} className="mt-5 inline-flex items-center gap-2 text-xs font-extrabold text-[#009dcc] transition-colors hover:text-[#0784b0]">Read the guide <span aria-hidden="true">→</span></Link>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </section>
+        )}
 
         <section id="why-mishbaby" className="mx-auto max-w-6xl scroll-mt-20 px-5 py-18 sm:px-8 md:py-24">
           <div className="max-w-xl">
