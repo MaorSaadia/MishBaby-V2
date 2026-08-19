@@ -1,6 +1,6 @@
 import { defineArrayMember, defineField, defineType } from "sanity";
 
-const offerFreshnessWarningDays = 30;
+export const offerFreshnessWarningDays = 30;
 const millisecondsPerDay = 24 * 60 * 60 * 1000;
 
 function activeOfferRequired(value: unknown, context: unknown, message: string) {

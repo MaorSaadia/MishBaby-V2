@@ -4,6 +4,20 @@ import { GuideAssistant } from "./sanity/guide-assistant/guide-assistant";
 import { ProductAssistant } from "./sanity/product-assistant/product-assistant";
 import { sanityDataset, studioProjectId } from "./sanity/env";
 import { schemaTypes } from "./sanity/schemaTypes";
+import { offerFreshnessWarningDays } from "./sanity/schemaTypes/product-offer";
+
+const secondsPerDay = 24 * 60 * 60;
+const staleOfferThresholdSeconds = (offerFreshnessWarningDays + 1) * secondsPerDay;
+const productsWithStaleOffersFilter = `
+  _type == "product" &&
+  count(offers[
+    status == "active" &&
+    (
+      !defined(lastVerifiedAt) ||
+      dateTime(lastVerifiedAt + "T00:00:00Z") <= dateTime(now()) - ${staleOfferThresholdSeconds}
+    )
+  ]) > 0
+`;
 
 export default defineConfig({
   name: "mishbaby",
@@ -30,6 +44,20 @@ export default defineConfig({
               ),
             structure.divider(),
             structure.documentTypeListItem("product").title("Products"),
+            structure
+              .listItem()
+              .title("Offers to recheck")
+              .schemaType("product")
+              .child(
+                structure
+                  .documentList()
+                  .title("Offers to recheck")
+                  .schemaType("product")
+                  .filter(productsWithStaleOffersFilter)
+                  .defaultOrdering([
+                    { field: "name", direction: "asc" },
+                  ]),
+              ),
             structure.documentTypeListItem("category").title("Categories"),
             structure.documentTypeListItem("guide").title("Guides"),
             structure.documentTypeListItem("merchant").title("Merchants"),
