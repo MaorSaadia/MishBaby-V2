@@ -3,6 +3,8 @@
 :root {
   --background: #fbfeff;
   --foreground: #063f5b;
+  --brand-cyan-accessible: #007797;
+  --brand-cyan-accessible-hover: #006b88;
 }
 
 @theme inline {
@@ -46,6 +48,29 @@ body {
 :where(a, button, input, select, textarea, summary):focus-visible {
   outline: 3px solid #009dcc;
   outline-offset: 3px;
+}
+
+/* Keep the brighter cyan for decorative accents while giving text and
+   interactive surfaces enough contrast against MishBaby's pale backgrounds. */
+.text-\[\#009dcc\] {
+  color: var(--brand-cyan-accessible);
+}
+
+.bg-\[\#009dcc\] {
+  background-color: var(--brand-cyan-accessible);
+}
+
+.hover\:text-\[\#009dcc\]:hover,
+.hover\:text-\[\#0784b0\]:hover {
+  color: var(--brand-cyan-accessible-hover);
+}
+
+.hover\:bg-\[\#0784b0\]:hover {
+  background-color: var(--brand-cyan-accessible-hover);
+}
+
+.group:hover .group-hover\:bg-\[\#009dcc\] {
+  background-color: var(--brand-cyan-accessible);
 }
 
 @media (prefers-reduced-motion: reduce) {

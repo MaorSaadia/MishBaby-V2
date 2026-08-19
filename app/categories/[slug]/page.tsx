@@ -101,7 +101,7 @@ export default async function CategoryPage({ params }: PageProps<"/categories/[s
         <section className="relative isolate overflow-hidden bg-[#f1fbfe] px-5 py-12 sm:px-8 md:py-20">
           <div className={`absolute -right-20 -top-24 -z-10 size-96 rounded-full ${getCategoryThemeClass(category.colorTheme)} blur-2xl`} />
           <div className="mx-auto max-w-6xl">
-            <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-sm font-bold text-[#063f5b]/55">
+          <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-2 text-sm font-bold text-[#063f5b]/55">
               <Link href="/" className="hover:text-[#009dcc]">Home</Link>
               <span aria-hidden="true">/</span>
               <Link href="/categories" className="hover:text-[#009dcc]">Categories</Link>

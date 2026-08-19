@@ -35,7 +35,7 @@ export default function AffiliateDisclosurePage() {
       <header className="relative isolate overflow-hidden bg-[#f1fbfe] px-5 py-14 sm:px-8 md:py-22">
         <div className="absolute -right-24 -top-24 -z-10 size-96 rounded-full bg-[#a8e8f5]/70 blur-3xl" />
         <div className="mx-auto max-w-4xl">
-          <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-sm font-bold text-[#063f5b]/55">
+          <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-2 text-sm font-bold text-[#063f5b]/55">
             <Link href="/" className="hover:text-[#009dcc]">Home</Link>
             <span aria-hidden="true">/</span>
             <span className="text-[#063f5b]">Affiliate Disclosure</span>
