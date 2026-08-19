@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { GuideImage } from "@/app/components/guide-image";
 import { ProductCard } from "@/app/components/product-card";
+import { RecentlyViewedGuides } from "@/app/components/recently-viewed-guides";
 import { getPublishedGuideBySlug, getPublishedGuides } from "@/lib/guides";
 import { siteConfig } from "@/lib/site";
 
@@ -178,6 +179,19 @@ export default async function GuidePage({ params }: PageProps<"/guides/[slug]">)
             <Link href={`/categories/${guide.relatedCategory.slug}`} className="mt-6 inline-flex rounded-full bg-white px-5 py-3 text-sm font-extrabold text-[#063f5b] transition hover:bg-[#e8f8fc]">Explore {guide.relatedCategory.label}</Link>
           </section>
         </article>
+
+        <RecentlyViewedGuides
+          guide={{
+            slug: guide.slug,
+            title: guide.title,
+            description: guide.description,
+            categoryLabel: guide.categoryLabel,
+            readingMinutes: guide.readingMinutes,
+            symbol: guide.symbol,
+            colorTheme: guide.colorTheme,
+            coverImage: guide.coverImage,
+          }}
+        />
     </>
   );
 }
