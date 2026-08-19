@@ -3,7 +3,7 @@ import Link from "next/link";
 import { GuideImage } from "@/app/components/guide-image";
 import { getGuides, type Guide } from "@/lib/guides";
 
-export const metadata: Metadata = {
+const guidesMetadata: Metadata = {
   title: "Parenting & Buying Guides",
   description: "Practical parenting guidance and thoughtful baby-product buying guides from MishBaby.",
 };
@@ -11,6 +11,24 @@ export const metadata: Metadata = {
 type GuidesPageProps = {
   searchParams: Promise<{ category?: string | string[]; q?: string | string[] }>;
 };
+
+export async function generateMetadata({ searchParams }: GuidesPageProps): Promise<Metadata> {
+  const resolvedSearchParams = await searchParams;
+  const hasFilteredParams = ["category", "q"].some((key) =>
+    Object.prototype.hasOwnProperty.call(resolvedSearchParams, key),
+  );
+
+  return {
+    ...guidesMetadata,
+    alternates: {
+      canonical: "/guides",
+    },
+    robots: {
+      index: !hasFilteredParams,
+      follow: true,
+    },
+  };
+}
 
 function GuideCard({ guide }: { guide: Guide }) {
   return (

@@ -4,7 +4,7 @@ import { ProductResults } from "@/app/products/product-results";
 import { getPublishedCategories } from "@/lib/categories";
 import { getPublishedProducts } from "@/lib/products";
 
-export const metadata: Metadata = {
+const productsMetadata: Metadata = {
   title: "Baby Products",
   description: "Browse MishBaby's thoughtfully selected baby products and compare available offers from multiple merchants.",
 };
@@ -12,6 +12,24 @@ export const metadata: Metadata = {
 type ProductsPageProps = {
   searchParams: Promise<{ category?: string | string[]; q?: string | string[]; sort?: string | string[] }>;
 };
+
+export async function generateMetadata({ searchParams }: ProductsPageProps): Promise<Metadata> {
+  const resolvedSearchParams = await searchParams;
+  const hasFilteredParams = ["category", "q", "sort"].some((key) =>
+    Object.prototype.hasOwnProperty.call(resolvedSearchParams, key),
+  );
+
+  return {
+    ...productsMetadata,
+    alternates: {
+      canonical: "/products",
+    },
+    robots: {
+      index: !hasFilteredParams,
+      follow: true,
+    },
+  };
+}
 
 export default async function ProductsPage({ searchParams }: ProductsPageProps) {
   const [resolvedSearchParams, categories, publishedProducts] = await Promise.all([
