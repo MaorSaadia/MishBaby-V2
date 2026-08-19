@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { ActiveOffer } from "@/lib/products";
 
 type OfferComparisonProps = {
@@ -54,7 +55,9 @@ export function OfferComparison({ offers }: OfferComparisonProps) {
           );
         })}
       </div>
-      <p className="border-t border-[#063f5b]/8 px-6 py-4 text-xs leading-5 text-[#063f5b]/50 sm:px-8">MishBaby may earn a commission from qualifying purchases at no additional cost to you.</p>
+      <p className="border-t border-[#063f5b]/8 px-6 py-4 text-xs leading-5 text-[#063f5b]/50 sm:px-8">
+        Affiliate disclosure: MishBaby may earn a commission from qualifying purchases. <Link href="/affiliate-disclosure" className="font-bold text-[#007fa8] hover:underline">Learn more</Link>.
+      </p>
     </div>
   );
 }
