@@ -6,6 +6,7 @@ import { useRef, useState } from "react";
 import { Brand } from "./brand";
 import { NavbarSearch } from "./navbar-search";
 import type { ProductSearchItem } from "@/lib/products";
+import { AccountLink } from "./auth/account-link";
 
 const links = [
   { label: "Products", href: "/products" },
@@ -44,12 +45,13 @@ export function Navbar({ products }: { products: ProductSearchItem[] }) {
             return <Link key={link.label} href={link.href} aria-current={active ? "page" : undefined} className={`rounded-md transition-colors hover:text-[#009dcc] ${active ? "text-[#009dcc]" : ""}`}>{link.label}</Link>;
           })}
         </nav>
+        <div className="hidden lg:block"><AccountLink /></div>
         <button ref={menuButtonRef} type="button" onClick={() => setIsOpen(!isOpen)} className="ml-auto grid size-10 shrink-0 place-items-center rounded-full border border-[#063f5b]/15 text-[#063f5b] sm:ml-0 lg:hidden" aria-expanded={isOpen} aria-controls="mobile-navigation">
           <span className="sr-only">{isOpen ? "Close" : "Open"} navigation menu</span>
           <svg viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d={isOpen ? "m6 6 12 12M18 6 6 18" : "M4 7h16M4 12h16M4 17h16"} /></svg>
         </button>
       </div>
-      {isOpen && <nav id="mobile-navigation" className="border-t border-[#063f5b]/10 px-5 py-4 lg:hidden" aria-label="Mobile navigation"><div className="mx-auto flex max-w-6xl flex-col gap-1">{links.map((link) => { const active = isActive(link.href); return <Link key={link.label} href={link.href} aria-current={active ? "page" : undefined} onClick={() => setIsOpen(false)} className={`rounded-xl px-3 py-3 font-bold hover:bg-[#a8e8f5]/40 ${active ? "bg-[#e2f7fc] text-[#007fa5]" : ""}`}>{link.label}</Link>; })}</div></nav>}
+      {isOpen && <nav id="mobile-navigation" className="border-t border-[#063f5b]/10 px-5 py-4 lg:hidden" aria-label="Mobile navigation"><div className="mx-auto flex max-w-6xl flex-col gap-1">{links.map((link) => { const active = isActive(link.href); return <Link key={link.label} href={link.href} aria-current={active ? "page" : undefined} onClick={() => setIsOpen(false)} className={`rounded-xl px-3 py-3 font-bold hover:bg-[#a8e8f5]/40 ${active ? "bg-[#e2f7fc] text-[#007fa5]" : ""}`}>{link.label}</Link>; })}<AccountLink mobile onNavigate={() => setIsOpen(false)} /></div></nav>}
     </header>
   );
 }

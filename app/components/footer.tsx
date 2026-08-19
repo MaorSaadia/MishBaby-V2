@@ -16,6 +16,8 @@ export function Footer() {
             <Link href="/guides">Parenting guides</Link>
             <Link href="/about">Our approach</Link>
             <Link href="/affiliate-disclosure">Affiliate disclosure</Link>
+            <Link href="/privacy">Privacy policy</Link>
+            <Link href="/terms">Terms of use</Link>
           </div>
         </div>
         <div>
