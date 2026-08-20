@@ -1,16 +1,16 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { AmazonSimilarProducts } from "../../components/amazon-similar-products";
 import { GuideImage } from "../../components/guide-image";
 import { OfferComparison } from "../../components/offer-comparison";
-import { ProductCard } from "../../components/product-card";
 import { ProductImage } from "../../components/product-image";
 import { RecentlyViewedProducts } from "../../components/recently-viewed-products";
 import { ShareControls } from "../../components/share-controls";
 import { FavoriteProductButton } from "../../components/favorite-product-button";
 import { getCategoryBySlug } from "@/lib/categories";
 import { getPublishedGuidesByProductId } from "@/lib/guides";
-import { getProductBySlug, getPublishedProducts, getRelatedProducts } from "@/lib/products";
+import { getProductBySlug, getPublishedProducts } from "@/lib/products";
 import { siteConfig } from "@/lib/site";
 
 export async function generateStaticParams() {
@@ -58,15 +58,15 @@ export default async function ProductPage({ params }: PageProps<"/products/[slug
 
   if (!product) notFound();
 
-  const [category, relatedGuides, relatedProducts] = await Promise.all([
+  const [category, relatedGuides] = await Promise.all([
     getCategoryBySlug(product.categorySlug),
     getPublishedGuidesByProductId(product.id),
-    getRelatedProducts(product),
   ]);
   if (!category) notFound();
 
   const productUrl = `${siteConfig.url}/products/${product.slug}`;
   const categoryUrl = `${siteConfig.url}/categories/${category.slug}`;
+  const currentAmazonAsin = product.offers.find((offer) => offer.merchant.id === "amazon")?.amazonAsin;
   const structuredData = {
     "@context": "https://schema.org",
     "@graph": [
@@ -172,26 +172,11 @@ export default async function ProductPage({ params }: PageProps<"/products/[slug
           <OfferComparison offers={product.offers} />
         </section>
 
-        {relatedProducts.length > 0 && (
-          <section className="border-y border-[#063f5b]/6 bg-[#f1fbfe] px-5 py-14 sm:px-8 md:py-20">
-            <div className="mx-auto max-w-6xl">
-              <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-                <div className="max-w-2xl">
-                  <p className="text-sm font-extrabold uppercase tracking-[0.14em] text-[#009dcc]">More to explore</p>
-                  <h2 className="mt-3 font-display text-4xl font-semibold tracking-[-0.045em] text-[#063f5b]">More from {category.name}.</h2>
-                  <p className="mt-4 text-base leading-7 text-[#063f5b]/65">Discover other useful products selected for the same stage or routine.</p>
-                </div>
-                <Link href={`/categories/${category.slug}`} className="shrink-0 text-sm font-extrabold text-[#009dcc] transition-colors hover:text-[#0784b0]">View all in {category.name} →</Link>
-              </div>
-
-              <div className="mt-9 grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
-                {relatedProducts.map((relatedProduct) => (
-                  <ProductCard key={relatedProduct.id} product={relatedProduct} variant="compact" />
-                ))}
-              </div>
-            </div>
-          </section>
-        )}
+        <AmazonSimilarProducts
+          productName={product.name}
+          categoryName={category.name}
+          currentAsin={currentAmazonAsin}
+        />
 
         {relatedGuides.length > 0 && (
           <section className="bg-[#f7fcfe] px-5 py-14 sm:px-8 md:py-20">
