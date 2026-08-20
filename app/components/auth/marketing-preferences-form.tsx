@@ -7,9 +7,10 @@ import { ActionMessage, SubmitButton } from "./auth-ui";
 export function MarketingPreferencesForm({ subscribed, occurredAt }: { subscribed: boolean; occurredAt?: string }) {
   const [state, action] = useActionState(updateMarketingConsentAction, {});
   const recordedDate = occurredAt ? new Intl.DateTimeFormat("en", { dateStyle: "medium" }).format(new Date(occurredAt)) : undefined;
+  const currentSubscription = state.status === "success" && typeof state.subscribed === "boolean" ? state.subscribed : subscribed;
 
   return <div className="mt-5"><ActionMessage state={state} />
-    {subscribed ? <form action={action}>
+    {currentSubscription ? <form action={action}>
       <input type="hidden" name="intent" value="unsubscribe" />
       <p className="text-sm leading-6 text-[#063f5b]/65">You’re subscribed to occasional MishBaby product discoveries, guides, and website updates.{recordedDate ? ` Preference recorded ${recordedDate}.` : ""}</p>
       <div className="mt-5 max-w-xs [&_button]:border [&_button]:border-[#063f5b]/15 [&_button]:bg-white [&_button]:text-[#063f5b] [&_button:hover]:bg-[#e8f8fc]"><SubmitButton pendingText="Unsubscribing…">Unsubscribe</SubmitButton></div>
