@@ -1,10 +1,12 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import { getCurrentUser, minimumPasswordLength, sanitizeReturnPath } from "@/lib/auth";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { getSiteUrl, isSupabaseConfigured } from "@/lib/supabase/config";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { marketingConsentPolicyVersion, marketingSignupConsentSource, marketingSignupCookieName, recordMarketingConsentEvent } from "@/lib/marketing-consent";
 
 export type AuthActionState = { status?: "error" | "success"; message?: string };
 
@@ -47,13 +49,27 @@ export async function signUpAction(_state: AuthActionState, formData: FormData):
   const passwordError = validateNewPassword(formData);
   if (passwordError) return passwordError;
   const next = sanitizeReturnPath(formData.get("next"));
+  const marketingOptIn = formData.get("marketingConsent") === "yes";
 
   const supabase = await createServerSupabaseClient();
-  await supabase.auth.signUp({
+  const { data: signupData } = await supabase.auth.signUp({
     email,
     password: textValue(formData, "password"),
-    options: { emailRedirectTo: getSiteUrl(), data: { return_path: next } },
+    options: {
+      emailRedirectTo: getSiteUrl(),
+      data: {
+        return_path: next,
+        ...(marketingOptIn ? {
+          marketing_opt_in: true,
+          marketing_policy_version: marketingConsentPolicyVersion,
+          marketing_consent_source: marketingSignupConsentSource,
+        } : {}),
+      },
+    },
   });
+  if (marketingOptIn && signupData.session && signupData.user) {
+    await recordMarketingConsentEvent(signupData.user.id, "subscribed", marketingSignupConsentSource);
+  }
 
   // Keep the response deliberately generic so account existence is not exposed.
   return { status: "success", message: "If this address can be registered, we’ll send a confirmation email shortly." };
@@ -83,6 +99,24 @@ export async function updatePasswordAction(_state: AuthActionState, formData: Fo
 export async function googleSignInAction(formData: FormData) {
   if (!isSupabaseConfigured) redirect("/sign-in?error=unavailable");
   const next = sanitizeReturnPath(formData.get("next"));
+  const cookieStore = await cookies();
+  if (formData.get("marketingConsent") === "yes") {
+    cookieStore.set(marketingSignupCookieName, marketingConsentPolicyVersion, {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      path: "/auth/callback",
+      maxAge: 60 * 15,
+    });
+  } else {
+    cookieStore.set(marketingSignupCookieName, "", {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      path: "/auth/callback",
+      maxAge: 0,
+    });
+  }
   const supabase = await createServerSupabaseClient();
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",

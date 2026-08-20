@@ -87,3 +87,5 @@ Run [`supabase/migrations/20260819001000_create_guide_favorites.sql`](./supabase
 Run [`supabase/migrations/20260820000000_create_marketing_consent_events.sql`](./supabase/migrations/20260820000000_create_marketing_consent_events.sql) once in the Supabase SQL Editor (or apply it through the Supabase CLI). The table stores an append-only history of opt-ins and withdrawals. Authenticated browser clients can read only their own history; writes go through MishBaby’s authenticated Server Action and server-only Supabase secret.
 
 This migration does not create a mailing list or send any marketing email. Test opt-in, withdrawal, repeated submissions, cross-account isolation, and account-deletion cleanup before connecting a future campaign provider.
+
+The signup page includes one unchecked consent checkbox shared by email and Google signup. When selected, MishBaby records the consent only after Supabase authenticates or confirms the user. Leaving it unchecked creates no marketing consent event and does not prevent account creation.

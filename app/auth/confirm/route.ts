@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { sanitizeReturnPath } from "@/lib/auth";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { marketingConsentPolicyVersion, marketingSignupConsentSource, recordMarketingConsentEvent } from "@/lib/marketing-consent";
 
 const allowedTypes = new Set<EmailOtpType>(["email", "signup", "recovery"]);
 
@@ -13,6 +14,8 @@ export async function GET(request: NextRequest) {
     const supabase = await createServerSupabaseClient();
     const { data, error } = await supabase.auth.verifyOtp({ type, token_hash: tokenHash });
     if (!error) {
+      const optedIn = data.user?.user_metadata?.marketing_opt_in === true && data.user.user_metadata.marketing_policy_version === marketingConsentPolicyVersion;
+      if (type !== "recovery" && optedIn && data.user) await recordMarketingConsentEvent(data.user.id, "subscribed", marketingSignupConsentSource);
       const requestedPath = sanitizeReturnPath(request.nextUrl.searchParams.get("next"));
       const signupReturnPath = sanitizeReturnPath(data.user?.user_metadata?.return_path, requestedPath);
       const destination = type === "recovery" ? "/update-password" : signupReturnPath;

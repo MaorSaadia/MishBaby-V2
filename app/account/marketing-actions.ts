@@ -3,8 +3,7 @@
 import { revalidatePath } from "next/cache";
 import type { AuthActionState } from "@/app/auth/actions";
 import { getCurrentUser } from "@/lib/auth";
-import { getMarketingPreference, marketingConsentPolicyVersion, marketingConsentSource, type MarketingConsentStatus } from "@/lib/marketing-consent";
-import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { getMarketingPreference, marketingConsentSource, recordMarketingConsentEvent, type MarketingConsentStatus } from "@/lib/marketing-consent";
 
 export async function updateMarketingConsentAction(_state: AuthActionState, formData: FormData): Promise<AuthActionState> {
   const user = await getCurrentUser();
@@ -19,18 +18,8 @@ export async function updateMarketingConsentAction(_state: AuthActionState, form
   if (currentPreference.error) return { status: "error", message: "Email preferences are temporarily unavailable. Please try again." };
   if (currentPreference.status === nextStatus) return { status: "success", message: nextStatus === "subscribed" ? "You are already subscribed." : "You are already unsubscribed." };
 
-  try {
-    const admin = createSupabaseAdminClient();
-    const { error } = await admin.from("marketing_consent_events").insert({
-      user_id: user.id,
-      status: nextStatus,
-      source: marketingConsentSource,
-      policy_version: marketingConsentPolicyVersion,
-    });
-    if (error) return { status: "error", message: "We couldn’t update your email preferences. Please try again." };
-  } catch {
-    return { status: "error", message: "We couldn’t update your email preferences. Please try again." };
-  }
+  const result = await recordMarketingConsentEvent(user.id, nextStatus, marketingConsentSource);
+  if (!result.ok) return { status: "error", message: "We couldn’t update your email preferences. Please try again." };
 
   revalidatePath("/account");
   return { status: "success", message: nextStatus === "subscribed" ? "You’re subscribed to optional MishBaby updates." : "You’ve been unsubscribed from optional MishBaby updates." };
