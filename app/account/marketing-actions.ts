@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import type { AuthActionState } from "@/app/auth/actions";
 import { getCurrentUser } from "@/lib/auth";
 import { getMarketingPreference, marketingConsentSource, recordMarketingConsentEvent, type MarketingConsentStatus } from "@/lib/marketing-consent";
-import { syncResendMarketingContact } from "@/lib/resend-marketing";
+import { isResendMarketingSyncEnabled, syncResendMarketingContact } from "@/lib/resend-marketing";
 
 export type MarketingConsentActionState = AuthActionState & { subscribed?: boolean };
 
@@ -20,6 +20,9 @@ export async function updateMarketingConsentAction(_state: MarketingConsentActio
   const currentPreference = await getMarketingPreference(user.id);
   if (currentPreference.error) return { status: "error", message: "Email preferences are temporarily unavailable. Please try again." };
   if (currentPreference.status === nextStatus) {
+    if (!isResendMarketingSyncEnabled()) {
+      return { status: "success", message: nextStatus === "subscribed" ? "You are already subscribed." : "You are already unsubscribed.", subscribed: nextStatus === "subscribed" };
+    }
     const sync = await syncResendMarketingContact(user.id, user.email, nextStatus);
     revalidatePath("/account");
     return { status: "success", message: sync.ok ? (nextStatus === "subscribed" ? "You are already subscribed and synced." : "You are already unsubscribed and synced.") : "Your preference is saved, but Resend synchronization is still pending.", subscribed: nextStatus === "subscribed" };
@@ -28,7 +31,9 @@ export async function updateMarketingConsentAction(_state: MarketingConsentActio
   const result = await recordMarketingConsentEvent(user.id, nextStatus, marketingConsentSource);
   if (!result.ok) return { status: "error", message: "We couldn’t update your email preferences. Please try again." };
 
-  const sync = await syncResendMarketingContact(user.id, user.email, nextStatus);
+  const sync = isResendMarketingSyncEnabled()
+    ? await syncResendMarketingContact(user.id, user.email, nextStatus)
+    : { ok: true };
   revalidatePath("/account");
   const savedMessage = nextStatus === "subscribed" ? "You’re subscribed to optional MishBaby updates." : "You’ve been unsubscribed from optional MishBaby updates.";
   return { status: "success", message: sync.ok ? savedMessage : `${savedMessage} Resend synchronization is pending.`, subscribed: nextStatus === "subscribed" };
@@ -44,5 +49,5 @@ export async function retryMarketingContactSyncAction(_state: MarketingSyncActio
   if (preference.error) return { status: "error", message: "Email preferences are temporarily unavailable." };
   const result = await syncResendMarketingContact(user.id, user.email, preference.status);
   revalidatePath("/account");
-  return result.ok ? { status: "success", message: "Your Resend contact is synchronized.", synced: true } : { status: "error", message: "Resend synchronization is still unavailable. Please try again later.", synced: false };
+  return result.ok ? { status: "success", message: "Your email preference is synchronized.", synced: true } : { status: "error", message: "Email synchronization is still unavailable. Please try again later.", synced: false };
 }

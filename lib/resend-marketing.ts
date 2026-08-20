@@ -11,6 +11,10 @@ function getResendMarketingConfig() {
   return { apiKey, segmentId };
 }
 
+export function isResendMarketingSyncEnabled() {
+  return getResendMarketingConfig() !== null;
+}
+
 export function getResendWebhookClient() {
   const apiKey = process.env.RESEND_MARKETING_API_KEY?.trim();
   return apiKey ? new Resend(apiKey) : null;
@@ -47,6 +51,9 @@ export async function getMarketingContactSync(userId: string) {
 
 export async function syncResendMarketingContact(userId: string, email: string, desiredStatus: MarketingConsentStatus) {
   const normalizedEmail = email.trim().toLowerCase();
+  const config = getResendMarketingConfig();
+  if (!config) return { ok: false, reason: "not_configured" as const };
+
   const admin = createSupabaseAdminClient();
   const { error: queueError } = await admin.from("marketing_contact_sync").upsert({
     user_id: userId,
@@ -57,12 +64,6 @@ export async function syncResendMarketingContact(userId: string, email: string, 
     updated_at: new Date().toISOString(),
   }, { onConflict: "user_id" });
   if (queueError) return { ok: false, reason: "queue_failed" as const };
-
-  const config = getResendMarketingConfig();
-  if (!config) {
-    await markSyncFailed(admin, userId, "resend_not_configured");
-    return { ok: false, reason: "not_configured" as const };
-  }
 
   const resend = new Resend(config.apiKey);
   let syncFailed = false;

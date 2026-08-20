@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "sync:marketing-contacts": "node --env-file=.env.local scripts/sync-resend-marketing-contacts.mjs"
   },
   "dependencies": {
     "@google/genai": "^2.17.1",

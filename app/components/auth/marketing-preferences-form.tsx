@@ -4,11 +4,11 @@ import { useActionState } from "react";
 import { retryMarketingContactSyncAction, updateMarketingConsentAction } from "@/app/account/marketing-actions";
 import { ActionMessage, SubmitButton } from "./auth-ui";
 
-export function MarketingPreferencesForm({ subscribed, occurredAt, syncStatus }: { subscribed: boolean; occurredAt?: string; syncStatus?: "pending" | "synced" | "failed" }) {
+export function MarketingPreferencesForm({ subscribed, occurredAt, syncEnabled, syncStatus }: { subscribed: boolean; occurredAt?: string; syncEnabled: boolean; syncStatus?: "pending" | "synced" | "failed" }) {
   const [state, action] = useActionState(updateMarketingConsentAction, {});
   const recordedDate = occurredAt ? new Intl.DateTimeFormat("en", { dateStyle: "medium" }).format(new Date(occurredAt)) : undefined;
   const currentSubscription = state.status === "success" && typeof state.subscribed === "boolean" ? state.subscribed : subscribed;
-  const needsSync = syncStatus === "failed" || syncStatus === "pending" || (currentSubscription && syncStatus !== "synced");
+  const needsSync = syncEnabled && (syncStatus === "failed" || syncStatus === "pending" || (currentSubscription && syncStatus !== "synced"));
 
   return <div className="mt-5"><ActionMessage state={state} />
     {needsSync && <MarketingSyncRetry />}
@@ -27,5 +27,5 @@ export function MarketingPreferencesForm({ subscribed, occurredAt, syncStatus }:
 function MarketingSyncRetry() {
   const [state, action] = useActionState(retryMarketingContactSyncAction, {});
   if (state.synced) return <ActionMessage state={state} />;
-  return <div className="mb-5 rounded-2xl bg-[#fff7df] p-4 text-sm leading-6 text-[#735a16]"><p>Your preference is saved in MishBaby, but the Resend contact still needs synchronization.</p><form action={action} className="mt-3"><button className="font-extrabold underline">Retry synchronization</button></form>{state.message && <p role="status" className="mt-2">{state.message}</p>}</div>;
+  return <div className="mb-5 rounded-2xl bg-[#fff7df] p-4 text-sm leading-6 text-[#735a16]"><p>Your preference is saved, but our email service still needs synchronization.</p><form action={action} className="mt-3"><button className="font-extrabold underline">Retry synchronization</button></form>{state.message && <p role="status" className="mt-2">{state.message}</p>}</div>;
 }

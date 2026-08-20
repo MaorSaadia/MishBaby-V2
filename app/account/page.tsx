@@ -10,7 +10,7 @@ import { getFavoriteGuideIds, getFavoriteProductIds } from "@/lib/favorites";
 import { getPublishedGuides } from "@/lib/guides";
 import { getPublishedProducts } from "@/lib/products";
 import { getMarketingPreference } from "@/lib/marketing-consent";
-import { getMarketingContactSync } from "@/lib/resend-marketing";
+import { getMarketingContactSync, isResendMarketingSyncEnabled } from "@/lib/resend-marketing";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 
 export const metadata: Metadata = { title: "Your account", robots: { index: false, follow: false } };
@@ -19,12 +19,13 @@ export default async function AccountPage({ searchParams }: PageProps<"/account"
   if (!isSupabaseConfigured) return <section className="mx-auto max-w-3xl px-5 py-16 sm:px-8"><h1 className="font-display text-4xl font-semibold">Accounts are being configured</h1><p className="mt-4 text-[#063f5b]/65">Please check back soon.</p></section>;
   const user = await getCurrentUser();
   if (!user?.email) redirect("/sign-in?next=/account");
+  const marketingSyncEnabled = isResendMarketingSyncEnabled();
   const [params, favoriteProductResult, favoriteGuideResult, marketingPreference, marketingContactSync, products, guides] = await Promise.all([
     searchParams,
     getFavoriteProductIds(user.id),
     getFavoriteGuideIds(user.id),
     getMarketingPreference(user.id),
-    getMarketingContactSync(user.id),
+    marketingSyncEnabled ? getMarketingContactSync(user.id) : Promise.resolve({ status: undefined }),
     getPublishedProducts(),
     getPublishedGuides(),
   ]);
@@ -57,7 +58,7 @@ export default async function AccountPage({ searchParams }: PageProps<"/account"
       <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-[#009dcc]">Email preferences</p>
       <h2 className="mt-2 font-display text-3xl font-semibold tracking-[-0.04em]">Optional MishBaby updates</h2>
       <p className="mt-3 max-w-2xl text-sm leading-6 text-[#063f5b]/65">Account and security emails remain transactional. Marketing updates are optional and require your clear consent.</p>
-      {marketingPreference.error ? <p role="status" className="mt-5 rounded-xl bg-[#fff0f1] px-4 py-3 text-sm text-[#8a2430]">Email preferences are temporarily unavailable. Please try again later.</p> : <MarketingPreferencesForm subscribed={marketingPreference.status === "subscribed"} occurredAt={marketingPreference.occurredAt} syncStatus={marketingContactSync.status} />}
+      {marketingPreference.error ? <p role="status" className="mt-5 rounded-xl bg-[#fff0f1] px-4 py-3 text-sm text-[#8a2430]">Email preferences are temporarily unavailable. Please try again later.</p> : <MarketingPreferencesForm subscribed={marketingPreference.status === "subscribed"} occurredAt={marketingPreference.occurredAt} syncEnabled={marketingSyncEnabled} syncStatus={marketingContactSync.status} />}
     </div>
     <div className="mt-6 grid gap-6 md:grid-cols-2">
       <div className="rounded-[2rem] border border-[#063f5b]/10 bg-white p-6 sm:p-8"><h2 className="text-xl font-extrabold">Sign-in email</h2><p className="mt-2 break-all text-[#063f5b]/65">{user.email}</p><SignOutButton /></div>

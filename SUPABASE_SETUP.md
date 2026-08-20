@@ -119,3 +119,21 @@ Test both directions before sending any campaign:
 - Delete the test account and confirm its Resend contact is removed.
 
 This integration synchronizes contacts only. It does not create or send broadcasts.
+
+### If Resend is intentionally disabled
+
+Leave `RESEND_MARKETING_API_KEY`, `RESEND_MARKETING_SEGMENT_ID`, and `RESEND_WEBHOOK_SECRET` unset. MishBaby will continue recording account consent in Supabase without showing email-provider synchronization warnings to users.
+
+When the domain and Resend are ready, apply the contact-sync migration and configure the variables above. Preview the existing subscribed contacts without changing Resend:
+
+```bash
+npm run sync:marketing-contacts
+```
+
+After reviewing the count, synchronize them with:
+
+```bash
+npm run sync:marketing-contacts -- --apply
+```
+
+The command adds only users whose latest Supabase consent event is `subscribed`. It does not send an email. Run the production smoke tests above after the backfill.
