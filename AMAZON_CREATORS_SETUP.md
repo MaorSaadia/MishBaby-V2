@@ -61,6 +61,14 @@ Redeploy after adding the Vercel variables, then verify:
 5. A different query or page creates a distinct cache entry and increments the quota tables.
 6. `/amazon-finds` is marked `noindex`, and `/api/amazon/` is disallowed in `robots.txt`.
 
+## Sanity Product Assistant handoff
+
+The Product Assistant includes an authenticated Amazon search for editors. Selecting a result adds its ASIN to an Amazon merchant offer, but Amazon's API title, image, and destination URL remain temporary reference content and are not copied into Sanity.
+
+Before creating the draft, provide MishBaby's own product name and description and upload an image you are permitted to store. The published product page resolves a fresh attributed Amazon URL from the saved ASIN through `/api/amazon/items`; that response uses the same private cache and quota controls as Amazon Finds.
+
+Existing manually managed Amazon and non-Amazon HTTPS offer URLs remain supported.
+
 Do not inspect or edit the attributed destination URL before sending it to the visitor. Prices, availability, ratings, reviews, and permanent catalog imports are outside this feature.
 
 ## Limits and retention
@@ -70,6 +78,7 @@ Only cache misses consume MishBaby's internal allowance:
 - 10 Creator API calls per salted visitor hash per fixed UTC hour
 - 250 Creator API calls across the site per UTC day
 - Pages 1–3 only, with up to ten results per page
+- Up to ten ASIN-backed offer links per product-page request
 
 Expired cache data is never served even if scheduled cleanup has not run yet. Raw visitor IP addresses and raw search phrases are not written to the Amazon search tables.
 

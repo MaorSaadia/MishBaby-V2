@@ -1,5 +1,9 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
+import type { AmazonOfferLinkResponse } from "@/lib/amazon-creators";
 import type { ActiveOffer } from "@/lib/products";
 
 type OfferComparisonProps = {
@@ -16,6 +20,41 @@ function formatVerifiedDate(value: string) {
 }
 
 export function OfferComparison({ offers }: OfferComparisonProps) {
+  const asinKey = useMemo(
+    () => offers.flatMap((offer) => !offer.url && offer.amazonAsin ? [offer.amazonAsin] : []).sort().join(","),
+    [offers],
+  );
+  const [amazonLinks, setAmazonLinks] = useState<Record<string, string>>({});
+  const [resolvingAmazonLinks, setResolvingAmazonLinks] = useState(Boolean(asinKey));
+
+  useEffect(() => {
+    const asins = asinKey ? asinKey.split(",") : [];
+    if (asins.length === 0) return;
+
+    const controller = new AbortController();
+    fetch("/api/amazon/items", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ asins }),
+      signal: controller.signal,
+    })
+      .then(async (response) => {
+        if (!response.ok) throw new Error("Amazon offers are unavailable.");
+        return response.json() as Promise<AmazonOfferLinkResponse>;
+      })
+      .then((response) => {
+        setAmazonLinks(Object.fromEntries(response.items.map((item) => [item.asin, item.detailPageUrl])));
+      })
+      .catch(() => {
+        if (!controller.signal.aborted) setAmazonLinks({});
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setResolvingAmazonLinks(false);
+      });
+
+    return () => controller.abort();
+  }, [asinKey]);
+
   return (
     <div className="overflow-hidden rounded-[2rem] border border-[#063f5b]/10 bg-white shadow-[0_18px_42px_-30px_rgba(6,63,91,.4)]">
       <div className="border-b border-[#063f5b]/8 bg-[#f7fcfe] px-6 py-5 sm:px-8">
@@ -31,6 +70,7 @@ export function OfferComparison({ offers }: OfferComparisonProps) {
         )}
         {offers.map((offer) => {
           const merchant = offer.merchant;
+          const resolvedUrl = offer.url ?? (offer.amazonAsin ? amazonLinks[offer.amazonAsin] : undefined);
 
           return (
             <div key={offer.id} className="flex flex-col gap-4 px-6 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-8">
@@ -45,19 +85,27 @@ export function OfferComparison({ offers }: OfferComparisonProps) {
                 <div>
                   <h3 className="font-extrabold text-[#063f5b]">{merchant.name}</h3>
                   <p className="mt-1 text-sm text-[#063f5b]/55">Check the merchant for current price, availability, and delivery details.</p>
-                  <p className="mt-1 text-xs font-semibold text-[#063f5b]/45">Link verified {formatVerifiedDate(offer.lastVerifiedAt)}</p>
+                  <p className="mt-1 text-xs font-semibold text-[#063f5b]/45">
+                    {offer.amazonAsin ? "Amazon link refreshed automatically" : `Link verified ${formatVerifiedDate(offer.lastVerifiedAt)}`}
+                  </p>
                 </div>
               </div>
-              <a
-                href={offer.url}
-                target="_blank"
-                rel={offer.affiliate ? "sponsored nofollow noopener noreferrer" : "noopener noreferrer"}
-                className="inline-flex w-fit shrink-0 items-center gap-2 rounded-full bg-[#009dcc] px-5 py-3 text-sm font-extrabold text-white transition hover:bg-[#0784b0]"
-                aria-label={`View ${merchant.name} offer for this product (opens in a new tab)`}
-              >
-                View offer
-                <span aria-hidden="true">↗</span>
-              </a>
+              {resolvedUrl ? (
+                <a
+                  href={resolvedUrl}
+                  target="_blank"
+                  rel={offer.affiliate ? "sponsored nofollow noopener noreferrer" : "noopener noreferrer"}
+                  className="inline-flex w-fit shrink-0 items-center gap-2 rounded-full bg-[#009dcc] px-5 py-3 text-sm font-extrabold text-white transition hover:bg-[#0784b0]"
+                  aria-label={`View ${merchant.name} offer for this product (opens in a new tab)`}
+                >
+                  View offer
+                  <span aria-hidden="true">↗</span>
+                </a>
+              ) : (
+                <span className="inline-flex w-fit shrink-0 rounded-full bg-[#e8f8fc] px-5 py-3 text-sm font-extrabold text-[#063f5b]/55" role="status">
+                  {offer.amazonAsin && resolvingAmazonLinks ? "Loading offer…" : "Offer unavailable"}
+                </span>
+              )}
             </div>
           );
         })}

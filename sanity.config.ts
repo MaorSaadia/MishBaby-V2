@@ -12,6 +12,7 @@ const productsWithStaleOffersFilter = `
   _type == "product" &&
   count(offers[
     status == "active" &&
+    !defined(amazonAsin) &&
     (
       !defined(lastVerifiedAt) ||
       dateTime(lastVerifiedAt + "T00:00:00Z") <= dateTime(now()) - ${staleOfferThresholdSeconds}

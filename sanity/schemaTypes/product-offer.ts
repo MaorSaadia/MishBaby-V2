@@ -12,13 +12,20 @@ function activeOfferRequired(value: unknown, context: unknown, message: string) 
   return offer?.status !== "active" || Boolean(value) || message;
 }
 
+function activeOfferDestination(value: unknown, context: unknown) {
+  const validationContext = context as { parent?: Record<string, unknown> };
+  const offer = validationContext.parent;
+  return offer?.status !== "active" || Boolean(value) || Boolean(offer?.amazonAsin)
+    || "An active offer requires an affiliate URL or an Amazon ASIN.";
+}
+
 function offerFreshnessWarning(value: unknown, context: unknown) {
   const validationContext = context as {
     document?: Record<string, unknown>;
     parent?: Record<string, unknown>;
   };
   const offer = validationContext.parent ?? validationContext.document;
-  if (offer?.status !== "active" || typeof value !== "string") return true;
+  if (offer?.status !== "active" || offer.amazonAsin || typeof value !== "string") return true;
 
   const verifiedTimestamp = Date.parse(`${value}T00:00:00Z`);
   const todayTimestamp = Date.parse(`${new Date().toISOString().slice(0, 10)}T00:00:00Z`);
@@ -70,7 +77,14 @@ export const offerFields = [
     validation: (rule) =>
       rule
         .uri({ scheme: ["https"] })
-        .custom((value, context) => activeOfferRequired(value, context, "An active offer requires an affiliate URL.")),
+        .custom(activeOfferDestination),
+  }),
+  defineField({
+    name: "amazonAsin",
+    title: "Amazon ASIN",
+    type: "string",
+    description: "For Amazon Creator API offers. MishBaby resolves a fresh attributed link and does not permanently store Amazon API content.",
+    validation: (rule) => rule.uppercase().regex(/^[A-Z0-9]{10}$/, { name: "ASIN" }),
   }),
   defineField({
     name: "affiliate",
@@ -101,10 +115,10 @@ export const productOfferType = defineType({
   fields: offerFields,
   validation: (rule) =>
     rule.custom((value) => {
-      const offer = value as { status?: string; url?: string; lastVerifiedAt?: string } | undefined;
+      const offer = value as { status?: string; url?: string; amazonAsin?: string; lastVerifiedAt?: string } | undefined;
 
       if (offer?.status !== "active") return true;
-      if (!offer.url) return "An active offer requires an affiliate URL.";
+      if (!offer.url && !offer.amazonAsin) return "An active offer requires an affiliate URL or an Amazon ASIN.";
       if (!offer.lastVerifiedAt) return "An active offer requires a verification date.";
       return true;
     }),
@@ -113,11 +127,14 @@ export const productOfferType = defineType({
       merchantName: "merchant.name",
       status: "status",
       lastVerifiedAt: "lastVerifiedAt",
+      amazonAsin: "amazonAsin",
     },
-    prepare({ merchantName, status, lastVerifiedAt }) {
+    prepare({ merchantName, status, lastVerifiedAt, amazonAsin }) {
       const subtitle = status === "paused"
         ? "Paused"
-        : isVerificationStale(lastVerifiedAt)
+        : amazonAsin
+          ? `Active · API-linked ${amazonAsin}`
+          : isVerificationStale(lastVerifiedAt)
           ? "Active · Recheck link"
           : "Active · Link current";
 

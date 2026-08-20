@@ -11,6 +11,7 @@ import {
   type ProductSuggestion,
   validateProductSuggestion,
 } from "@/lib/product-assistant";
+import type { AmazonSearchItem, AmazonSearchResponse } from "@/lib/amazon-creators";
 import styles from "./product-assistant.module.css";
 
 const apiVersion = "2026-08-16";
@@ -24,12 +25,14 @@ type CategoryOption = {
 type MerchantOption = {
   id: string;
   name: string;
+  slug: string;
 };
 
 type OfferInput = {
   key: string;
   merchantId: string;
   url: string;
+  amazonAsin: string;
 };
 
 type AssistantResponse = {
@@ -38,7 +41,7 @@ type AssistantResponse = {
 };
 
 function newOffer(): OfferInput {
-  return { key: crypto.randomUUID(), merchantId: "", url: "" };
+  return { key: crypto.randomUUID(), merchantId: "", url: "", amazonAsin: "" };
 }
 
 function isValidHttpsUrl(value: string) {
@@ -64,6 +67,11 @@ export function ProductAssistant() {
   const [generating, setGenerating] = useState(false);
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState("");
+  const [amazonQuery, setAmazonQuery] = useState("");
+  const [amazonResults, setAmazonResults] = useState<AmazonSearchItem[]>([]);
+  const [selectedAmazonItem, setSelectedAmazonItem] = useState<AmazonSearchItem | null>(null);
+  const [amazonSearching, setAmazonSearching] = useState(false);
+  const [amazonMessage, setAmazonMessage] = useState("");
 
   const imagePreviewUrl = useMemo(() => (image ? URL.createObjectURL(image) : ""), [image]);
 
@@ -87,7 +95,8 @@ export function ProductAssistant() {
       client.fetch<MerchantOption[]>(`
         *[_type == "merchant" && defined(name) && defined(slug.current)] | order(coalesce(displayOrder, 100) asc, name asc) {
           "id": _id,
-          name
+          name,
+          "slug": slug.current
         }
       `),
     ])
@@ -134,12 +143,90 @@ export function ProductAssistant() {
     setImage(nextImage);
   }
 
-  function updateOffer(key: string, field: "merchantId" | "url", value: string) {
+  function updateOffer(key: string, field: "merchantId" | "url" | "amazonAsin", value: string) {
     setOffers((current) => current.map((offer) => (offer.key === key ? { ...offer, [field]: value } : offer)));
+  }
+
+  function updateOfferMerchant(key: string, merchantId: string) {
+    const merchant = merchants.find((option) => option.id === merchantId);
+    setOffers((current) => current.map((offer) => offer.key === key
+      ? { ...offer, merchantId, ...(merchant?.slug !== "amazon" ? { amazonAsin: "" } : {}) }
+      : offer));
   }
 
   function removeOffer(key: string) {
     setOffers((current) => current.filter((offer) => offer.key !== key));
+  }
+
+  async function searchAmazon(event: FormEvent) {
+    event.preventDefault();
+    const normalized = amazonQuery.trim().replace(/\s+/g, " ");
+    setAmazonMessage("");
+    if (normalized.length < 2 || normalized.length > 80) {
+      setAmazonMessage("Enter between 2 and 80 characters.");
+      return;
+    }
+
+    setAmazonSearching(true);
+    try {
+      const response = await fetch("/api/amazon/search", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query: normalized, page: 1 }),
+      });
+      const result = await response.json() as AmazonSearchResponse & { error?: string };
+      if (!response.ok) throw new Error(result.error || "Amazon search is temporarily unavailable.");
+      setAmazonResults(result.items);
+      if (result.items.length === 0) setAmazonMessage("Amazon did not return any results for that search.");
+    } catch (caughtError) {
+      setAmazonResults([]);
+      setAmazonMessage(caughtError instanceof Error ? caughtError.message : "Amazon search is temporarily unavailable.");
+    } finally {
+      setAmazonSearching(false);
+    }
+  }
+
+  async function selectAmazonResult(item: AmazonSearchItem) {
+    setError("");
+    setAmazonMessage("");
+    const amazonMerchant = merchants.find((merchant) => merchant.slug === "amazon");
+    if (!amazonMerchant) {
+      setAmazonMessage("Create and publish a merchant with the slug amazon before selecting a result.");
+      return;
+    }
+
+    try {
+      const duplicateCount = await client.fetch<number>(
+        `count(*[_type == "product" && count(offers[amazonAsin == $asin]) > 0])`,
+        { asin: item.asin },
+        { perspective: "raw" },
+      );
+      if (duplicateCount > 0) {
+        setAmazonMessage("A published product or draft already uses this Amazon ASIN.");
+        return;
+      }
+
+      setSelectedAmazonItem(item);
+      setSuggestion(null);
+      setOffers((current) => {
+        const existingIndex = current.findIndex((offer) => offer.merchantId === amazonMerchant.id);
+        if (existingIndex >= 0) {
+          return current.map((offer, index) => index === existingIndex
+            ? { ...offer, amazonAsin: item.asin, url: "" }
+            : offer);
+        }
+        const emptyIndex = current.findIndex((offer) => !offer.merchantId && !offer.url && !offer.amazonAsin);
+        if (emptyIndex >= 0) {
+          return current.map((offer, index) => index === emptyIndex
+            ? { ...offer, merchantId: amazonMerchant.id, amazonAsin: item.asin, url: "" }
+            : offer);
+        }
+        return [...current, { ...newOffer(), merchantId: amazonMerchant.id, amazonAsin: item.asin }];
+      });
+      setAmazonMessage("Amazon ASIN added. Write original MishBaby details and upload an approved image below.");
+    } catch {
+      setAmazonMessage("The ASIN could not be checked against Sanity. Please try again.");
+    }
   }
 
   async function generateCopy(event: FormEvent) {
@@ -214,7 +301,13 @@ export function ProductAssistant() {
       return "Choose a merchant for every offer.";
     }
     if (new Set(merchantIds).size !== merchantIds.length) return "Each merchant can only appear once.";
-    if (offers.some((offer) => !isValidHttpsUrl(offer.url.trim()))) return "Every affiliate URL must be a valid HTTPS URL.";
+    for (const offer of offers) {
+      const merchant = merchants.find((option) => option.id === offer.merchantId);
+      const asin = offer.amazonAsin.trim().toUpperCase();
+      if (asin && !/^[A-Z0-9]{10}$/.test(asin)) return "Amazon ASINs must contain exactly 10 letters or numbers.";
+      if (merchant?.slug === "amazon" && asin) continue;
+      if (!isValidHttpsUrl(offer.url.trim())) return "Every offer requires a valid HTTPS URL, unless it uses an Amazon ASIN.";
+    }
     return "";
   }
 
@@ -234,16 +327,17 @@ export function ProductAssistant() {
     if (!confirmedSuggestion || !category || !image) return;
 
     const slug = createProductSlug(name);
+    const amazonAsin = offers.find((offer) => offer.amazonAsin)?.amazonAsin.trim().toUpperCase() ?? "";
     setCreating(true);
     let uploadedAssetId = "";
 
     try {
       const duplicateCount = await client.fetch<number>(
-        `count(*[_type == "product" && slug.current == $slug])`,
-        { slug },
+        `count(*[_type == "product" && (slug.current == $slug || ($amazonAsin != "" && count(offers[amazonAsin == $amazonAsin]) > 0))])`,
+        { slug, amazonAsin },
         { perspective: "raw" },
       );
-      if (duplicateCount > 0) throw new Error("A published product or draft already uses this product name and slug.");
+      if (duplicateCount > 0) throw new Error("A published product or draft already uses this product slug or Amazon ASIN.");
 
       const asset = await client.assets.upload("image", image, { filename: image.name });
       uploadedAssetId = asset._id;
@@ -271,7 +365,8 @@ export function ProductAssistant() {
           _type: "productOffer",
           merchant: { _type: "reference", _ref: offer.merchantId },
           status: "active",
-          url: offer.url.trim(),
+          ...(offer.url.trim() ? { url: offer.url.trim() } : {}),
+          ...(offer.amazonAsin.trim() ? { amazonAsin: offer.amazonAsin.trim().toUpperCase() } : {}),
           affiliate: true,
           lastVerifiedAt: today,
         })),
@@ -315,6 +410,65 @@ export function ProductAssistant() {
             </Card>
           )}
 
+          <Card padding={5} radius={3} shadow={1}>
+            <div className={styles.stack4}>
+              <Box>
+                <Heading size={2}>Find a product on Amazon</Heading>
+                <Text muted size={1} className={styles.sectionText}>
+                  Search Amazon US, select a reference, then write original MishBaby content. Only the ASIN is saved to Sanity.
+                </Text>
+              </Box>
+              <form onSubmit={searchAmazon}>
+                <Flex align="flex-end" gap={3} wrap="wrap">
+                  <label className={`${styles.field} ${styles.amazonSearchField}`}>
+                    <span>Amazon Baby search</span>
+                    <input value={amazonQuery} onChange={(event) => setAmazonQuery(event.target.value)} minLength={2} maxLength={80} placeholder="Bottle warmer" />
+                  </label>
+                  <Button type="submit" text="Search Amazon" tone="primary" loading={amazonSearching} disabled={amazonSearching || loadingOptions} />
+                </Flex>
+              </form>
+              {amazonMessage && <Text size={1} muted>{amazonMessage}</Text>}
+              {selectedAmazonItem && (
+                <Card padding={4} radius={2} tone="positive">
+                  <Flex align="center" gap={3}>
+                    {selectedAmazonItem.image && (
+                      // Amazon's image remains a temporary API reference and is never uploaded to Sanity.
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img className={styles.amazonReferenceImage} src={selectedAmazonItem.image.url} alt="" />
+                    )}
+                    <div className={styles.amazonReferenceText}>
+                      <Text weight="semibold" size={1}>{selectedAmazonItem.title}</Text>
+                      <Text muted size={1}>ASIN {selectedAmazonItem.asin} selected</Text>
+                    </div>
+                  </Flex>
+                </Card>
+              )}
+              {amazonResults.length > 0 && (
+                <div className={styles.amazonResults}>
+                  {amazonResults.map((item) => (
+                    <article key={item.asin} className={styles.amazonResult}>
+                      <div className={styles.amazonResultImage}>
+                        {item.image ? (
+                          // Amazon's image is displayed directly and is not persisted by MishBaby.
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={item.image.url} alt="" />
+                        ) : <span>No image</span>}
+                      </div>
+                      <div className={styles.amazonResultBody}>
+                        <Text size={1} weight="semibold">{item.title}</Text>
+                        <Text muted size={1}>ASIN {item.asin}</Text>
+                        <Button type="button" mode="ghost" text={selectedAmazonItem?.asin === item.asin ? "Selected" : "Use as reference"} disabled={selectedAmazonItem?.asin === item.asin} onClick={() => void selectAmazonResult(item)} />
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              )}
+              <Card padding={3} radius={2} tone="caution">
+                <Text size={1}>Amazon titles, images, and API URLs are temporary reference content. Upload your approved image and write MishBaby’s own product details before creating the draft.</Text>
+              </Card>
+            </div>
+          </Card>
+
           <form onSubmit={generateCopy}>
             <div className={styles.stack5}>
               <Card padding={5} radius={3} shadow={1}>
@@ -356,15 +510,23 @@ export function ProductAssistant() {
                         <div className={styles.offerRow} key={offer.key}>
                           <label className={styles.field}>
                             <span>Merchant {index + 1}</span>
-                            <select value={offer.merchantId} onChange={(event) => updateOffer(offer.key, "merchantId", event.target.value)}>
+                            <select value={offer.merchantId} onChange={(event) => updateOfferMerchant(offer.key, event.target.value)}>
                               <option value="">Choose merchant</option>
                               {merchants.map((merchant) => <option key={merchant.id} value={merchant.id}>{merchant.name}</option>)}
                             </select>
                           </label>
-                          <label className={styles.field}>
-                            <span>Affiliate URL</span>
-                            <input type="url" value={offer.url} onChange={(event) => updateOffer(offer.key, "url", event.target.value)} placeholder="https://..." />
-                          </label>
+                          <div className={styles.offerDestinations}>
+                            <label className={styles.field}>
+                              <span>Affiliate URL {merchants.find((merchant) => merchant.id === offer.merchantId)?.slug === "amazon" && <small>(optional with ASIN)</small>}</span>
+                              <input type="url" value={offer.url} onChange={(event) => updateOffer(offer.key, "url", event.target.value)} placeholder="https://..." />
+                            </label>
+                            {merchants.find((merchant) => merchant.id === offer.merchantId)?.slug === "amazon" && (
+                              <label className={styles.field}>
+                                <span>Amazon ASIN <small>(Creator API)</small></span>
+                                <input value={offer.amazonAsin} onChange={(event) => updateOffer(offer.key, "amazonAsin", event.target.value.toUpperCase())} maxLength={10} placeholder="B0XXXXXXXX" />
+                              </label>
+                            )}
+                          </div>
                           <Button type="button" mode="bleed" tone="critical" text="Remove" disabled={offers.length === 1} onClick={() => removeOffer(offer.key)} />
                         </div>
                       ))}

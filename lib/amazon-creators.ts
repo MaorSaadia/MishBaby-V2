@@ -1,10 +1,11 @@
 import "server-only";
 
 import { createHash } from "node:crypto";
-import { ApiClient, DefaultApi, SearchItemsRequestContent } from "@amzn/creatorsapi-nodejs-sdk";
+import { ApiClient, DefaultApi, GetItemsRequestContent, SearchItemsRequestContent } from "@amzn/creatorsapi-nodejs-sdk";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 const amazonSearchCacheVersion = "v1";
+const amazonOfferCacheVersion = "offer-link-v1";
 const amazonSearchCacheHours = 24;
 const amazonSearchHourlyLimit = 10;
 const amazonSearchDailyLimit = 250;
@@ -27,6 +28,12 @@ export type AmazonSearchResponse = {
   totalResultCount: number;
   hasMore: boolean;
   items: AmazonSearchItem[];
+};
+
+export type AmazonOfferLink = Pick<AmazonSearchItem, "asin" | "detailPageUrl">;
+
+export type AmazonOfferLinkResponse = {
+  items: AmazonOfferLink[];
 };
 
 type CachedAmazonSearchResponse = Omit<AmazonSearchResponse, "query">;
@@ -52,6 +59,9 @@ type RawAmazonResponse = {
     totalResultCount?: unknown;
     items?: RawAmazonItem[];
   };
+};
+type RawAmazonItemsResponse = {
+  itemsResult?: { items?: RawAmazonItem[] };
 };
 
 let api: DefaultApi | undefined;
@@ -91,6 +101,12 @@ export function createAmazonVisitorHash(ipAddress: string, secret: string) {
 function createCacheKey(query: string, page: number, marketplace: string) {
   return createHash("sha256")
     .update(`${amazonSearchCacheVersion}:${marketplace}:${page}:${query.toLocaleLowerCase("en-US")}`)
+    .digest("hex");
+}
+
+function createOfferCacheKey(asins: string[], marketplace: string) {
+  return createHash("sha256")
+    .update(`${amazonOfferCacheVersion}:${marketplace}:${asins.join(",")}`)
     .digest("hex");
 }
 
@@ -178,6 +194,30 @@ export async function searchAmazonProducts(query: string, page: number, config: 
   return { ok: true as const, cacheKey, admin, cached: false as const };
 }
 
+export function normalizeAmazonAsins(value: unknown) {
+  if (!Array.isArray(value) || value.length < 1 || value.length > 10) return null;
+  const asins = [...new Set(value.map((item) => typeof item === "string" ? item.trim().toUpperCase() : ""))].sort();
+  return asins.length > 0 && asins.every((asin) => /^[A-Z0-9]{10}$/.test(asin)) ? asins : null;
+}
+
+export async function getCachedAmazonOfferLinks(asins: string[], config: AmazonConfig) {
+  const admin = createSupabaseAdminClient();
+  const cacheKey = createOfferCacheKey(asins, config.marketplace);
+  const { data: cached, error } = await admin
+    .from("amazon_search_cache")
+    .select("payload")
+    .eq("cache_key", cacheKey)
+    .gt("expires_at", new Date().toISOString())
+    .maybeSingle();
+
+  if (error) return { ok: false as const, reason: "storage_unavailable" as const };
+  if (cached?.payload) {
+    return { ok: true as const, data: cached.payload as AmazonOfferLinkResponse, cached: true as const };
+  }
+
+  return { ok: true as const, cacheKey, admin, cached: false as const };
+}
+
 export async function consumeAmazonSearchQuota(
   admin: ReturnType<typeof createSupabaseAdminClient>,
   visitorHash: string,
@@ -223,6 +263,41 @@ export async function fetchAndCacheAmazonProducts(
     const { error } = await admin.from("amazon_search_cache").upsert({
       cache_key: cacheKey,
       payload: cachePayload,
+      expires_at: expiresAt,
+    }, { onConflict: "cache_key" });
+    if (error) return { ok: false as const, reason: "storage_unavailable" as const };
+    return { ok: true as const, data, cached: false as const };
+  } catch {
+    return { ok: false as const, reason: "amazon_unavailable" as const };
+  }
+}
+
+export async function fetchAndCacheAmazonOfferLinks(
+  asins: string[],
+  config: AmazonConfig,
+  cacheKey: string,
+  admin: ReturnType<typeof createSupabaseAdminClient>,
+) {
+  const requestContent = new GetItemsRequestContent(config.partnerTag, asins);
+  requestContent.languagesOfPreference = ["en_US"];
+  requestContent.resources = [];
+
+  try {
+    const rawResponse = await getApi(config).getItems(config.marketplace, requestContent) as RawAmazonItemsResponse;
+    const rawItems = Array.isArray(rawResponse.itemsResult?.items) ? rawResponse.itemsResult.items : [];
+    const data: AmazonOfferLinkResponse = {
+      items: rawItems.flatMap((rawItem): AmazonOfferLink[] => {
+        const asin = typeof rawItem.asin === "string" ? rawItem.asin.trim().toUpperCase() : "";
+        const detailPageUrl = typeof rawItem.detailPageURL === "string" ? rawItem.detailPageURL.trim() : "";
+        return /^[A-Z0-9]{10}$/.test(asin) && asins.includes(asin) && isAmazonDetailPageUrl(detailPageUrl)
+          ? [{ asin, detailPageUrl }]
+          : [];
+      }),
+    };
+    const expiresAt = new Date(Date.now() + amazonSearchCacheHours * 60 * 60 * 1000).toISOString();
+    const { error } = await admin.from("amazon_search_cache").upsert({
+      cache_key: cacheKey,
+      payload: data,
       expires_at: expiresAt,
     }, { onConflict: "cache_key" });
     if (error) return { ok: false as const, reason: "storage_unavailable" as const };

@@ -18,7 +18,8 @@ export type ProductImage = {
 export type ActiveOffer = {
   id: string;
   status: "active";
-  url: string;
+  url?: string;
+  amazonAsin?: string;
   affiliate: boolean;
   lastVerifiedAt: string;
   merchant: Merchant;
@@ -61,13 +62,14 @@ const publishedProductsQuery = `
     },
     "offers": offers[
       status == "active" &&
-      defined(url) &&
+      (defined(url) || defined(amazonAsin)) &&
       defined(lastVerifiedAt) &&
       defined(merchant->slug.current)
     ] | order(coalesce(merchant->displayOrder, 100) asc, merchant->name asc) {
       "id": _key,
       status,
       url,
+      amazonAsin,
       "affiliate": coalesce(affiliate, true),
       lastVerifiedAt,
       "merchant": merchant->{
