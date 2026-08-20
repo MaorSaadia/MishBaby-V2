@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import type { AmazonOfferLinkResponse } from "@/lib/amazon-creators";
+import type { AmazonOfferLink, AmazonOfferLinkResponse } from "@/lib/amazon-creators";
 import type { ActiveOffer } from "@/lib/products";
 
 type OfferComparisonProps = {
@@ -24,7 +24,8 @@ export function OfferComparison({ offers }: OfferComparisonProps) {
     () => offers.flatMap((offer) => !offer.url && offer.amazonAsin ? [offer.amazonAsin] : []).sort().join(","),
     [offers],
   );
-  const [amazonLinks, setAmazonLinks] = useState<Record<string, string>>({});
+  const [amazonOffers, setAmazonOffers] = useState<Record<string, AmazonOfferLink>>({});
+  const [offersUpdatedAt, setOffersUpdatedAt] = useState("");
   const [resolvingAmazonLinks, setResolvingAmazonLinks] = useState(Boolean(asinKey));
 
   useEffect(() => {
@@ -43,10 +44,11 @@ export function OfferComparison({ offers }: OfferComparisonProps) {
         return response.json() as Promise<AmazonOfferLinkResponse>;
       })
       .then((response) => {
-        setAmazonLinks(Object.fromEntries(response.items.map((item) => [item.asin, item.detailPageUrl])));
+        setAmazonOffers(Object.fromEntries(response.items.map((item) => [item.asin, item])));
+        setOffersUpdatedAt(response.offersUpdatedAt ?? "");
       })
       .catch(() => {
-        if (!controller.signal.aborted) setAmazonLinks({});
+        if (!controller.signal.aborted) setAmazonOffers({});
       })
       .finally(() => {
         if (!controller.signal.aborted) setResolvingAmazonLinks(false);
@@ -70,7 +72,9 @@ export function OfferComparison({ offers }: OfferComparisonProps) {
         )}
         {offers.map((offer) => {
           const merchant = offer.merchant;
-          const resolvedUrl = offer.url ?? (offer.amazonAsin ? amazonLinks[offer.amazonAsin] : undefined);
+          const amazonOffer = offer.amazonAsin ? amazonOffers[offer.amazonAsin] : undefined;
+          const resolvedUrl = offer.url ?? amazonOffer?.detailPageUrl;
+          const availability = availabilityLabel(amazonOffer);
 
           return (
             <div key={offer.id} className="flex flex-col gap-4 px-6 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-8">
@@ -84,6 +88,8 @@ export function OfferComparison({ offers }: OfferComparisonProps) {
                 </span>
                 <div>
                   <h3 className="font-extrabold text-[#063f5b]">{merchant.name}</h3>
+                  {amazonOffer?.price && <p className="mt-1 text-lg font-black text-[#063f5b]">{amazonOffer.price.displayAmount}</p>}
+                  {availability && <p className="mt-1 text-xs font-bold text-[#087b54]">{availability}</p>}
                   <p className="mt-1 text-sm text-[#063f5b]/55">Check the merchant for current price, availability, and delivery details.</p>
                   <p className="mt-1 text-xs font-semibold text-[#063f5b]/45">
                     {offer.amazonAsin ? "Amazon link refreshed automatically" : `Link verified ${formatVerifiedDate(offer.lastVerifiedAt)}`}
@@ -111,8 +117,39 @@ export function OfferComparison({ offers }: OfferComparisonProps) {
         })}
       </div>
       <p className="border-t border-[#063f5b]/8 px-6 py-4 text-xs leading-5 text-[#063f5b]/50 sm:px-8">
-        Affiliate disclosure: MishBaby may earn a commission from qualifying purchases. <Link href="/affiliate-disclosure" className="font-bold text-[#007fa8] hover:underline">Learn more</Link>.
+        Affiliate disclosure: MishBaby may earn a commission from qualifying purchases.
+        {asinKey && <> Amazon prices and availability may change; the information shown on Amazon when you purchase applies.</>} <Link href="/affiliate-disclosure" className="font-bold text-[#007fa8] hover:underline">Learn more</Link>.
+        {offersUpdatedAt && <> Amazon offer information checked {formatOfferTime(offersUpdatedAt)}.</>}
       </p>
     </div>
   );
+}
+
+function formatOfferTime(value: string) {
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    timeZoneName: "short",
+  }).format(new Date(value));
+}
+
+function availabilityLabel(offer?: AmazonOfferLink) {
+  if (!offer?.availability) return "";
+  if (offer.availability.message) return offer.availability.message;
+  const labels: Record<string, string> = {
+    INSTOCK: "In stock",
+    IN_STOCK: "In stock",
+    INSTOCKSCARCE: "Limited availability",
+    OUTOFSTOCK: "Out of stock",
+    OUT_OF_STOCK: "Out of stock",
+    PREORDER: "Available for preorder",
+    UNAVAILABLE: "Currently unavailable",
+    LEADTIME: "Usually ships later",
+    AVAILABLEDATE: "Available at a later date",
+    AVAILABLE_DATE: "Available at a later date",
+  };
+  return labels[offer.availability.type] ?? "Check availability on Amazon";
 }

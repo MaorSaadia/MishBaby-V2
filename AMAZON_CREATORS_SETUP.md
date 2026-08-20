@@ -10,7 +10,8 @@ Open the Supabase SQL Editor for the MishBaby project and run:
 
 The migration creates private server-only tables for:
 
-- Amazon responses cached for no more than 24 hours
+- Amazon titles, images, and attributed links cached for no more than 24 hours
+- Amazon price and availability data cached for no more than one hour
 - salted visitor hashes retained for no more than 48 hours
 - aggregate daily request counts retained for seven days
 
@@ -60,6 +61,7 @@ Redeploy after adding the Vercel variables, then verify:
 4. Repeating the same query and page within 24 hours uses the existing `amazon_search_cache` row.
 5. A different query or page creates a distinct cache entry and increments the quota tables.
 6. `/amazon-finds` is marked `noindex`, and `/api/amazon/` is disallowed in `robots.txt`.
+7. Returned prices and availability appear when Amazon supplies them and refresh after their one-hour cache expires.
 
 ## Sanity Product Assistant handoff
 
@@ -80,7 +82,7 @@ Only cache misses consume MishBaby's internal allowance:
 - Pages 1–3 only, with up to ten results per page
 - Up to ten ASIN-backed offer links per product-page request
 
-Expired cache data is never served even if scheduled cleanup has not run yet. Raw visitor IP addresses and raw search phrases are not written to the Amazon search tables.
+Expired cache data is never served even if scheduled cleanup has not run yet. Offer details use a one-hour cache while their attributed fallback links use a separate 24-hour cache. Raw visitor IP addresses and raw search phrases are not written to the Amazon search tables.
 
 Amazon documentation:
 

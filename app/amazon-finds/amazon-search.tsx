@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { FormEvent, useEffect, useRef, useState } from "react";
-import type { AmazonSearchItem, AmazonSearchResponse } from "@/lib/amazon-creators";
+import type { AmazonOfferLink, AmazonOfferLinkResponse, AmazonSearchItem, AmazonSearchResponse } from "@/lib/amazon-creators";
 
 type SearchStatus = "idle" | "loading" | "loading-more" | "success" | "error";
 
@@ -17,9 +17,45 @@ export function AmazonSearch() {
   const [hasMore, setHasMore] = useState(false);
   const [status, setStatus] = useState<SearchStatus>("idle");
   const [message, setMessage] = useState("");
+  const [offerDetails, setOfferDetails] = useState<Record<string, AmazonOfferLink>>({});
+  const [offersUpdatedAt, setOffersUpdatedAt] = useState("");
   const controllerRef = useRef<AbortController | null>(null);
+  const offerControllerRef = useRef<AbortController | null>(null);
 
-  useEffect(() => () => controllerRef.current?.abort(), []);
+  useEffect(() => () => {
+    controllerRef.current?.abort();
+    offerControllerRef.current?.abort();
+  }, []);
+
+  async function requestOfferDetails(products: AmazonSearchItem[], replace: boolean) {
+    const asins = products.map((product) => product.asin);
+    if (asins.length === 0) return;
+    offerControllerRef.current?.abort();
+    const controller = new AbortController();
+    offerControllerRef.current = controller;
+    if (replace) {
+      setOfferDetails({});
+      setOffersUpdatedAt("");
+    }
+
+    try {
+      const response = await fetch("/api/amazon/items", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ asins }),
+        signal: controller.signal,
+      });
+      if (!response.ok) return;
+      const result = await response.json() as AmazonOfferLinkResponse;
+      setOfferDetails((current) => ({
+        ...(replace ? {} : current),
+        ...Object.fromEntries(result.items.map((item) => [item.asin, item])),
+      }));
+      if (result.offersUpdatedAt) setOffersUpdatedAt(result.offersUpdatedAt);
+    } catch {
+      // Search results remain usable when current offer details are unavailable.
+    }
+  }
 
   async function requestSearch(searchQuery: string, requestedPage: number, append: boolean) {
     controllerRef.current?.abort();
@@ -53,6 +89,7 @@ export function AmazonSearch() {
       setTotalResultCount(result.totalResultCount);
       setHasMore(result.hasMore);
       setStatus("success");
+      void requestOfferDetails(result.items, !append);
       if (result.items.length === 0 && !append) setMessage("Amazon didn’t return any Baby products for that search. Try a different phrase.");
     } catch (error) {
       if (controller.signal.aborted) return;
@@ -122,7 +159,7 @@ export function AmazonSearch() {
       {items.length > 0 && (
         <>
           <div className="mt-7 grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
-            {items.map((item) => <AmazonResultCard key={item.asin} item={item} />)}
+            {items.map((item) => <AmazonResultCard key={item.asin} item={item} offer={offerDetails[item.asin]} />)}
           </div>
           <div className="mt-10 text-center">
             {hasMore && page < 3 ? (
@@ -133,17 +170,51 @@ export function AmazonSearch() {
               <p className="text-sm font-semibold text-[#063f5b]/50">You’ve reached the end of the available results for this search.</p>
             )}
           </div>
-          <p className="mx-auto mt-8 max-w-3xl rounded-2xl bg-[#fff7df] px-5 py-4 text-center text-xs leading-5 text-[#735a16]">Amazon product titles, images, and links are provided by Amazon. As an Amazon Associate, MishBaby earns from qualifying purchases.</p>
+          <p className="mx-auto mt-8 max-w-3xl rounded-2xl bg-[#fff7df] px-5 py-4 text-center text-xs leading-5 text-[#735a16]">
+            Amazon product titles, images, links, prices, and availability are provided by Amazon. Prices and availability may change; the information shown on Amazon when you purchase applies. As an Amazon Associate, MishBaby earns from qualifying purchases.
+            {offersUpdatedAt && <> Offer information checked {formatOfferTime(offersUpdatedAt)}.</>}
+          </p>
         </>
       )}
     </div>
   );
 }
 
-function AmazonResultCard({ item }: { item: AmazonSearchItem }) {
+function formatOfferTime(value: string) {
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    timeZoneName: "short",
+  }).format(new Date(value));
+}
+
+function availabilityLabel(offer?: AmazonOfferLink) {
+  if (!offer?.availability) return "";
+  if (offer.availability.message) return offer.availability.message;
+  const labels: Record<string, string> = {
+    INSTOCK: "In stock",
+    IN_STOCK: "In stock",
+    INSTOCKSCARCE: "Limited availability",
+    OUTOFSTOCK: "Out of stock",
+    OUT_OF_STOCK: "Out of stock",
+    PREORDER: "Available for preorder",
+    UNAVAILABLE: "Currently unavailable",
+    LEADTIME: "Usually ships later",
+    AVAILABLEDATE: "Available at a later date",
+    AVAILABLE_DATE: "Available at a later date",
+  };
+  return labels[offer.availability.type] ?? "Check availability on Amazon";
+}
+
+function AmazonResultCard({ item, offer }: { item: AmazonSearchItem; offer?: AmazonOfferLink }) {
+  const destinationUrl = offer?.detailPageUrl ?? item.detailPageUrl;
+  const availability = availabilityLabel(offer);
   return (
     <article className="group flex overflow-hidden rounded-2xl border border-[#063f5b]/8 bg-white shadow-[0_16px_36px_-28px_rgba(6,63,91,.4)] transition duration-300 hover:-translate-y-1 sm:rounded-[2rem]">
-      <a href={item.detailPageUrl} target="_blank" rel="sponsored nofollow noopener noreferrer" className="flex w-full flex-col focus-visible:outline-offset-[-3px]" aria-label={`View ${item.title} on Amazon (opens in a new tab)`}>
+      <a href={destinationUrl} target="_blank" rel="sponsored nofollow noopener noreferrer" className="flex w-full flex-col focus-visible:outline-offset-[-3px]" aria-label={`View ${item.title} on Amazon (opens in a new tab)`}>
         <div className="relative grid aspect-square place-items-center overflow-hidden bg-white p-3 sm:aspect-[4/3]">
           {item.image ? (
             <Image src={item.image.url} alt="" fill sizes="(max-width: 1024px) 50vw, 272px" className="object-contain p-3 transition-transform duration-300 group-hover:scale-[1.03] sm:p-5" />
@@ -154,6 +225,12 @@ function AmazonResultCard({ item }: { item: AmazonSearchItem }) {
         <div className="flex flex-1 flex-col p-3 sm:p-5">
           <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-[#009dcc] sm:text-xs">Amazon result</p>
           <h2 className="mt-2 line-clamp-4 text-sm font-extrabold leading-5 tracking-[-0.025em] text-[#063f5b] sm:text-base sm:leading-6">{item.title}</h2>
+          {(offer?.price || availability) && (
+            <div className="mt-3 border-t border-[#063f5b]/8 pt-3">
+              {offer?.price && <p className="text-base font-black text-[#063f5b] sm:text-lg">{offer.price.displayAmount}</p>}
+              {availability && <p className="mt-1 text-[11px] font-semibold leading-4 text-[#087b54] sm:text-xs">{availability}</p>}
+            </div>
+          )}
           <span className="mt-auto pt-4 text-xs font-extrabold text-[#009dcc] sm:text-sm">View on Amazon <span aria-hidden="true">↗</span></span>
         </div>
       </a>

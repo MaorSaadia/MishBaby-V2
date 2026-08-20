@@ -68,13 +68,23 @@ export async function POST(request: NextRequest) {
     createAmazonVisitorHash(visitorIp, config.rateLimitSecret),
   );
   if (!quota.ok) {
+    if (cacheLookup.fallbackData) return json(cacheLookup.fallbackData);
     if (quota.reason === "hourly_limit") {
       return json({ error: "The hourly Amazon request limit has been reached." }, 429, { "Retry-After": "3600" });
     }
     return json({ error: "Amazon offers have reached today’s usage limit." }, 503);
   }
 
-  const result = await fetchAndCacheAmazonOfferLinks(asins, config, cacheLookup.cacheKey, cacheLookup.admin);
-  if (!result.ok) return json({ error: "Amazon offers are temporarily unavailable." }, 503);
+  const result = await fetchAndCacheAmazonOfferLinks(
+    asins,
+    config,
+    cacheLookup.cacheKey,
+    cacheLookup.linkCacheKey,
+    cacheLookup.admin,
+  );
+  if (!result.ok) {
+    if (cacheLookup.fallbackData) return json(cacheLookup.fallbackData);
+    return json({ error: "Amazon offers are temporarily unavailable." }, 503);
+  }
   return json(result.data);
 }
