@@ -1,12 +1,14 @@
 import type { MetadataRoute } from "next";
 import { getPublishedCategories } from "@/lib/categories";
+import { getPublishedCollections } from "@/lib/collections";
 import { getPublishedGuides } from "@/lib/guides";
 import { getPublishedProducts } from "@/lib/products";
 import { siteConfig } from "@/lib/site";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [categories, publishedProducts, publishedGuides] = await Promise.all([
+  const [categories, collections, publishedProducts, publishedGuides] = await Promise.all([
     getPublishedCategories(),
+    getPublishedCollections(),
     getPublishedProducts(),
     getPublishedGuides(),
   ]);
@@ -14,6 +16,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: siteConfig.url, changeFrequency: "weekly", priority: 1 },
     { url: `${siteConfig.url}/products`, changeFrequency: "weekly", priority: 0.9 },
     { url: `${siteConfig.url}/categories`, changeFrequency: "weekly", priority: 0.9 },
+    { url: `${siteConfig.url}/collections`, changeFrequency: "weekly", priority: 0.8 },
     { url: `${siteConfig.url}/guides`, changeFrequency: "weekly", priority: 0.8 },
     { url: `${siteConfig.url}/about`, changeFrequency: "monthly", priority: 0.6 },
     { url: `${siteConfig.url}/affiliate-disclosure`, changeFrequency: "yearly", priority: 0.4 },
@@ -33,11 +36,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
+  const collectionRoutes: MetadataRoute.Sitemap = collections.map((collection) => ({
+    url: `${siteConfig.url}/collections/${collection.slug}`,
+    lastModified: collection.updatedAt,
+    changeFrequency: "weekly",
+    priority: 0.7,
+  }));
+
   const guideRoutes: MetadataRoute.Sitemap = publishedGuides.map((guide) => ({
     url: `${siteConfig.url}/guides/${guide.slug}`,
     changeFrequency: "monthly",
     priority: 0.7,
   }));
 
-  return [...staticRoutes, ...categoryRoutes, ...productRoutes, ...guideRoutes];
+  return [...staticRoutes, ...categoryRoutes, ...collectionRoutes, ...productRoutes, ...guideRoutes];
 }

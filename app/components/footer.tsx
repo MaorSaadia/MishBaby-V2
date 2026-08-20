@@ -13,6 +13,7 @@ export function Footer() {
           <h2 className="text-sm font-extrabold uppercase tracking-[0.14em]">Explore</h2>
           <div className="mt-4 grid gap-2 text-sm text-[#063f5b]/70">
             <Link href="/categories">Product categories</Link>
+            <Link href="/collections">Curated collections</Link>
             <Link href="/guides">Parenting guides</Link>
             <Link href="/about">Our approach</Link>
             <Link href="/affiliate-disclosure">Affiliate disclosure</Link>

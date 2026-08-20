@@ -92,14 +92,16 @@ function saveHistory(guides: RecentlyViewedGuide[]) {
   }
 }
 
-export function RecentlyViewedGuides({ guide }: { guide: RecentlyViewedGuide }) {
+export function RecentlyViewedGuides({ guide }: { guide?: RecentlyViewedGuide }) {
   const historySnapshot = useSyncExternalStore(subscribeToHistory, getHistorySnapshot, () => "[]");
   const history = useMemo(() => parseHistory(historySnapshot), [historySnapshot]);
   const previousGuides = history
-    .filter((historyGuide) => historyGuide.slug !== guide.slug)
+    .filter((historyGuide) => historyGuide.slug !== guide?.slug)
     .slice(0, displayedGuideLimit);
 
   useEffect(() => {
+    if (!guide) return;
+
     const storedHistory = parseHistory(getHistorySnapshot());
     const nextHistory = [
       guide,

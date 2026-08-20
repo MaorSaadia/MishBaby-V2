@@ -59,6 +59,7 @@ export default defineConfig({
                   ]),
               ),
             structure.documentTypeListItem("category").title("Categories"),
+            structure.documentTypeListItem("collection").title("Collections"),
             structure.documentTypeListItem("guide").title("Guides"),
             structure.documentTypeListItem("merchant").title("Merchants"),
           ]),
