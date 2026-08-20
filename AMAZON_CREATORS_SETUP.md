@@ -56,7 +56,7 @@ Open [http://localhost:3000/amazon-finds](http://localhost:3000/amazon-finds). T
 Redeploy after adding the Vercel variables, then verify:
 
 1. A two-character-or-longer search returns up to ten Baby results.
-2. **Load more** accumulates pages two and three without duplicate ASINs.
+2. Price, Prime, rating, and sorting filters produce a new filtered search and **Load more** preserves those filters across pages two and three.
 3. Result links open Amazon in a new tab and keep Amazon's returned URL unchanged.
 4. Repeating the same query and page within 24 hours uses the existing `amazon_search_cache` row.
 5. A different query or page creates a distinct cache entry and increments the quota tables.
@@ -80,6 +80,7 @@ Only cache misses consume MishBaby's internal allowance:
 - 10 Creator API calls per salted visitor hash per fixed UTC hour
 - 250 Creator API calls across the site per UTC day
 - Pages 1–3 only, with up to ten results per page
+- Validated US-dollar price ranges, Prime eligibility, 3-or-4-star thresholds, and Amazon-supported sort values
 - Up to ten ASIN-backed offer links per product-page request
 
 Expired cache data is never served even if scheduled cleanup has not run yet. Offer details use a one-hour cache while their attributed fallback links use a separate 24-hour cache. Raw visitor IP addresses and raw search phrases are not written to the Amazon search tables.

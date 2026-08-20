@@ -4,7 +4,7 @@ import { createHash } from "node:crypto";
 import { ApiClient, DefaultApi, GetItemsRequestContent, SearchItemsRequestContent } from "@amzn/creatorsapi-nodejs-sdk";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
-const amazonSearchCacheVersion = "v1";
+const amazonSearchCacheVersion = "v2";
 const amazonOfferLinkCacheVersion = "offer-link-v2";
 const amazonOfferDetailsCacheVersion = "offer-details-v1";
 const amazonSearchCacheHours = 24;
@@ -30,6 +30,23 @@ export type AmazonSearchResponse = {
   totalResultCount: number;
   hasMore: boolean;
   items: AmazonSearchItem[];
+};
+
+export const amazonSearchSortValues = [
+  "Relevance",
+  "Featured",
+  "NewestArrivals",
+  "Price:LowToHigh",
+  "Price:HighToLow",
+  "AvgCustomerReviews",
+] as const;
+
+export type AmazonSearchFilters = {
+  minPrice?: number;
+  maxPrice?: number;
+  primeOnly: boolean;
+  minRating?: 3 | 4;
+  sortBy: (typeof amazonSearchSortValues)[number];
 };
 
 export type AmazonOfferLink = Pick<AmazonSearchItem, "asin" | "detailPageUrl"> & {
@@ -91,6 +108,39 @@ export function parseAmazonSearchPage(value: unknown) {
     : null;
 }
 
+function parsePriceFilter(value: unknown) {
+  if (value === undefined || value === null || value === "") return undefined;
+  if (typeof value !== "string" && typeof value !== "number") return null;
+  const normalized = String(value).trim();
+  if (!/^(?:0|[1-9]\d{0,4})(?:\.\d{1,2})?$/.test(normalized)) return null;
+  const cents = Math.round(Number(normalized) * 100);
+  return cents >= 1 && cents <= 1_000_000 ? cents : null;
+}
+
+export function normalizeAmazonSearchFilters(record: Record<string, unknown>): AmazonSearchFilters | null {
+  const minPrice = parsePriceFilter(record.minPrice);
+  const maxPrice = parsePriceFilter(record.maxPrice);
+  const primeOnly = record.primeOnly === undefined || record.primeOnly === false
+    ? false
+    : record.primeOnly === true
+      ? true
+      : null;
+  const minRating = record.minRating === undefined || record.minRating === null || record.minRating === ""
+    ? undefined
+    : record.minRating === 3 || record.minRating === 4
+      ? record.minRating
+      : null;
+  const sortBy = record.sortBy === undefined || record.sortBy === ""
+    ? "Relevance"
+    : typeof record.sortBy === "string" && amazonSearchSortValues.includes(record.sortBy as (typeof amazonSearchSortValues)[number])
+      ? record.sortBy as (typeof amazonSearchSortValues)[number]
+      : null;
+
+  if (minPrice === null || maxPrice === null || primeOnly === null || minRating === null || sortBy === null) return null;
+  if (minPrice !== undefined && maxPrice !== undefined && minPrice > maxPrice) return null;
+  return { minPrice, maxPrice, primeOnly, minRating, sortBy };
+}
+
 export function getAmazonConfig(): AmazonConfig | null {
   const credentialId = process.env.AMAZON_CREATORS_CREDENTIAL_ID?.trim();
   const credentialSecret = process.env.AMAZON_CREATORS_CREDENTIAL_SECRET?.trim();
@@ -111,9 +161,9 @@ export function createAmazonVisitorHash(ipAddress: string, secret: string) {
   return createHash("sha256").update(`${secret}:${ipAddress}`).digest("hex");
 }
 
-function createCacheKey(query: string, page: number, marketplace: string) {
+function createCacheKey(query: string, page: number, filters: AmazonSearchFilters, marketplace: string) {
   return createHash("sha256")
-    .update(`${amazonSearchCacheVersion}:${marketplace}:${page}:${query.toLocaleLowerCase("en-US")}`)
+    .update(`${amazonSearchCacheVersion}:${marketplace}:${page}:${query.toLocaleLowerCase("en-US")}:${JSON.stringify(filters)}`)
     .digest("hex");
 }
 
@@ -185,9 +235,9 @@ function getApi(config: AmazonConfig) {
   return api;
 }
 
-export async function searchAmazonProducts(query: string, page: number, config: AmazonConfig) {
+export async function searchAmazonProducts(query: string, page: number, filters: AmazonSearchFilters, config: AmazonConfig) {
   const admin = createSupabaseAdminClient();
-  const cacheKey = createCacheKey(query, page, config.marketplace);
+  const cacheKey = createCacheKey(query, page, filters, config.marketplace);
   const now = new Date();
   const { data: cached, error: cacheError } = await admin
     .from("amazon_search_cache")
@@ -267,6 +317,7 @@ export async function consumeAmazonSearchQuota(
 export async function fetchAndCacheAmazonProducts(
   query: string,
   page: number,
+  filters: AmazonSearchFilters,
   config: AmazonConfig,
   cacheKey: string,
   admin: ReturnType<typeof createSupabaseAdminClient>,
@@ -278,6 +329,11 @@ export async function fetchAndCacheAmazonProducts(
   requestContent.itemCount = 10;
   requestContent.itemPage = page;
   requestContent.languagesOfPreference = ["en_US"];
+  if (filters.primeOnly) requestContent.deliveryFlags = ["Prime"];
+  requestContent.minPrice = filters.minPrice;
+  requestContent.maxPrice = filters.maxPrice;
+  requestContent.minReviewsRating = filters.minRating;
+  requestContent.sortBy = filters.sortBy;
   requestContent.resources = ["images.primary.large", "itemInfo.title"];
 
   try {

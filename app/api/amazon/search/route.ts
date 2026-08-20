@@ -4,6 +4,7 @@ import {
   createAmazonVisitorHash,
   fetchAndCacheAmazonProducts,
   getAmazonConfig,
+  normalizeAmazonSearchFilters,
   normalizeAmazonSearchQuery,
   parseAmazonSearchPage,
   searchAmazonProducts,
@@ -55,13 +56,14 @@ export async function POST(request: NextRequest) {
   const record = body && typeof body === "object" ? body as Record<string, unknown> : {};
   const query = normalizeAmazonSearchQuery(record.query);
   const page = parseAmazonSearchPage(record.page);
-  if (!query || !page) return json({ error: "Enter between 2 and 80 characters and choose a valid result page." }, 400);
+  const filters = normalizeAmazonSearchFilters(record);
+  if (!query || !page || !filters) return json({ error: "Review the search phrase, price range, rating, and sorting options." }, 400);
 
   const config = getAmazonConfig();
   const visitorIp = getVisitorIp(request);
   if (!config || !visitorIp) return json({ error: "Amazon search is temporarily unavailable." }, 503);
 
-  const cacheLookup = await searchAmazonProducts(query, page, config);
+  const cacheLookup = await searchAmazonProducts(query, page, filters, config);
   if (!cacheLookup.ok) return json({ error: "Amazon search is temporarily unavailable." }, 503);
   if (cacheLookup.cached) return json(cacheLookup.data);
 
@@ -74,7 +76,7 @@ export async function POST(request: NextRequest) {
     return json({ error: "Amazon search has reached today’s usage limit. Please try again tomorrow." }, 503);
   }
 
-  const result = await fetchAndCacheAmazonProducts(query, page, config, cacheLookup.cacheKey, cacheLookup.admin);
+  const result = await fetchAndCacheAmazonProducts(query, page, filters, config, cacheLookup.cacheKey, cacheLookup.admin);
   if (!result.ok) return json({ error: "Amazon couldn’t complete this search right now. Please try again shortly." }, 503);
   return json(result.data);
 }

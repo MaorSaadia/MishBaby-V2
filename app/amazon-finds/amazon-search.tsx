@@ -5,8 +5,24 @@ import { FormEvent, useEffect, useRef, useState } from "react";
 import type { AmazonOfferLink, AmazonOfferLinkResponse, AmazonSearchItem, AmazonSearchResponse } from "@/lib/amazon-creators";
 
 type SearchStatus = "idle" | "loading" | "loading-more" | "success" | "error";
+type SearchFilters = {
+  minPrice?: string;
+  maxPrice?: string;
+  primeOnly: boolean;
+  minRating?: 3 | 4;
+  sortBy: string;
+};
 
 const suggestedSearches = ["baby monitor", "bottle warmer", "diaper bag"];
+const defaultFilters: SearchFilters = { primeOnly: false, sortBy: "Relevance" };
+
+function validatedPrice(value: string) {
+  const normalized = value.trim();
+  if (!normalized) return undefined;
+  if (!/^(?:0|[1-9]\d{0,4})(?:\.\d{1,2})?$/.test(normalized)) return null;
+  const amount = Number(normalized);
+  return amount >= 0.01 && amount <= 10_000 ? normalized : null;
+}
 
 export function AmazonSearch() {
   const [query, setQuery] = useState("");
@@ -19,6 +35,12 @@ export function AmazonSearch() {
   const [message, setMessage] = useState("");
   const [offerDetails, setOfferDetails] = useState<Record<string, AmazonOfferLink>>({});
   const [offersUpdatedAt, setOffersUpdatedAt] = useState("");
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
+  const [primeOnly, setPrimeOnly] = useState(false);
+  const [minRating, setMinRating] = useState<"" | "3" | "4">("");
+  const [sortBy, setSortBy] = useState("Relevance");
+  const [activeFilters, setActiveFilters] = useState<SearchFilters>(defaultFilters);
   const controllerRef = useRef<AbortController | null>(null);
   const offerControllerRef = useRef<AbortController | null>(null);
 
@@ -57,7 +79,7 @@ export function AmazonSearch() {
     }
   }
 
-  async function requestSearch(searchQuery: string, requestedPage: number, append: boolean) {
+  async function requestSearch(searchQuery: string, requestedPage: number, append: boolean, filters: SearchFilters) {
     controllerRef.current?.abort();
     const controller = new AbortController();
     controllerRef.current = controller;
@@ -68,7 +90,7 @@ export function AmazonSearch() {
       const response = await fetch("/api/amazon/search", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query: searchQuery, page: requestedPage }),
+        body: JSON.stringify({ query: searchQuery, page: requestedPage, ...filters }),
         signal: controller.signal,
       });
       const payload: unknown = await response.json();
@@ -106,22 +128,59 @@ export function AmazonSearch() {
       setMessage("Enter between 2 and 80 characters.");
       return;
     }
+    const filters = getSelectedFilters();
+    if (!filters) return;
     setItems([]);
     setPage(0);
     setHasMore(false);
-    void requestSearch(normalized, 1, false);
+    setActiveFilters(filters);
+    void requestSearch(normalized, 1, false, filters);
   }
 
   function chooseSuggestion(suggestion: string) {
+    const filters = getSelectedFilters();
+    if (!filters) return;
     setQuery(suggestion);
     setItems([]);
     setPage(0);
     setHasMore(false);
-    void requestSearch(suggestion, 1, false);
+    setActiveFilters(filters);
+    void requestSearch(suggestion, 1, false, filters);
+  }
+
+  function getSelectedFilters(): SearchFilters | null {
+    const validatedMin = validatedPrice(minPrice);
+    const validatedMax = validatedPrice(maxPrice);
+    if (validatedMin === null || validatedMax === null) {
+      setStatus("error");
+      setMessage("Enter prices between $0.01 and $10,000 using no more than two decimal places.");
+      return null;
+    }
+    if (validatedMin && validatedMax && Number(validatedMin) > Number(validatedMax)) {
+      setStatus("error");
+      setMessage("The minimum price cannot be higher than the maximum price.");
+      return null;
+    }
+    return {
+      minPrice: validatedMin,
+      maxPrice: validatedMax,
+      primeOnly,
+      minRating: minRating ? Number(minRating) as 3 | 4 : undefined,
+      sortBy,
+    };
+  }
+
+  function clearFilters() {
+    setMinPrice("");
+    setMaxPrice("");
+    setPrimeOnly(false);
+    setMinRating("");
+    setSortBy("Relevance");
   }
 
   const initialLoading = status === "loading";
   const loadingMore = status === "loading-more";
+  const filtersActive = Boolean(minPrice || maxPrice || primeOnly || minRating || sortBy !== "Relevance");
 
   return (
     <div>
@@ -150,6 +209,52 @@ export function AmazonSearch() {
           <span className="font-bold">Popular:</span>
           {suggestedSearches.map((suggestion) => <button key={suggestion} type="button" onClick={() => chooseSuggestion(suggestion)} disabled={initialLoading || loadingMore} className="rounded-full bg-[#e8f8fc] px-3 py-1.5 font-bold transition hover:bg-[#d2f2f9] disabled:opacity-50">{suggestion}</button>)}
         </div>
+        <div className="mt-5 border-t border-[#063f5b]/8 pt-5">
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-[#063f5b]/55">Refine results</p>
+            {filtersActive && <button type="button" onClick={clearFilters} disabled={initialLoading || loadingMore} className="text-xs font-bold text-[#009dcc] hover:underline disabled:opacity-50">Clear filters</button>}
+          </div>
+          <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+            <label className="grid gap-1.5 text-xs font-bold text-[#063f5b]">
+              Minimum price
+              <span className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#063f5b]/45">$</span>
+                <input type="text" inputMode="decimal" value={minPrice} onChange={(event) => setMinPrice(event.target.value)} placeholder="Any" className="h-11 w-full rounded-xl border border-[#063f5b]/15 bg-[#fbfeff] pl-7 pr-3 font-normal outline-none focus:border-[#009dcc] focus:ring-3 focus:ring-[#009dcc]/15" />
+              </span>
+            </label>
+            <label className="grid gap-1.5 text-xs font-bold text-[#063f5b]">
+              Maximum price
+              <span className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#063f5b]/45">$</span>
+                <input type="text" inputMode="decimal" value={maxPrice} onChange={(event) => setMaxPrice(event.target.value)} placeholder="Any" className="h-11 w-full rounded-xl border border-[#063f5b]/15 bg-[#fbfeff] pl-7 pr-3 font-normal outline-none focus:border-[#009dcc] focus:ring-3 focus:ring-[#009dcc]/15" />
+              </span>
+            </label>
+            <label className="grid gap-1.5 text-xs font-bold text-[#063f5b]">
+              Customer rating
+              <select value={minRating} onChange={(event) => setMinRating(event.target.value as "" | "3" | "4")} className="h-11 rounded-xl border border-[#063f5b]/15 bg-[#fbfeff] px-3 font-normal outline-none focus:border-[#009dcc] focus:ring-3 focus:ring-[#009dcc]/15">
+                <option value="">Any rating</option>
+                <option value="4">4 stars & up</option>
+                <option value="3">3 stars & up</option>
+              </select>
+            </label>
+            <label className="grid gap-1.5 text-xs font-bold text-[#063f5b]">
+              Sort by
+              <select value={sortBy} onChange={(event) => setSortBy(event.target.value)} className="h-11 rounded-xl border border-[#063f5b]/15 bg-[#fbfeff] px-3 font-normal outline-none focus:border-[#009dcc] focus:ring-3 focus:ring-[#009dcc]/15">
+                <option value="Relevance">Relevance</option>
+                <option value="Featured">Featured</option>
+                <option value="NewestArrivals">Newest arrivals</option>
+                <option value="Price:LowToHigh">Price: low to high</option>
+                <option value="Price:HighToLow">Price: high to low</option>
+                <option value="AvgCustomerReviews">Customer reviews</option>
+              </select>
+            </label>
+            <label className="flex h-11 items-center gap-2 self-end rounded-xl border border-[#063f5b]/15 bg-[#fbfeff] px-3 text-xs font-bold text-[#063f5b]">
+              <input type="checkbox" checked={primeOnly} onChange={(event) => setPrimeOnly(event.target.checked)} className="size-4 accent-[#009dcc]" />
+              Prime eligible
+            </label>
+          </div>
+          <p className="mt-3 text-[11px] leading-5 text-[#063f5b]/45">Filters apply when you start a new search. Price filters use US dollars.</p>
+        </div>
       </form>
 
       <div aria-live="polite" aria-atomic="true" className="mt-5 min-h-6 text-sm text-[#063f5b]/65">
@@ -163,7 +268,7 @@ export function AmazonSearch() {
           </div>
           <div className="mt-10 text-center">
             {hasMore && page < 3 ? (
-              <button type="button" onClick={() => void requestSearch(activeQuery, page + 1, true)} disabled={loadingMore} className="rounded-full border border-[#063f5b]/15 bg-white px-7 py-3.5 text-sm font-extrabold text-[#063f5b] transition hover:border-[#009dcc] hover:bg-[#e8f8fc] disabled:cursor-wait disabled:opacity-60">
+              <button type="button" onClick={() => void requestSearch(activeQuery, page + 1, true, activeFilters)} disabled={loadingMore} className="rounded-full border border-[#063f5b]/15 bg-white px-7 py-3.5 text-sm font-extrabold text-[#063f5b] transition hover:border-[#009dcc] hover:bg-[#e8f8fc] disabled:cursor-wait disabled:opacity-60">
                 {loadingMore ? "Loading more…" : "Load more Amazon results"}
               </button>
             ) : (

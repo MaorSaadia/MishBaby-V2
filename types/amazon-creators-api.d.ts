@@ -31,7 +31,12 @@ declare module "@amzn/creatorsapi-nodejs-sdk" {
     searchIndex?: string;
     itemCount?: number;
     itemPage?: number;
+    deliveryFlags?: string[];
     languagesOfPreference?: string[];
+    minPrice?: number;
+    maxPrice?: number;
+    minReviewsRating?: number;
+    sortBy?: string;
     resources?: string[];
   }
 }
