@@ -82,14 +82,16 @@ function saveHistory(products: RecentlyViewedProduct[]) {
   }
 }
 
-export function RecentlyViewedProducts({ product }: { product: RecentlyViewedProduct }) {
+export function RecentlyViewedProducts({ product }: { product?: RecentlyViewedProduct }) {
   const historySnapshot = useSyncExternalStore(subscribeToHistory, getHistorySnapshot, () => "[]");
   const history = useMemo(() => parseHistory(historySnapshot), [historySnapshot]);
   const previousProducts = history
-    .filter((historyProduct) => historyProduct.slug !== product.slug)
+    .filter((historyProduct) => historyProduct.slug !== product?.slug)
     .slice(0, displayedProductLimit);
 
   useEffect(() => {
+    if (!product) return;
+
     const storedHistory = parseHistory(getHistorySnapshot());
     const nextHistory = [
       product,

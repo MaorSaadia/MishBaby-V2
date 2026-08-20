@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { GuideCard } from "./components/guide-card";
 import { ProductCard } from "./components/product-card";
+import { RecentlyViewedProducts } from "./components/recently-viewed-products";
 import { getPublishedCategories } from "@/lib/categories";
 import { getCategoryThemeClass } from "@/lib/category-themes";
 import { getPublishedGuides } from "@/lib/guides";
@@ -90,6 +91,8 @@ export default async function Home() {
             </div>
           </div>
         </section>
+
+        <RecentlyViewedProducts />
 
         {homepageGuides.length > 0 && (
           <section className="mx-auto max-w-6xl px-5 py-18 sm:px-8 md:py-24">
