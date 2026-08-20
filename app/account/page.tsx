@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { signOutAction } from "@/app/auth/actions";
 import { DeleteAccountForm } from "@/app/components/auth/delete-account-form";
+import { SignOutButton } from "@/app/components/auth/sign-out-button";
 import { ProductCard } from "@/app/components/product-card";
 import { GuideCard } from "@/app/components/guide-card";
 import { getCurrentUser } from "@/lib/auth";
@@ -49,7 +49,7 @@ export default async function AccountPage({ searchParams }: PageProps<"/account"
       {favoriteGuideResult.error ? <p role="status" className="mt-5 rounded-xl bg-[#fff0f1] px-4 py-3 text-sm text-[#8a2430]">Saved guides are temporarily unavailable. Please try again later.</p> : favoriteGuides.length > 0 ? <div className="mt-7 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">{favoriteGuides.map((guide) => <GuideCard key={guide.id} guide={guide} variant="related" />)}</div> : <div className="mt-5 rounded-2xl bg-[#f1fbfe] p-5"><p className="font-bold">Your reading list is empty</p><p className="mt-1 text-sm leading-6 text-[#063f5b]/60">Use the bookmark button on a guide to save it here.</p></div>}
     </div>
     <div className="mt-6 grid gap-6 md:grid-cols-2">
-      <div className="rounded-[2rem] border border-[#063f5b]/10 bg-white p-6 sm:p-8"><h2 className="text-xl font-extrabold">Sign-in email</h2><p className="mt-2 break-all text-[#063f5b]/65">{user.email}</p><form action={signOutAction} className="mt-6"><button className="rounded-full border border-[#063f5b]/15 px-5 py-3 text-sm font-extrabold transition hover:bg-[#e8f8fc]">Sign out</button></form></div>
+      <div className="rounded-[2rem] border border-[#063f5b]/10 bg-white p-6 sm:p-8"><h2 className="text-xl font-extrabold">Sign-in email</h2><p className="mt-2 break-all text-[#063f5b]/65">{user.email}</p><SignOutButton /></div>
       <div className="rounded-[2rem] border border-[#9f2734]/20 bg-white p-6 sm:p-8"><h2 className="text-xl font-extrabold text-[#8a2430]">Delete account</h2><p className="mt-2 text-sm leading-6 text-[#063f5b]/65">This permanently deletes your MishBaby account, saved products, and saved guides and cannot be undone.</p><DeleteAccountForm email={user.email} /></div>
     </div>
   </div></section>;

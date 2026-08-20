@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { usePathname, useRouter } from "next/navigation";
 import { getBrowserSupabaseClient } from "@/lib/supabase/browser";
@@ -14,6 +14,7 @@ type FavoritesContextValue = {
   isFavorite: (kind: FavoriteKind, id: string) => boolean;
   isBusy: (kind: FavoriteKind, id: string) => boolean;
   toggle: (kind: FavoriteKind, id: string) => Promise<{ ok: boolean; saved: boolean; requiresSignIn?: boolean }>;
+  signOut: () => Promise<boolean>;
 };
 
 const FavoritesContext = createContext<FavoritesContextValue | null>(null);
@@ -25,6 +26,7 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
   const [busyKeys, setBusyKeys] = useState<string[]>([]);
   const pathname = usePathname();
   const router = useRouter();
+  const previousPathname = useRef(pathname);
 
   useEffect(() => {
     const supabase = getBrowserSupabaseClient();
@@ -61,6 +63,21 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
+  useEffect(() => {
+    if (previousPathname.current === pathname) return;
+    previousPathname.current = pathname;
+    if (authStatus !== "signed-in") return;
+    const supabase = getBrowserSupabaseClient();
+    if (!supabase) return;
+
+    supabase.auth.getUser().then(({ data, error }) => {
+      if (!error && data.user) return;
+      setAuthStatus("signed-out");
+      setProductIds([]);
+      setGuideIds([]);
+    });
+  }, [authStatus, pathname]);
+
   const value = useMemo<FavoritesContextValue>(() => ({
     authStatus,
     isFavorite: (kind, id) => (kind === "product" ? productIds : guideIds).includes(id),
@@ -93,6 +110,17 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
       update((current) => saved ? current.filter((item) => item !== id) : [...current, id]);
       if (pathname === "/account") router.refresh();
       return { ok: true, saved: !saved };
+    },
+    signOut: async () => {
+      const supabase = getBrowserSupabaseClient();
+      if (!supabase) return false;
+      const { error } = await supabase.auth.signOut({ scope: "local" });
+      if (error) return false;
+      setAuthStatus("signed-out");
+      setProductIds([]);
+      setGuideIds([]);
+      setBusyKeys([]);
+      return true;
     },
   }), [authStatus, busyKeys, guideIds, pathname, productIds, router]);
 

@@ -92,14 +92,6 @@ export async function googleSignInAction(formData: FormData) {
   redirect(data.url);
 }
 
-export async function signOutAction() {
-  if (isSupabaseConfigured) {
-    const supabase = await createServerSupabaseClient();
-    await supabase.auth.signOut({ scope: "local" });
-  }
-  redirect("/");
-}
-
 export async function deleteAccountAction(_state: AuthActionState, formData: FormData): Promise<AuthActionState> {
   if (!isSupabaseConfigured) return unavailable;
   const user = await getCurrentUser();
