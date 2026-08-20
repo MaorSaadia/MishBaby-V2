@@ -23,6 +23,13 @@ const nextConfig: NextConfig = {
         pathname: "/images/**",
         search: "",
       },
+      {
+        protocol: "https",
+        hostname: "m.media-amazon.com",
+        port: "",
+        pathname: "/images/**",
+        search: "",
+      },
     ],
   },
   async headers() {

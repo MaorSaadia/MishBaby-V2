@@ -2,14 +2,20 @@
   "name": "mishbabyv2",
   "version": "0.1.0",
   "private": true,
+  "workspaces": [
+    "creatorsapi-nodejs-sdk/creatorsapi-nodejs-sdk"
+  ],
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:creators-api-sdk": "npm run build --workspace=@amzn/creatorsapi-nodejs-sdk",
+    "postinstall": "npm run build:creators-api-sdk",
     "start": "next start",
     "lint": "eslint",
     "sync:marketing-contacts": "node --env-file=.env.local scripts/sync-resend-marketing-contacts.mjs"
   },
   "dependencies": {
+    "@amzn/creatorsapi-nodejs-sdk": "1.2.0",
     "@google/genai": "^2.17.1",
     "@supabase/ssr": "^0.12.4",
     "@supabase/supabase-js": "^2.112.3",

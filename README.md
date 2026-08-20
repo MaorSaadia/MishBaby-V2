@@ -12,6 +12,7 @@ Requirements:
 - Access to the MishBaby Sanity project
 - A Gemini API key if you need the Studio assistants
 - Access to the MishBaby Supabase project if you need account features
+- Approved Amazon Creator API credentials if you need Amazon Finds
 
 Copy `.env.example` to `.env.local`, fill in the required values, then run:
 
@@ -37,6 +38,12 @@ Open [http://localhost:3000](http://localhost:3000) for the storefront and [http
 | `RESEND_MARKETING_API_KEY` | For marketing contact sync | Server only | Synchronizes opted-in account contacts with Resend. |
 | `RESEND_MARKETING_SEGMENT_ID` | For marketing contact sync | Server only | Identifies the Resend segment used for MishBaby updates. |
 | `RESEND_WEBHOOK_SECRET` | For marketing contact sync | Server only | Verifies Resend contact webhook signatures. |
+| `AMAZON_CREATORS_CREDENTIAL_ID` | For Amazon Finds | Server only | Identifies the approved Amazon Creator API credential. |
+| `AMAZON_CREATORS_CREDENTIAL_SECRET` | For Amazon Finds | Server only | Authenticates server-to-server Creator API requests. |
+| `AMAZON_CREATORS_CREDENTIAL_VERSION` | For Amazon Finds | Server only | Uses the exact credential version issued by Amazon. |
+| `AMAZON_CREATORS_PARTNER_TAG` | For Amazon Finds | Server only | Attributes US Amazon results to the matching Associates tag. |
+| `AMAZON_CREATORS_MARKETPLACE` | For Amazon Finds | Server only | Must be `www.amazon.com` in this phase. |
+| `AMAZON_SEARCH_RATE_LIMIT_SECRET` | For Amazon Finds | Server only | Salts one-way visitor-IP hashes used for abuse protection. |
 
 Never commit `.env.local`. Variables prefixed with `NEXT_PUBLIC_` are bundled into browser code and must not contain secrets.
 
@@ -54,3 +61,5 @@ The production build validates the Sanity connection and prerenders the current 
 MishBaby requires a full Next.js deployment because it uses route handlers, ISR, image optimization, and the embedded Studio. Static export is not supported.
 
 Follow [DEPLOYMENT.md](./DEPLOYMENT.md) for the Vercel environment, domain, Sanity CORS, and post-deployment checklist. Follow [SUPABASE_SETUP.md](./SUPABASE_SETUP.md) for authentication, Google OAuth, Resend SMTP, marketing contact synchronization, and email-template setup.
+
+Follow [AMAZON_CREATORS_SETUP.md](./AMAZON_CREATORS_SETUP.md) before enabling Amazon Finds locally or in Vercel.

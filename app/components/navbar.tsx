@@ -11,6 +11,7 @@ import { AccountLink } from "./auth/account-link";
 const links = [
   { label: "Products", href: "/products" },
   { label: "Discover", href: "/categories" },
+  { label: "Amazon Finds", href: "/amazon-finds" },
   { label: "Guides", href: "/guides" },
   { label: "About", href: "/about" },
 ];

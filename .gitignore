@@ -2,6 +2,8 @@
 
 # dependencies
 /node_modules
+/creatorsapi-nodejs-sdk/creatorsapi-nodejs-sdk/node_modules/
+/creatorsapi-nodejs-sdk/creatorsapi-nodejs-sdk/dist/
 /.pnp
 .pnp.*
 .yarn/*

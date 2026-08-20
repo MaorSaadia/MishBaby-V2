@@ -20,6 +20,10 @@ const disclosureSections = [
     body: "MishBaby currently uses affiliate links for merchants including Amazon and AliExpress, and may work with additional merchants or affiliate networks in the future. A product can have offers from more than one merchant, and the product itself remains separate from those offers.",
   },
   {
+    title: "Amazon Finds",
+    body: "Amazon Finds displays temporary product-search results supplied by Amazon. Result links include Amazon's attribution information, and MishBaby may earn from qualifying purchases. Confirm all product details and suitability directly on Amazon before purchasing.",
+  },
+  {
     title: "Editorial independence",
     body: "Affiliate relationships do not guarantee that a product will be included, featured, or recommended. MishBaby aims to organize products and guidance around usefulness and relevance for parents. We do not claim hands-on testing, professional expertise, or merchant endorsement unless that is stated clearly on the page.",
   },

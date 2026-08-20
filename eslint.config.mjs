@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Amazon's supplied SDK is generated vendor code with its own build rules.
+    "creatorsapi-nodejs-sdk/**",
   ]),
 ]);
 
