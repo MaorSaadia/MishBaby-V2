@@ -32,8 +32,11 @@ Open [http://localhost:3000](http://localhost:3000) for the storefront and [http
 | `GEMINI_MODEL` | No | Server only | Overrides the assistants' default Gemini model. |
 | `NEXT_PUBLIC_SUPABASE_URL` | For accounts | Public | Connects the browser and server auth clients to Supabase. |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | For accounts | Public | Authorizes public Supabase Auth operations. |
-| `SUPABASE_SECRET_KEY` | For account deletion | Server only | Allows the authenticated deletion action to remove an Auth user. |
+| `SUPABASE_SECRET_KEY` | For accounts | Server only | Allows authenticated server actions to manage private account data. |
 | `NEXT_PUBLIC_SITE_URL` | For accounts | Public | Absolute origin used in OAuth and authentication email redirects. |
+| `RESEND_MARKETING_API_KEY` | For marketing contact sync | Server only | Synchronizes opted-in account contacts with Resend. |
+| `RESEND_MARKETING_SEGMENT_ID` | For marketing contact sync | Server only | Identifies the Resend segment used for MishBaby updates. |
+| `RESEND_WEBHOOK_SECRET` | For marketing contact sync | Server only | Verifies Resend contact webhook signatures. |
 
 Never commit `.env.local`. Variables prefixed with `NEXT_PUBLIC_` are bundled into browser code and must not contain secrets.
 
@@ -50,4 +53,4 @@ The production build validates the Sanity connection and prerenders the current 
 
 MishBaby requires a full Next.js deployment because it uses route handlers, ISR, image optimization, and the embedded Studio. Static export is not supported.
 
-Follow [DEPLOYMENT.md](./DEPLOYMENT.md) for the Vercel environment, domain, Sanity CORS, and post-deployment checklist. Follow [SUPABASE_SETUP.md](./SUPABASE_SETUP.md) for authentication, Google OAuth, Resend SMTP, and email-template setup.
+Follow [DEPLOYMENT.md](./DEPLOYMENT.md) for the Vercel environment, domain, Sanity CORS, and post-deployment checklist. Follow [SUPABASE_SETUP.md](./SUPABASE_SETUP.md) for authentication, Google OAuth, Resend SMTP, marketing contact synchronization, and email-template setup.

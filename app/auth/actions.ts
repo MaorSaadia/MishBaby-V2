@@ -7,6 +7,7 @@ import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { getSiteUrl, isSupabaseConfigured } from "@/lib/supabase/config";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { marketingConsentPolicyVersion, marketingSignupConsentSource, marketingSignupCookieName, recordMarketingConsentEvent } from "@/lib/marketing-consent";
+import { deleteResendMarketingContact, syncResendMarketingContact } from "@/lib/resend-marketing";
 
 export type AuthActionState = { status?: "error" | "success"; message?: string };
 
@@ -69,6 +70,7 @@ export async function signUpAction(_state: AuthActionState, formData: FormData):
   });
   if (marketingOptIn && signupData.session && signupData.user) {
     await recordMarketingConsentEvent(signupData.user.id, "subscribed", marketingSignupConsentSource);
+    if (signupData.user.email) await syncResendMarketingContact(signupData.user.id, signupData.user.email, "subscribed");
   }
 
   // Keep the response deliberately generic so account existence is not exposed.
@@ -134,6 +136,8 @@ export async function deleteAccountAction(_state: AuthActionState, formData: For
   if (confirmationEmail !== user.email.toLowerCase()) return { status: "error", message: "Enter your account email exactly to confirm deletion." };
 
   try {
+    const resendDeletion = await deleteResendMarketingContact(user.email);
+    if (!resendDeletion.ok) return { status: "error", message: "We couldn’t remove your email contact right now. Please try account deletion again." };
     const admin = createSupabaseAdminClient();
     const { error } = await admin.auth.admin.deleteUser(user.id, false);
     if (error) return { status: "error", message: "We couldn’t delete your account right now. Please try again." };

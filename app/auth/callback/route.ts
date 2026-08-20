@@ -3,6 +3,7 @@ import { sanitizeReturnPath } from "@/lib/auth";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { marketingConsentPolicyVersion, marketingSignupConsentSource, marketingSignupCookieName, recordMarketingConsentEvent } from "@/lib/marketing-consent";
+import { syncResendMarketingContact } from "@/lib/resend-marketing";
 
 function redirectAndClearConsentCookie(destination: URL) {
   const response = NextResponse.redirect(destination);
@@ -18,7 +19,10 @@ export async function GET(request: NextRequest) {
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
       const optedIn = request.cookies.get(marketingSignupCookieName)?.value === marketingConsentPolicyVersion;
-      if (optedIn && data.user) await recordMarketingConsentEvent(data.user.id, "subscribed", marketingSignupConsentSource);
+      if (optedIn && data.user) {
+        await recordMarketingConsentEvent(data.user.id, "subscribed", marketingSignupConsentSource);
+        if (data.user.email) await syncResendMarketingContact(data.user.id, data.user.email, "subscribed");
+      }
       return redirectAndClearConsentCookie(new URL(next, request.url));
     }
   }

@@ -89,3 +89,33 @@ Run [`supabase/migrations/20260820000000_create_marketing_consent_events.sql`](.
 This migration does not create a mailing list or send any marketing email. Test opt-in, withdrawal, repeated submissions, cross-account isolation, and account-deletion cleanup before connecting a future campaign provider.
 
 The signup page includes one unchecked consent checkbox shared by email and Google signup. When selected, MishBaby records the consent only after Supabase authenticates or confirms the user. Leaving it unchecked creates no marketing consent event and does not prevent account creation.
+
+## 10. Synchronize opted-in contacts with Resend
+
+Run [`supabase/migrations/20260820001000_create_marketing_contact_sync.sql`](./supabase/migrations/20260820001000_create_marketing_contact_sync.sql) in the Supabase SQL Editor (or apply it through the Supabase CLI). Supabase remains the consent source of truth; this table records whether the current preference has been synchronized to Resend.
+
+In Resend:
+
+1. Create a segment named **MishBaby Updates** and copy its segment ID.
+2. Create a dedicated marketing API key. Do not reuse the SMTP key used by Supabase Auth.
+3. Add a webhook whose endpoint is `https://mish-baby-v2.vercel.app/api/webhooks/resend` and subscribe it to `contact.updated` and `contact.deleted` events.
+4. Copy the webhook signing secret, including its `whsec_` prefix.
+
+Add these server-only values to `.env.local` and Vercel, then redeploy:
+
+```text
+RESEND_MARKETING_API_KEY=
+RESEND_MARKETING_SEGMENT_ID=
+RESEND_WEBHOOK_SECRET=
+```
+
+Never give these variables a `NEXT_PUBLIC_` prefix. When `mishbaby.com` becomes the production domain, create or update the Resend webhook endpoint to use that domain.
+
+Test both directions before sending any campaign:
+
+- Opt in from the Account page and confirm the Resend contact is active and belongs to **MishBaby Updates**.
+- Withdraw consent in MishBaby and confirm the Resend contact is marked unsubscribed.
+- Mark a test contact unsubscribed in Resend and confirm the Account page reflects the withdrawal after reloading.
+- Delete the test account and confirm its Resend contact is removed.
+
+This integration synchronizes contacts only. It does not create or send broadcasts.
