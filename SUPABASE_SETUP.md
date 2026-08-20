@@ -81,3 +81,9 @@ After applying it, verify with two separate accounts that each account can see a
 ## 8. Enable guide favorites
 
 Run [`supabase/migrations/20260819001000_create_guide_favorites.sql`](./supabase/migrations/20260819001000_create_guide_favorites.sql) once in the Supabase SQL Editor (or apply it through the Supabase CLI). Verify with two accounts that saved guides remain private to their owner and are removed when the Auth user is deleted.
+
+## 9. Enable marketing consent preferences
+
+Run [`supabase/migrations/20260820000000_create_marketing_consent_events.sql`](./supabase/migrations/20260820000000_create_marketing_consent_events.sql) once in the Supabase SQL Editor (or apply it through the Supabase CLI). The table stores an append-only history of opt-ins and withdrawals. Authenticated browser clients can read only their own history; writes go through MishBaby’s authenticated Server Action and server-only Supabase secret.
+
+This migration does not create a mailing list or send any marketing email. Test opt-in, withdrawal, repeated submissions, cross-account isolation, and account-deletion cleanup before connecting a future campaign provider.
