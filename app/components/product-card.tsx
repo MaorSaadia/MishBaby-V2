@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Product } from "@/lib/products";
 import { ProductImage } from "./product-image";
+import { CardFavoriteButton } from "./card-favorite-button";
 
 type ProductCardProps = {
   product: Product;
@@ -15,6 +16,7 @@ export function ProductCard({ product, variant = "default" }: ProductCardProps) 
   return (
     <article className={`group overflow-hidden border border-[#063f5b]/8 bg-white shadow-[0_16px_36px_-28px_rgba(6,63,91,.45)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_42px_-26px_rgba(6,63,91,.35)] ${compact ? "rounded-2xl sm:rounded-[2rem]" : "rounded-[2rem]"}`}>
       <div className="relative grid aspect-[4/3] place-items-center overflow-hidden bg-[#e8f8fc]">
+        <div className="absolute right-2 top-2 z-20 sm:right-4 sm:top-4"><CardFavoriteButton kind="product" id={product.id} label={product.name} /></div>
         <div className="absolute -right-12 -top-12 size-40 rounded-full bg-[#a8e8f5]/75 transition-transform duration-300 group-hover:scale-110" />
         <div className="absolute -bottom-16 -left-10 size-36 rounded-full bg-white/75" />
         {product.badge && (

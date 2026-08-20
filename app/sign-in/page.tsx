@@ -28,7 +28,7 @@ export default async function SignInPage({ searchParams }: PageProps<"/sign-in">
         <label className={labelClass}>Email<input className={inputClass} type="email" name="email" autoComplete="email" required /></label>
         <label className={labelClass}>Password<input className={inputClass} type="password" name="password" autoComplete="current-password" required /></label>
       </StatefulForm>
-      <div className="mt-6 grid gap-2 text-center text-sm text-[#063f5b]/65"><Link className="font-bold text-[#007fa5]" href="/forgot-password">Forgot your password?</Link><p>New here? <Link className="font-bold text-[#007fa5]" href="/sign-up">Create an account</Link></p></div>
+      <div className="mt-6 grid gap-2 text-center text-sm text-[#063f5b]/65"><Link className="font-bold text-[#007fa5]" href="/forgot-password">Forgot your password?</Link><p>New here? <Link className="font-bold text-[#007fa5]" href={`/sign-up?next=${encodeURIComponent(next)}`}>Create an account</Link></p></div>
     </>}
   </AuthShell>;
 }

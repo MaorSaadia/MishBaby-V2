@@ -46,12 +46,13 @@ export async function signUpAction(_state: AuthActionState, formData: FormData):
   if (!validEmail(email)) return { status: "error", message: "Enter a valid email address." };
   const passwordError = validateNewPassword(formData);
   if (passwordError) return passwordError;
+  const next = sanitizeReturnPath(formData.get("next"));
 
   const supabase = await createServerSupabaseClient();
   await supabase.auth.signUp({
     email,
     password: textValue(formData, "password"),
-    options: { emailRedirectTo: getSiteUrl() },
+    options: { emailRedirectTo: getSiteUrl(), data: { return_path: next } },
   });
 
   // Keep the response deliberately generic so account existence is not exposed.

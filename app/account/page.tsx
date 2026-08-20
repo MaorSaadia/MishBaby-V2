@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { signOutAction } from "@/app/auth/actions";
 import { DeleteAccountForm } from "@/app/components/auth/delete-account-form";
 import { ProductCard } from "@/app/components/product-card";
-import { GuideImage } from "@/app/components/guide-image";
+import { GuideCard } from "@/app/components/guide-card";
 import { getCurrentUser } from "@/lib/auth";
 import { getFavoriteGuideIds, getFavoriteProductIds } from "@/lib/favorites";
 import { getPublishedGuides } from "@/lib/guides";
@@ -47,7 +46,7 @@ export default async function AccountPage({ searchParams }: PageProps<"/account"
     <div className="mt-6 rounded-[2rem] border border-[#063f5b]/10 bg-white p-6 sm:p-8">
       <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-[#009dcc]">Saved guides</p>
       <h2 className="mt-2 font-display text-3xl font-semibold tracking-[-0.04em]">Your reading list</h2>
-      {favoriteGuideResult.error ? <p role="status" className="mt-5 rounded-xl bg-[#fff0f1] px-4 py-3 text-sm text-[#8a2430]">Saved guides are temporarily unavailable. Please try again later.</p> : favoriteGuides.length > 0 ? <div className="mt-7 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">{favoriteGuides.map((guide) => <article key={guide.id} className="group overflow-hidden rounded-[2rem] border border-[#063f5b]/8 bg-[#fbfeff] shadow-[0_16px_36px_-28px_rgba(6,63,91,.4)]"><Link href={`/guides/${guide.slug}`} className="block h-full"><GuideImage guide={guide} variant="related" /><div className="p-6"><div className="flex flex-wrap items-center gap-3 text-xs font-bold"><span className="uppercase tracking-[0.12em] text-[#009dcc]">{guide.categoryLabel}</span>{guide.readingMinutes && <span className="text-[#063f5b]/45">{guide.readingMinutes} min read</span>}</div><h3 className="mt-3 text-xl font-extrabold leading-snug tracking-[-0.03em]">{guide.title}</h3><p className="mt-3 line-clamp-2 text-sm leading-6 text-[#063f5b]/65">{guide.description}</p><span className="mt-5 inline-flex text-xs font-extrabold text-[#009dcc]">Read the guide <span aria-hidden="true">&rarr;</span></span></div></Link></article>)}</div> : <div className="mt-5 rounded-2xl bg-[#f1fbfe] p-5"><p className="font-bold">Your reading list is empty</p><p className="mt-1 text-sm leading-6 text-[#063f5b]/60">Use the bookmark button on a guide to save it here.</p></div>}
+      {favoriteGuideResult.error ? <p role="status" className="mt-5 rounded-xl bg-[#fff0f1] px-4 py-3 text-sm text-[#8a2430]">Saved guides are temporarily unavailable. Please try again later.</p> : favoriteGuides.length > 0 ? <div className="mt-7 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">{favoriteGuides.map((guide) => <GuideCard key={guide.id} guide={guide} variant="related" />)}</div> : <div className="mt-5 rounded-2xl bg-[#f1fbfe] p-5"><p className="font-bold">Your reading list is empty</p><p className="mt-1 text-sm leading-6 text-[#063f5b]/60">Use the bookmark button on a guide to save it here.</p></div>}
     </div>
     <div className="mt-6 grid gap-6 md:grid-cols-2">
       <div className="rounded-[2rem] border border-[#063f5b]/10 bg-white p-6 sm:p-8"><h2 className="text-xl font-extrabold">Sign-in email</h2><p className="mt-2 break-all text-[#063f5b]/65">{user.email}</p><form action={signOutAction} className="mt-6"><button className="rounded-full border border-[#063f5b]/15 px-5 py-3 text-sm font-extrabold transition hover:bg-[#e8f8fc]">Sign out</button></form></div>

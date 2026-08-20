@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { GuideImage } from "@/app/components/guide-image";
-import { getGuides, type Guide } from "@/lib/guides";
+import { GuideCard } from "@/app/components/guide-card";
+import { CardFavoriteButton } from "@/app/components/card-favorite-button";
+import { getGuides } from "@/lib/guides";
 import { siteConfig } from "@/lib/site";
 import { createItemListStructuredData, serializeStructuredData } from "@/lib/structured-data";
 
@@ -30,29 +32,6 @@ export async function generateMetadata({ searchParams }: GuidesPageProps): Promi
       follow: true,
     },
   };
-}
-
-function GuideCard({ guide }: { guide: Guide }) {
-  return (
-    <article className="overflow-hidden rounded-[2rem] border border-[#063f5b]/8 bg-white shadow-[0_16px_36px_-28px_rgba(6,63,91,.4)]">
-      <GuideImage guide={guide} variant="card" />
-      <div className="p-6">
-        <div className="flex flex-wrap items-center gap-3">
-          <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-[#009dcc]">{guide.categoryLabel}</p>
-          {guide.readingMinutes && <span className="text-xs font-bold text-[#063f5b]/40">{guide.readingMinutes} min read</span>}
-        </div>
-        <h3 className="mt-3 text-xl font-extrabold leading-snug tracking-[-0.03em] text-[#063f5b]">{guide.title}</h3>
-        <p className="mt-3 text-sm leading-6 text-[#063f5b]/65">{guide.description}</p>
-        {guide.status === "published" ? (
-          <Link href={`/guides/${guide.slug}`} className="mt-5 inline-flex items-center gap-2 text-xs font-extrabold text-[#009dcc] transition hover:text-[#0784b0]">
-            Read the guide <span aria-hidden="true">→</span>
-          </Link>
-        ) : (
-          <p className="mt-5 text-xs font-extrabold text-[#063f5b]/45">In preparation</p>
-        )}
-      </div>
-    </article>
-  );
 }
 
 export default async function GuidesPage({ searchParams }: GuidesPageProps) {
@@ -188,7 +167,8 @@ export default async function GuidesPage({ searchParams }: GuidesPageProps) {
         </div>
 
         {featuredGuide && (
-          <div className="grid overflow-hidden rounded-[2rem] border border-[#063f5b]/8 bg-white shadow-[0_20px_48px_-34px_rgba(6,63,91,.4)] md:grid-cols-[.85fr_1.15fr]">
+          <div className="relative grid overflow-hidden rounded-[2rem] border border-[#063f5b]/8 bg-white shadow-[0_20px_48px_-34px_rgba(6,63,91,.4)] md:grid-cols-[.85fr_1.15fr]">
+            {featuredGuide.status === "published" && <div className="absolute right-4 top-4 z-20"><CardFavoriteButton kind="guide" id={featuredGuide.id} label={featuredGuide.title} /></div>}
             <GuideImage guide={featuredGuide} variant="featured" preload />
             <div className="flex flex-col justify-center p-7 sm:p-10">
               <div className="flex flex-wrap items-center gap-3">

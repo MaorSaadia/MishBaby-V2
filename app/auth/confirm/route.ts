@@ -11,9 +11,11 @@ export async function GET(request: NextRequest) {
   const type = request.nextUrl.searchParams.get("type") as EmailOtpType | null;
   if (isSupabaseConfigured && tokenHash && type && allowedTypes.has(type)) {
     const supabase = await createServerSupabaseClient();
-    const { error } = await supabase.auth.verifyOtp({ type, token_hash: tokenHash });
+    const { data, error } = await supabase.auth.verifyOtp({ type, token_hash: tokenHash });
     if (!error) {
-      const destination = type === "recovery" ? "/update-password" : sanitizeReturnPath(request.nextUrl.searchParams.get("next"));
+      const requestedPath = sanitizeReturnPath(request.nextUrl.searchParams.get("next"));
+      const signupReturnPath = sanitizeReturnPath(data.user?.user_metadata?.return_path, requestedPath);
+      const destination = type === "recovery" ? "/update-password" : signupReturnPath;
       return NextResponse.redirect(new URL(destination, request.url));
     }
   }

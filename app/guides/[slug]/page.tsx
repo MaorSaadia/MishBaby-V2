@@ -6,6 +6,7 @@ import { ProductCard } from "@/app/components/product-card";
 import { RecentlyViewedGuides } from "@/app/components/recently-viewed-guides";
 import { ShareControls } from "@/app/components/share-controls";
 import { FavoriteGuideButton } from "@/app/components/favorite-guide-button";
+import { GuideCard } from "@/app/components/guide-card";
 import { getPublishedGuideBySlug, getPublishedGuides, getRelatedGuides } from "@/lib/guides";
 import { siteConfig } from "@/lib/site";
 
@@ -232,26 +233,7 @@ export default async function GuidePage({ params }: PageProps<"/guides/[slug]">)
               </div>
 
               <div className="mt-9 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                {relatedGuides.map((relatedGuide) => (
-                  <article key={relatedGuide.id} className="group overflow-hidden rounded-[2rem] border border-[#063f5b]/8 bg-[#fbfeff] shadow-[0_16px_36px_-28px_rgba(6,63,91,.4)]">
-                    <Link href={`/guides/${relatedGuide.slug}`} className="block focus-visible:outline-offset-[-3px]">
-                      <div className="overflow-hidden">
-                        <GuideImage guide={relatedGuide} variant="related" />
-                      </div>
-                      <div className="p-6">
-                        <div className="flex flex-wrap items-center gap-3">
-                          <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-[#009dcc]">{relatedGuide.categoryLabel}</p>
-                          {relatedGuide.readingMinutes && <span className="text-xs font-bold text-[#063f5b]/40">{relatedGuide.readingMinutes} min read</span>}
-                        </div>
-                        <h3 className="mt-3 text-xl font-extrabold leading-snug tracking-[-0.03em] text-[#063f5b]">{relatedGuide.title}</h3>
-                        <p className="mt-3 line-clamp-2 text-sm leading-6 text-[#063f5b]/65">{relatedGuide.description}</p>
-                        <span className="mt-5 inline-flex items-center gap-2 text-xs font-extrabold text-[#009dcc]">
-                          Read the guide <span aria-hidden="true">→</span>
-                        </span>
-                      </div>
-                    </Link>
-                  </article>
-                ))}
+                {relatedGuides.map((relatedGuide) => <GuideCard key={relatedGuide.id} guide={relatedGuide} variant="related" />)}
               </div>
             </div>
           </section>

@@ -3,6 +3,7 @@ import { Footer } from "./components/footer";
 import { Navbar } from "./components/navbar";
 import { getProductSearchItems } from "@/lib/products";
 import { siteConfig } from "@/lib/site";
+import { FavoritesProvider } from "./components/favorites-provider";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -37,10 +38,12 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       className="h-full antialiased"
     >
       <body className="flex min-h-full flex-col">
-        <a href="#main-content" className="skip-link">Skip to main content</a>
-        <Navbar products={productSearchItems} />
-        <main id="main-content" className="flex-1">{children}</main>
-        <Footer />
+        <FavoritesProvider>
+          <a href="#main-content" className="skip-link">Skip to main content</a>
+          <Navbar products={productSearchItems} />
+          <main id="main-content" className="flex-1">{children}</main>
+          <Footer />
+        </FavoritesProvider>
       </body>
     </html>
   );
