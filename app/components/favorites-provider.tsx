@@ -11,6 +11,7 @@ type AuthStatus = "loading" | "signed-out" | "signed-in";
 
 type FavoritesContextValue = {
   authStatus: AuthStatus;
+  user: User | null;
   isFavorite: (kind: FavoriteKind, id: string) => boolean;
   isBusy: (kind: FavoriteKind, id: string) => boolean;
   toggle: (kind: FavoriteKind, id: string) => Promise<{ ok: boolean; saved: boolean; requiresSignIn?: boolean }>;
@@ -21,6 +22,7 @@ const FavoritesContext = createContext<FavoritesContextValue | null>(null);
 
 export function FavoritesProvider({ children }: { children: React.ReactNode }) {
   const [authStatus, setAuthStatus] = useState<AuthStatus>(isSupabaseConfigured ? "loading" : "signed-out");
+  const [user, setUser] = useState<User | null>(null);
   const [productIds, setProductIds] = useState<string[]>([]);
   const [guideIds, setGuideIds] = useState<string[]>([]);
   const [busyKeys, setBusyKeys] = useState<string[]>([]);
@@ -37,12 +39,14 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
       if (!active) return;
       if (!currentUser) {
         setAuthStatus("signed-out");
+        setUser(null);
         setProductIds([]);
         setGuideIds([]);
         return;
       }
 
       setAuthStatus("signed-in");
+      setUser(currentUser);
       const [products, guides] = await Promise.all([
         supabase!.from("product_favorites").select("product_id").eq("user_id", currentUser.id),
         supabase!.from("guide_favorites").select("guide_id").eq("user_id", currentUser.id),
@@ -71,8 +75,12 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
     if (!supabase) return;
 
     supabase.auth.getUser().then(({ data, error }) => {
-      if (!error && data.user) return;
+      if (!error && data.user) {
+        setUser(data.user);
+        return;
+      }
       setAuthStatus("signed-out");
+      setUser(null);
       setProductIds([]);
       setGuideIds([]);
     });
@@ -80,6 +88,7 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
 
   const value = useMemo<FavoritesContextValue>(() => ({
     authStatus,
+    user,
     isFavorite: (kind, id) => (kind === "product" ? productIds : guideIds).includes(id),
     isBusy: (kind, id) => busyKeys.includes(`${kind}:${id}`),
     toggle: async (kind, id) => {
@@ -117,12 +126,13 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
       const { error } = await supabase.auth.signOut({ scope: "local" });
       if (error) return false;
       setAuthStatus("signed-out");
+      setUser(null);
       setProductIds([]);
       setGuideIds([]);
       setBusyKeys([]);
       return true;
     },
-  }), [authStatus, busyKeys, guideIds, pathname, productIds, router]);
+  }), [authStatus, busyKeys, guideIds, pathname, productIds, router, user]);
 
   return <FavoritesContext.Provider value={value}>{children}</FavoritesContext.Provider>;
 }

@@ -39,7 +39,7 @@ function subscribeToTheme(onStoreChange: () => void) {
   };
 }
 
-export function ThemeToggle({ mobile = false }: { mobile?: boolean }) {
+export function ThemeToggle({ mobile = false, compact = false }: { mobile?: boolean; compact?: boolean }) {
   const theme = useSyncExternalStore(subscribeToTheme, getThemeSnapshot, () => "light");
   const nextTheme = theme === "dark" ? "light" : "dark";
 
@@ -62,7 +62,7 @@ export function ThemeToggle({ mobile = false }: { mobile?: boolean }) {
       title={`Use ${nextTheme} mode`}
       className={mobile
         ? "mt-2 flex w-full items-center gap-3 rounded-xl border border-[#063f5b]/10 bg-white px-3 py-3 text-left text-sm font-bold text-[#063f5b] transition-colors hover:border-[#009dcc]/40 hover:text-[#009dcc]"
-        : "grid size-10 shrink-0 place-items-center rounded-full border border-[#063f5b]/15 bg-white text-[#063f5b] transition-colors hover:border-[#009dcc]/40 hover:text-[#009dcc]"}
+        : `grid shrink-0 place-items-center rounded-full border border-[#063f5b]/15 bg-white text-[#063f5b] transition-colors hover:border-[#009dcc]/40 hover:text-[#009dcc] ${compact ? "size-9 sm:size-10" : "size-10"}`}
     >
       {theme === "dark" ? (
         <svg viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">

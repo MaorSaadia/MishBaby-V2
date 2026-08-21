@@ -30,7 +30,19 @@ function saveRecentSearches(searches: string[]) {
   }
 }
 
-export function NavbarSearch({ products }: { products: ProductSearchItem[] }) {
+export function NavbarSearch({
+  products,
+  focusRequested = false,
+  onNavigate,
+  onOpenRequest,
+  onRequestClose,
+}: {
+  products: ProductSearchItem[];
+  focusRequested?: boolean;
+  onNavigate?: () => void;
+  onOpenRequest?: () => void;
+  onRequestClose?: () => void;
+}) {
   const router = useRouter();
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -66,7 +78,8 @@ export function NavbarSearch({ products }: { products: ProductSearchItem[] }) {
     function handleShortcut(event: KeyboardEvent) {
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
         event.preventDefault();
-        inputRef.current?.focus();
+        onOpenRequest?.();
+        window.requestAnimationFrame(() => inputRef.current?.focus());
       }
     }
 
@@ -83,7 +96,11 @@ export function NavbarSearch({ products }: { products: ProductSearchItem[] }) {
       window.removeEventListener("keydown", handleShortcut);
       document.removeEventListener("pointerdown", handlePointerDown);
     };
-  }, []);
+  }, [onOpenRequest]);
+
+  useEffect(() => {
+    if (focusRequested) inputRef.current?.focus();
+  }, [focusRequested]);
 
   function openSearch() {
     setRecentSearches(readRecentSearches());
@@ -114,6 +131,7 @@ export function NavbarSearch({ products }: { products: ProductSearchItem[] }) {
     setQuery(trimmedQuery);
     rememberSearch(trimmedQuery);
     setIsOpen(false);
+    onNavigate?.();
     router.push(`/products?q=${encodeURIComponent(trimmedQuery)}`);
   }
 
@@ -121,6 +139,7 @@ export function NavbarSearch({ products }: { products: ProductSearchItem[] }) {
     rememberSearch(query || product.name);
     setIsOpen(false);
     setActiveSuggestionIndex(-1);
+    onNavigate?.();
     router.push(`/products/${product.slug}`);
   }
 
@@ -163,6 +182,7 @@ export function NavbarSearch({ products }: { products: ProductSearchItem[] }) {
               if (event.key === "Escape") {
                 setIsOpen(false);
                 inputRef.current?.blur();
+                onRequestClose?.();
               } else if (showSuggestions && suggestions.length > 0 && event.key === "ArrowDown") {
                 event.preventDefault();
                 setActiveSuggestionIndex((current) => Math.min(current + 1, suggestions.length - 1));

@@ -30,6 +30,13 @@ const nextConfig: NextConfig = {
         pathname: "/images/**",
         search: "",
       },
+      {
+        protocol: "https",
+        hostname: "**.googleusercontent.com",
+        port: "",
+        pathname: "/**",
+        search: "",
+      },
     ],
   },
   async headers() {
