@@ -25,8 +25,23 @@ type AmazonSimilarProductsProps = {
   currentAsin?: string;
 };
 
-function buildSearchQuery(productName: string, categoryName: string) {
-  const normalized = `${productName} ${categoryName}`.trim().replace(/\s+/g, " ");
+type AmazonGuideProductsProps = {
+  guideTitle: string;
+  categoryName: string;
+  excludedAsins?: string[];
+};
+
+type AmazonRecommendationsProps = {
+  searchTerms: string[];
+  excludedAsins?: string[];
+  maximumResults: number;
+  eyebrow: string;
+  heading: string;
+  description: string;
+};
+
+function buildSearchQuery(searchTerms: string[]) {
+  const normalized = searchTerms.join(" ").trim().replace(/\s+/g, " ");
   if (normalized.length <= 80) return normalized;
 
   const shortened = normalized.slice(0, 80);
@@ -35,19 +50,50 @@ function buildSearchQuery(productName: string, categoryName: string) {
 }
 
 export function AmazonSimilarProducts({ productName, categoryName, currentAsin }: AmazonSimilarProductsProps) {
+  return (
+    <AmazonRecommendations
+      searchTerms={[productName, categoryName]}
+      excludedAsins={currentAsin ? [currentAsin] : []}
+      maximumResults={4}
+      eyebrow="More to explore on Amazon"
+      heading="Similar products you may like."
+      description="Live Amazon results selected from this product's name and category."
+    />
+  );
+}
+
+export function AmazonGuideProducts({ guideTitle, categoryName, excludedAsins = [] }: AmazonGuideProductsProps) {
+  return (
+    <AmazonRecommendations
+      searchTerms={[guideTitle, categoryName]}
+      excludedAsins={excludedAsins}
+      maximumResults={8}
+      eyebrow="Related products on Amazon"
+      heading="Amazon finds for this guide."
+      description="Live Amazon results selected from this guide's topic and related category."
+    />
+  );
+}
+
+function AmazonRecommendations({ searchTerms, excludedAsins = [], maximumResults, eyebrow, heading, description }: AmazonRecommendationsProps) {
   const [items, setItems] = useState<AmazonSimilarItem[]>([]);
   const [status, setStatus] = useState<"loading" | "success" | "empty" | "error">("loading");
+  const searchQuery = buildSearchQuery(searchTerms);
+  const excludedAsinKey = excludedAsins.map((asin) => asin.trim().toUpperCase()).sort().join(",");
 
   useEffect(() => {
     const controller = new AbortController();
 
     async function loadSimilarProducts() {
+      setItems([]);
+      setStatus("loading");
+
       try {
         const response = await fetch("/api/amazon/search", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            query: buildSearchQuery(productName, categoryName),
+            query: searchQuery,
             page: 1,
             primeOnly: false,
             sortBy: "Relevance",
@@ -57,10 +103,10 @@ export function AmazonSimilarProducts({ productName, categoryName, currentAsin }
 
         if (!response.ok) throw new Error("Amazon search unavailable");
         const payload = await response.json() as AmazonSearchPayload;
-        const normalizedCurrentAsin = currentAsin?.trim().toUpperCase();
+        const excludedAsinSet = new Set(excludedAsinKey ? excludedAsinKey.split(",") : []);
         const similarItems = payload.items
-          .filter((item) => item.asin !== normalizedCurrentAsin)
-          .slice(0, 4);
+          .filter((item) => !excludedAsinSet.has(item.asin))
+          .slice(0, maximumResults);
 
         setItems(similarItems);
         setStatus(similarItems.length > 0 ? "success" : "empty");
@@ -71,16 +117,16 @@ export function AmazonSimilarProducts({ productName, categoryName, currentAsin }
 
     void loadSimilarProducts();
     return () => controller.abort();
-  }, [categoryName, currentAsin, productName]);
+  }, [excludedAsinKey, maximumResults, searchQuery]);
 
   return (
     <section className="border-y border-[#063f5b]/6 bg-[#f1fbfe] px-5 py-14 sm:px-8 md:py-20">
       <div className="mx-auto max-w-6xl">
         <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
           <div className="max-w-2xl">
-            <p className="text-sm font-extrabold uppercase tracking-[0.14em] text-[#009dcc]">More to explore on Amazon</p>
-            <h2 className="mt-3 font-display text-4xl font-semibold tracking-[-0.045em] text-[#063f5b]">Similar products you may like.</h2>
-            <p className="mt-4 text-base leading-7 text-[#063f5b]/65">Live Amazon results selected from this product&apos;s name and category.</p>
+            <p className="text-sm font-extrabold uppercase tracking-[0.14em] text-[#009dcc]">{eyebrow}</p>
+            <h2 className="mt-3 font-display text-4xl font-semibold tracking-[-0.045em] text-[#063f5b]">{heading}</h2>
+            <p className="mt-4 text-base leading-7 text-[#063f5b]/65">{description}</p>
           </div>
           <Link href="/amazon-finds" className="shrink-0 text-sm font-extrabold text-[#009dcc] transition-colors hover:text-[#0784b0]">Search Amazon <span aria-hidden="true">→</span></Link>
         </div>
@@ -88,7 +134,7 @@ export function AmazonSimilarProducts({ productName, categoryName, currentAsin }
         <div aria-live="polite" aria-busy={status === "loading"}>
           {status === "loading" && (
             <div className="mt-9 grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
-              {[0, 1, 2, 3].map((item) => (
+              {Array.from({ length: maximumResults }, (_, item) => (
                 <div key={item} className="overflow-hidden rounded-2xl border border-[#063f5b]/8 bg-white sm:rounded-[2rem]">
                   <div className="aspect-square animate-pulse bg-[#e4f6fa] sm:aspect-[4/3]" />
                   <div className="space-y-3 p-4 sm:p-5">

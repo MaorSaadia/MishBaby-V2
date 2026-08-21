@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { AmazonGuideProducts } from "@/app/components/amazon-similar-products";
 import { GuideImage } from "@/app/components/guide-image";
 import { ProductCard } from "@/app/components/product-card";
 import { RecentlyViewedGuides } from "@/app/components/recently-viewed-guides";
@@ -68,6 +69,9 @@ export default async function GuidePage({ params }: PageProps<"/guides/[slug]">)
 
   const relatedGuides = await getRelatedGuides(guide);
   const guideUrl = `${siteConfig.url}/guides/${guide.slug}`;
+  const curatedAmazonAsins = guide.relatedProducts.flatMap((product) =>
+    product.offers.flatMap((offer) => offer.amazonAsin ? [offer.amazonAsin] : []),
+  );
   const structuredData = {
     "@context": "https://schema.org",
     "@graph": [
@@ -200,25 +204,37 @@ export default async function GuidePage({ params }: PageProps<"/guides/[slug]">)
             ))}
           </div>
 
-          {guide.relatedProducts.length > 0 && (
-            <section className="mt-16 border-t border-[#063f5b]/10 pt-14">
-              <div>
-                <p className="text-sm font-extrabold uppercase tracking-[0.14em] text-[#009dcc]">Related products</p>
-                <h2 className="mt-3 font-display text-3xl font-semibold tracking-[-0.04em] text-[#063f5b]">Thoughtful finds for this guide.</h2>
-                <p className="mt-3 max-w-xl text-sm leading-6 text-[#063f5b]/65">Explore selected products and compare the active merchant offers currently available.</p>
-              </div>
-              <div className="mt-8 grid gap-5 sm:grid-cols-2">
-                {guide.relatedProducts.map((product) => <ProductCard key={product.id} product={product} />)}
-              </div>
-            </section>
-          )}
-
           <section className="mt-16 rounded-[2rem] bg-[#063f5b] px-7 py-9 text-white sm:px-9">
             <p className="text-sm font-extrabold uppercase tracking-[0.14em] text-[#a8e8f5]">Ready to explore?</p>
             <h2 className="mt-2 font-display text-3xl font-semibold tracking-[-0.04em]">Find thoughtful products for your family’s routine.</h2>
             <Link href={`/categories/${guide.relatedCategory.slug}`} className="mt-6 inline-flex rounded-full bg-white px-5 py-3 text-sm font-extrabold text-[#063f5b] transition hover:bg-[#e8f8fc]">Explore {guide.relatedCategory.label}</Link>
           </section>
         </article>
+
+        {guide.relatedProducts.length > 0 && (
+          <section className="border-y border-[#063f5b]/6 bg-white px-5 py-14 sm:px-8 md:py-20">
+            <div className="mx-auto max-w-6xl">
+              <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+                <div className="max-w-2xl">
+                  <p className="text-sm font-extrabold uppercase tracking-[0.14em] text-[#009dcc]">Related products</p>
+                  <h2 className="mt-3 font-display text-4xl font-semibold tracking-[-0.045em] text-[#063f5b]">Thoughtful finds for this guide.</h2>
+                  <p className="mt-4 text-base leading-7 text-[#063f5b]/65">Explore selected products and compare the active merchant offers currently available.</p>
+                </div>
+                <Link href={`/categories/${guide.relatedCategory.slug}`} className="shrink-0 text-sm font-extrabold text-[#009dcc] transition-colors hover:text-[#0784b0]">View all in {guide.relatedCategory.label} <span aria-hidden="true">→</span></Link>
+              </div>
+
+              <div className="mt-9 grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
+                {guide.relatedProducts.map((product) => <ProductCard key={product.id} product={product} variant="compact" />)}
+              </div>
+            </div>
+          </section>
+        )}
+
+        <AmazonGuideProducts
+          guideTitle={guide.title}
+          categoryName={guide.relatedCategory.label}
+          excludedAsins={curatedAmazonAsins}
+        />
 
         {relatedGuides.length > 0 && (
           <section className="border-t border-[#063f5b]/6 bg-white px-5 py-14 sm:px-8 md:py-20">
