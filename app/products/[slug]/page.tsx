@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AmazonSimilarProducts } from "../../components/amazon-similar-products";
-import { GuideImage } from "../../components/guide-image";
+import { GuideCard } from "../../components/guide-card";
 import { OfferComparison } from "../../components/offer-comparison";
 import { ProductImage } from "../../components/product-image";
 import { RecentlyViewedProducts } from "../../components/recently-viewed-products";
@@ -188,20 +188,7 @@ export default async function ProductPage({ params }: PageProps<"/products/[slug
               </div>
 
               <div className="mt-9 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                {relatedGuides.map((guide) => (
-                  <article key={guide.id} className="overflow-hidden rounded-[2rem] border border-[#063f5b]/8 bg-white shadow-[0_16px_36px_-28px_rgba(6,63,91,.4)]">
-                    <GuideImage guide={guide} variant="related" />
-                    <div className="p-6">
-                      <div className="flex flex-wrap items-center gap-3 text-xs font-bold">
-                        <span className="uppercase tracking-[0.12em] text-[#009dcc]">{guide.categoryLabel}</span>
-                        {guide.readingMinutes && <span className="text-[#063f5b]/45">{guide.readingMinutes} min read</span>}
-                      </div>
-                      <h3 className="mt-3 text-xl font-extrabold leading-snug tracking-[-0.03em] text-[#063f5b]">{guide.title}</h3>
-                      <p className="mt-3 text-sm leading-6 text-[#063f5b]/65">{guide.description}</p>
-                      <Link href={`/guides/${guide.slug}`} className="mt-5 inline-flex items-center gap-2 text-xs font-extrabold text-[#009dcc] transition-colors hover:text-[#0784b0]">Read the guide <span aria-hidden="true">→</span></Link>
-                    </div>
-                  </article>
-                ))}
+                {relatedGuides.map((guide) => <GuideCard key={guide.id} guide={guide} variant="related" />)}
               </div>
             </div>
           </section>

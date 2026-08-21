@@ -167,7 +167,8 @@ export default async function GuidesPage({ searchParams }: GuidesPageProps) {
         </div>
 
         {featuredGuide && (
-          <div className="relative grid overflow-hidden rounded-[2rem] border border-[#063f5b]/8 bg-white shadow-[0_20px_48px_-34px_rgba(6,63,91,.4)] md:grid-cols-[.85fr_1.15fr]">
+          <div className="group relative grid overflow-hidden rounded-[2rem] border border-[#063f5b]/8 bg-white shadow-[0_20px_48px_-34px_rgba(6,63,91,.4)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_26px_52px_-32px_rgba(6,63,91,.38)] md:grid-cols-[.85fr_1.15fr]">
+            {featuredGuide.status === "published" && <Link href={`/guides/${featuredGuide.slug}`} aria-label={`Read ${featuredGuide.title}`} className="absolute inset-0 z-10 rounded-[inherit] focus-visible:outline-3 focus-visible:outline-offset-[-3px] focus-visible:outline-[#009dcc]" />}
             {featuredGuide.status === "published" && <div className="absolute right-4 top-4 z-20"><CardFavoriteButton kind="guide" id={featuredGuide.id} label={featuredGuide.title} /></div>}
             <GuideImage guide={featuredGuide} variant="featured" preload />
             <div className="flex flex-col justify-center p-7 sm:p-10">
@@ -178,9 +179,9 @@ export default async function GuidesPage({ searchParams }: GuidesPageProps) {
               <h2 className="mt-5 font-display text-4xl font-semibold leading-tight tracking-[-0.045em] text-[#063f5b]">{featuredGuide.title}</h2>
               <p className="mt-4 max-w-xl text-base leading-7 text-[#063f5b]/65">{featuredGuide.description}</p>
               {featuredGuide.status === "published" && (
-                <Link href={`/guides/${featuredGuide.slug}`} className="mt-6 inline-flex items-center gap-2 text-sm font-extrabold text-[#009dcc] transition-colors hover:text-[#0784b0]">
+                <span className="mt-6 inline-flex items-center gap-2 text-sm font-extrabold text-[#009dcc] transition-colors group-hover:text-[#0784b0]">
                   Read the guide <span aria-hidden="true">→</span>
-                </Link>
+                </span>
               )}
             </div>
           </div>
