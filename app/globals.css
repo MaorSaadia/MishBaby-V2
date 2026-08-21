@@ -5,6 +5,31 @@
   --foreground: #063f5b;
   --brand-cyan-accessible: #007797;
   --brand-cyan-accessible-hover: #006b88;
+  --brand-cyan-surface: #007797;
+  --brand-cyan-surface-hover: #006b88;
+  --surface: #ffffff;
+  --surface-soft: #f7fcfe;
+  --surface-tint: #f1fbfe;
+  --surface-accent: #e8f8fc;
+  --surface-accent-strong: #e2f7fc;
+  --surface-strong: #063f5b;
+  --border-color: #063f5b;
+}
+
+:root[data-theme="dark"] {
+  --background: #071c28;
+  --foreground: #eaf9fc;
+  --brand-cyan-accessible: #59d7ee;
+  --brand-cyan-accessible-hover: #86e5f5;
+  --brand-cyan-surface: #087e9f;
+  --brand-cyan-surface-hover: #0a91b5;
+  --surface: #0d2937;
+  --surface-soft: #092330;
+  --surface-tint: #0b3040;
+  --surface-accent: #123b4a;
+  --surface-accent-strong: #17495a;
+  --surface-strong: #0c4157;
+  --border-color: #b9e8f2;
 }
 
 @theme inline {
@@ -22,6 +47,7 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: ui-rounded, "Avenir Next", Avenir, "Segoe UI", sans-serif;
+  transition: background-color 180ms ease, color 180ms ease;
 }
 
 ::selection { background: #a8e8f5; color: #063f5b; }
@@ -57,7 +83,7 @@ body {
 }
 
 .bg-\[\#009dcc\] {
-  background-color: var(--brand-cyan-accessible);
+  background-color: var(--brand-cyan-surface);
 }
 
 .hover\:text-\[\#009dcc\]:hover,
@@ -66,12 +92,94 @@ body {
 }
 
 .hover\:bg-\[\#0784b0\]:hover {
-  background-color: var(--brand-cyan-accessible-hover);
+  background-color: var(--brand-cyan-surface-hover);
 }
 
 .group:hover .group-hover\:bg-\[\#009dcc\] {
-  background-color: var(--brand-cyan-accessible);
+  background-color: var(--brand-cyan-surface);
 }
+
+/* The public UI was originally authored with MishBaby's light palette as
+   Tailwind arbitrary colors. These mappings keep that markup stable while
+   making every shared color role respond to the centralized theme tokens. */
+:root[data-theme="dark"] .bg-white { background-color: var(--surface); }
+:root[data-theme="dark"] .bg-white\/90 { background-color: color-mix(in srgb, var(--surface) 90%, transparent); }
+:root[data-theme="dark"] .bg-white\/75 { background-color: color-mix(in srgb, var(--surface) 75%, transparent); }
+:root[data-theme="dark"] .bg-white\/70 { background-color: color-mix(in srgb, var(--surface) 70%, transparent); }
+:root[data-theme="dark"] .bg-white\/65 { background-color: color-mix(in srgb, var(--surface) 65%, transparent); }
+:root[data-theme="dark"] .bg-\[\#fbfeff\] { background-color: var(--background); }
+:root[data-theme="dark"] .bg-\[\#fbfeff\]\/95 { background-color: color-mix(in srgb, var(--background) 95%, transparent); }
+:root[data-theme="dark"] .bg-\[\#f7fcfe\] { background-color: var(--surface-soft); }
+:root[data-theme="dark"] .bg-\[\#f1fbfe\] { background-color: var(--surface-tint); }
+:root[data-theme="dark"] .bg-\[\#e8f8fc\] { background-color: var(--surface-accent); }
+:root[data-theme="dark"] .bg-\[\#e2f7fc\] { background-color: var(--surface-accent-strong); }
+:root[data-theme="dark"] .bg-\[\#e4f6fa\],
+:root[data-theme="dark"] .bg-\[\#d4eff5\],
+:root[data-theme="dark"] .bg-\[\#d2f2f9\],
+:root[data-theme="dark"] .bg-\[\#dff4f8\] { background-color: #164252; }
+:root[data-theme="dark"] .bg-\[\#c7eff8\],
+:root[data-theme="dark"] .bg-\[\#d9f4ee\],
+:root[data-theme="dark"] .bg-\[\#dbe9fb\],
+:root[data-theme="dark"] .bg-\[\#d8eee5\],
+:root[data-theme="dark"] .bg-\[\#e2f2e8\] { background-color: #174252; }
+:root[data-theme="dark"] .bg-\[\#063f5b\] { background-color: var(--surface-strong); }
+:root[data-theme="dark"] .bg-\[\#063f5b\]\/10 { background-color: color-mix(in srgb, var(--foreground) 10%, transparent); }
+:root[data-theme="dark"] .bg-\[\#007797\],
+:root[data-theme="dark"] .bg-\[\#0784b0\] { background-color: var(--brand-cyan-surface); }
+:root[data-theme="dark"] .bg-\[\#006b88\] { background-color: var(--brand-cyan-surface-hover); }
+:root[data-theme="dark"] .bg-\[\#a8e8f5\] { background-color: #27758a; }
+:root[data-theme="dark"] .bg-\[\#a8e8f5\]\/80 { background-color: rgb(39 117 138 / 0.8); }
+:root[data-theme="dark"] .bg-\[\#a8e8f5\]\/75 { background-color: rgb(39 117 138 / 0.75); }
+:root[data-theme="dark"] .bg-\[\#a8e8f5\]\/70 { background-color: rgb(39 117 138 / 0.7); }
+:root[data-theme="dark"] .bg-\[\#a8e8f5\]\/65 { background-color: rgb(39 117 138 / 0.65); }
+:root[data-theme="dark"] .bg-\[\#a8e8f5\]\/40 { background-color: rgb(39 117 138 / 0.4); }
+:root[data-theme="dark"] .bg-\[\#c7eff8\]\/80 { background-color: rgb(23 66 82 / 0.8); }
+
+:root[data-theme="dark"] .text-\[\#063f5b\] { color: var(--foreground); }
+:root[data-theme="dark"] .text-\[\#063f5b\]\/75 { color: color-mix(in srgb, var(--foreground) 75%, transparent); }
+:root[data-theme="dark"] .text-\[\#063f5b\]\/72 { color: color-mix(in srgb, var(--foreground) 72%, transparent); }
+:root[data-theme="dark"] .text-\[\#063f5b\]\/70 { color: color-mix(in srgb, var(--foreground) 70%, transparent); }
+:root[data-theme="dark"] .text-\[\#063f5b\]\/65 { color: color-mix(in srgb, var(--foreground) 65%, transparent); }
+:root[data-theme="dark"] .text-\[\#063f5b\]\/60 { color: color-mix(in srgb, var(--foreground) 60%, transparent); }
+:root[data-theme="dark"] .text-\[\#063f5b\]\/55 { color: color-mix(in srgb, var(--foreground) 55%, transparent); }
+:root[data-theme="dark"] .text-\[\#063f5b\]\/50 { color: color-mix(in srgb, var(--foreground) 50%, transparent); }
+:root[data-theme="dark"] .text-\[\#063f5b\]\/45 { color: color-mix(in srgb, var(--foreground) 45%, transparent); }
+:root[data-theme="dark"] .text-\[\#063f5b\]\/40 { color: color-mix(in srgb, var(--foreground) 40%, transparent); }
+:root[data-theme="dark"] .text-\[\#063f5b\]\/35 { color: color-mix(in srgb, var(--foreground) 35%, transparent); }
+:root[data-theme="dark"] .text-\[\#007fa5\],
+:root[data-theme="dark"] .text-\[\#007fa8\],
+:root[data-theme="dark"] .text-\[\#007797\],
+:root[data-theme="dark"] .text-\[\#0784b0\] { color: var(--brand-cyan-accessible); }
+:root[data-theme="dark"] .text-\[\#a8e8f5\] { color: #b9eef7; }
+:root[data-theme="dark"] .text-\[\#376579\] { color: #a8d4df; }
+:root[data-theme="dark"] .placeholder\:text-\[\#063f5b\]\/45::placeholder { color: color-mix(in srgb, var(--foreground) 45%, transparent); }
+:root[data-theme="dark"] .placeholder\:text-\[\#063f5b\]\/40::placeholder { color: color-mix(in srgb, var(--foreground) 40%, transparent); }
+:root[data-theme="dark"] .placeholder\:text-\[\#063f5b\]\/35::placeholder { color: color-mix(in srgb, var(--foreground) 35%, transparent); }
+
+:root[data-theme="dark"] .border-\[\#063f5b\]\/15 { border-color: color-mix(in srgb, var(--border-color) 15%, transparent); }
+:root[data-theme="dark"] .border-\[\#063f5b\]\/12 { border-color: color-mix(in srgb, var(--border-color) 12%, transparent); }
+:root[data-theme="dark"] .border-\[\#063f5b\]\/10 { border-color: color-mix(in srgb, var(--border-color) 10%, transparent); }
+:root[data-theme="dark"] .border-\[\#063f5b\]\/8 { border-color: color-mix(in srgb, var(--border-color) 8%, transparent); }
+:root[data-theme="dark"] .border-\[\#063f5b\]\/6 { border-color: color-mix(in srgb, var(--border-color) 6%, transparent); }
+:root[data-theme="dark"] .divide-\[\#063f5b\]\/8 > :not(:last-child) { border-color: color-mix(in srgb, var(--border-color) 8%, transparent); }
+
+:root[data-theme="dark"] .bg-\[\#fff7df\] { background-color: #3b3119; }
+:root[data-theme="dark"] .text-\[\#735a16\] { color: #f4d581; }
+:root[data-theme="dark"] .bg-\[\#fff0f1\] { background-color: #3b2026; }
+:root[data-theme="dark"] .text-\[\#8a2430\] { color: #ffb3bd; }
+:root[data-theme="dark"] .bg-\[\#e7f8ee\],
+:root[data-theme="dark"] .bg-\[\#d9f4ee\]\/75,
+:root[data-theme="dark"] .bg-\[\#d9f4ee\]\/70 { background-color: #14382d; }
+:root[data-theme="dark"] .text-\[\#195b37\],
+:root[data-theme="dark"] .text-\[\#087b54\] { color: #92e6bd; }
+
+:root[data-theme="dark"] .hover\:bg-white:hover { background-color: #123747; }
+:root[data-theme="dark"] .hover\:bg-\[\#e8f8fc\]:hover,
+:root[data-theme="dark"] .hover\:bg-\[\#d2f2f9\]:hover { background-color: #18495a; }
+:root[data-theme="dark"] .hover\:border-\[\#009dcc\]\/40:hover,
+:root[data-theme="dark"] .hover\:border-\[\#009dcc\]\/35:hover { border-color: color-mix(in srgb, var(--brand-cyan-accessible) 55%, transparent); }
+
+:root[data-theme="dark"] ::selection { background: #27758a; color: #ffffff; }
 
 @media (prefers-reduced-motion: reduce) {
   *,

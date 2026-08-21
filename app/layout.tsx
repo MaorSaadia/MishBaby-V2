@@ -6,6 +6,23 @@ import { siteConfig } from "@/lib/site";
 import { FavoritesProvider } from "./components/favorites-provider";
 import "./globals.css";
 
+const themeScript = `(() => {
+  try {
+    const root = document.documentElement;
+    if (window.location.pathname.startsWith("/studio")) {
+      root.dataset.theme = "light";
+      root.style.colorScheme = "light";
+      return;
+    }
+    const storedTheme = window.localStorage.getItem("mishbaby-theme");
+    const theme = storedTheme === "light" || storedTheme === "dark"
+      ? storedTheme
+      : window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    root.dataset.theme = theme;
+    root.style.colorScheme = theme;
+  } catch {}
+})();`;
+
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
   title: {
@@ -36,7 +53,9 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="en"
       className="h-full antialiased"
+      suppressHydrationWarning
     >
+      <head><script dangerouslySetInnerHTML={{ __html: themeScript }} /></head>
       <body className="flex min-h-full flex-col">
         <FavoritesProvider>
           <a href="#main-content" className="skip-link">Skip to main content</a>
