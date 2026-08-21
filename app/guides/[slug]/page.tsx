@@ -211,6 +211,12 @@ export default async function GuidePage({ params }: PageProps<"/guides/[slug]">)
           </section>
         </article>
 
+        <AmazonGuideProducts
+          guideTitle={guide.title}
+          categoryName={guide.relatedCategory.label}
+          excludedAsins={curatedAmazonAsins}
+        />
+
         {guide.relatedProducts.length > 0 && (
           <section className="border-y border-[#063f5b]/6 bg-white px-5 py-14 sm:px-8 md:py-20">
             <div className="mx-auto max-w-6xl">
@@ -229,12 +235,6 @@ export default async function GuidePage({ params }: PageProps<"/guides/[slug]">)
             </div>
           </section>
         )}
-
-        <AmazonGuideProducts
-          guideTitle={guide.title}
-          categoryName={guide.relatedCategory.label}
-          excludedAsins={curatedAmazonAsins}
-        />
 
         {relatedGuides.length > 0 && (
           <section className="border-t border-[#063f5b]/6 bg-white px-5 py-14 sm:px-8 md:py-20">
