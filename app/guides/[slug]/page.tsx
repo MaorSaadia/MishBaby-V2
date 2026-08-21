@@ -194,7 +194,16 @@ export default async function GuidePage({ params }: PageProps<"/guides/[slug]">)
                 </div>
                 {section.items && (
                   <ul className="mt-6 grid gap-3 rounded-3xl bg-[#f7fcfe] p-6">
-                    {section.items.map((item) => <li key={item} className="flex gap-3 text-sm leading-6 text-[#063f5b]/70"><span className="mt-2 grid size-4 shrink-0 place-items-center rounded-full bg-[#009dcc] text-[9px] font-black text-white">✓</span>{item}</li>)}
+                    {section.items.map((item) => (
+                      <li key={item} className="flex gap-3 text-sm leading-6 text-[#063f5b]/70">
+                        <span className="mt-1.5 grid size-4 shrink-0 place-items-center rounded-full bg-[#009dcc] text-white" aria-hidden="true">
+                          <svg viewBox="0 0 12 12" className="size-2.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="m2.25 6.25 2.25 2.25 5.25-5.25" />
+                          </svg>
+                        </span>
+                        <span>{item}</span>
+                      </li>
+                    ))}
                   </ul>
                 )}
                 <a href="#guide-contents" className="mt-6 inline-flex items-center gap-2 text-xs font-extrabold text-[#063f5b]/45 transition hover:text-[#009dcc]">
