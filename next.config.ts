@@ -32,6 +32,27 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
+        hostname: "*.alicdn.com",
+        port: "",
+        pathname: "/**",
+        search: "",
+      },
+      {
+        protocol: "https",
+        hostname: "*.aliexpress-media.com",
+        port: "",
+        pathname: "/**",
+        search: "",
+      },
+      {
+        protocol: "https",
+        hostname: "ae-pic-a1.aliexpress-media.com",
+        port: "",
+        pathname: "/kf/**",
+        search: "",
+      },
+      {
+        protocol: "https",
         hostname: "**.googleusercontent.com",
         port: "",
         pathname: "/**",

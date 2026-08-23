@@ -2,27 +2,49 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Brand } from "./brand";
 import { NavbarSearch } from "./navbar-search";
 import type { ProductSearchItem } from "@/lib/products";
 import { AccountMenu } from "./auth/account-menu";
 import { ThemeToggle } from "./theme-toggle";
 
-const links = [
+const linksBeforeFinds = [
   { label: "Products", href: "/products" },
   { label: "Discover", href: "/categories" },
-  { label: "Amazon Finds", href: "/amazon-finds" },
+];
+
+const findsLinks = [
+  { label: "Amazon Finds", href: "/amazon-finds", description: "Search Amazon's Baby catalog" },
+  { label: "AliExpress Finds", href: "/aliexpress-finds", description: "Search AliExpress baby products" },
+];
+
+const linksAfterFinds = [
   { label: "Guides", href: "/guides" },
   { label: "About", href: "/about" },
 ];
 
+const mobileLinks = [...linksBeforeFinds, ...findsLinks, ...linksAfterFinds];
+
 export function Navbar({ products }: { products: ProductSearchItem[] }) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [findsOpen, setFindsOpen] = useState(false);
   const pathname = usePathname();
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const searchButtonRef = useRef<HTMLButtonElement>(null);
+  const findsButtonRef = useRef<HTMLButtonElement>(null);
+  const findsMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function closeFindsOnOutsideClick(event: PointerEvent) {
+      if (findsMenuRef.current?.contains(event.target as Node)) return;
+      setFindsOpen(false);
+    }
+
+    document.addEventListener("pointerdown", closeFindsOnOutsideClick);
+    return () => document.removeEventListener("pointerdown", closeFindsOnOutsideClick);
+  }, []);
 
   function isActive(href: string) {
     return pathname === href || pathname.startsWith(`${href}/`);
@@ -33,6 +55,9 @@ export function Navbar({ products }: { products: ProductSearchItem[] }) {
     if (searchOpen) {
       setSearchOpen(false);
       searchButtonRef.current?.focus();
+    } else if (findsOpen) {
+      setFindsOpen(false);
+      findsButtonRef.current?.focus();
     } else if (isOpen) {
       setIsOpen(false);
       menuButtonRef.current?.focus();
@@ -48,7 +73,10 @@ export function Navbar({ products }: { products: ProductSearchItem[] }) {
 
   function toggleMenu() {
     setIsOpen((current) => {
-      if (!current) setSearchOpen(false);
+      if (!current) {
+        setSearchOpen(false);
+        setFindsOpen(false);
+      }
       return !current;
     });
   }
@@ -67,9 +95,47 @@ export function Navbar({ products }: { products: ProductSearchItem[] }) {
           />
         </div>
         <nav className="ml-auto hidden shrink-0 items-center gap-6 text-sm font-bold text-[#063f5b]/75 lg:flex" aria-label="Primary navigation">
-          {links.map((link) => {
+          {linksBeforeFinds.map((link) => {
             const active = isActive(link.href);
 
+            return <Link key={link.label} href={link.href} aria-current={active ? "page" : undefined} className={`rounded-md transition-colors hover:text-[#009dcc] ${active ? "text-[#009dcc]" : ""}`}>{link.label}</Link>;
+          })}
+          <div ref={findsMenuRef} className="relative">
+            <button
+              ref={findsButtonRef}
+              type="button"
+              onClick={() => setFindsOpen((current) => !current)}
+              aria-expanded={findsOpen}
+              aria-controls="finds-navigation"
+              className={`flex items-center gap-1.5 rounded-md transition-colors hover:text-[#009dcc] ${pathname.startsWith("/amazon-finds") || pathname.startsWith("/aliexpress-finds") ? "text-[#009dcc]" : ""}`}
+            >
+              Finds
+              <svg viewBox="0 0 20 20" aria-hidden="true" className={`size-4 transition-transform ${findsOpen ? "rotate-180" : ""}`} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <path d="m6 8 4 4 4-4" />
+              </svg>
+            </button>
+            {findsOpen && (
+              <div id="finds-navigation" className="absolute left-1/2 top-[calc(100%+1rem)] w-64 -translate-x-1/2 rounded-2xl border border-[#063f5b]/10 bg-white p-2 shadow-[0_22px_55px_-28px_rgba(6,63,91,.55)]">
+                {findsLinks.map((link) => {
+                  const active = isActive(link.href);
+                  return (
+                    <Link
+                      key={link.label}
+                      href={link.href}
+                      aria-current={active ? "page" : undefined}
+                      onClick={() => setFindsOpen(false)}
+                      className={`block rounded-xl px-3 py-3 transition-colors hover:bg-[#e8f8fc] ${active ? "bg-[#e2f7fc]" : ""}`}
+                    >
+                      <span className="block font-extrabold text-[#063f5b]">{link.label}</span>
+                      <span className="mt-0.5 block text-xs font-normal leading-5 text-[#063f5b]/60">{link.description}</span>
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+          {linksAfterFinds.map((link) => {
+            const active = isActive(link.href);
             return <Link key={link.label} href={link.href} aria-current={active ? "page" : undefined} className={`rounded-md transition-colors hover:text-[#009dcc] ${active ? "text-[#009dcc]" : ""}`}>{link.label}</Link>;
           })}
         </nav>
@@ -93,7 +159,7 @@ export function Navbar({ products }: { products: ProductSearchItem[] }) {
       {isOpen && (
         <nav id="mobile-navigation" className="border-t border-[#063f5b]/10 px-5 py-4 lg:hidden" aria-label="Mobile navigation">
           <div className="mx-auto flex max-w-6xl flex-col gap-1">
-            {links.map((link) => {
+            {mobileLinks.map((link) => {
               const active = isActive(link.href);
               return <Link key={link.label} href={link.href} aria-current={active ? "page" : undefined} onClick={() => setIsOpen(false)} className={`rounded-xl px-3 py-3 font-bold hover:bg-[#a8e8f5]/40 ${active ? "bg-[#e2f7fc] text-[#007fa5]" : ""}`}>{link.label}</Link>;
             })}

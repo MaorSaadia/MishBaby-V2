@@ -66,6 +66,7 @@ export function Footer() {
           <div className="mt-4 grid gap-2 text-sm text-[#063f5b]/70">
             <Link href="/categories">Product categories</Link>
             <Link href="/amazon-finds">Amazon Finds</Link>
+            <Link href="/aliexpress-finds">AliExpress Finds</Link>
             {/* <Link href="/collections">Curated collections</Link> */}
             <Link href="/guides">Parenting guides</Link>
             <Link href="/about">Our approach</Link>

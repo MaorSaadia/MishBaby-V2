@@ -4,6 +4,7 @@
 /node_modules
 /creatorsapi-nodejs-sdk/creatorsapi-nodejs-sdk/node_modules/
 /creatorsapi-nodejs-sdk/creatorsapi-nodejs-sdk/dist/
+/aliexpress-sdk
 /.pnp
 .pnp.*
 .yarn/*
