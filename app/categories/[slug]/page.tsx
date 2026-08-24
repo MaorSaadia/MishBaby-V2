@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { GuideCard } from "../../components/guide-card";
 import { ProductCard } from "../../components/product-card";
+import { AmazonCategoryProducts } from "@/app/components/amazon-similar-products";
 import { getCategoryBySlug, getPublishedCategories } from "@/lib/categories";
 import { getCategoryThemeClass } from "@/lib/category-themes";
 import { getPublishedGuidesByCategorySlug } from "@/lib/guides";
@@ -42,6 +43,9 @@ export default async function CategoryPage({ params }: PageProps<"/categories/[s
     getProductsByCategory(category.slug),
     getPublishedGuidesByCategorySlug(category.slug),
   ]);
+  const curatedAmazonAsins = featuredProducts.flatMap((product) =>
+    product.offers.flatMap((offer) => offer.amazonAsin ? [offer.amazonAsin] : []),
+  );
   const categoryUrl = `${siteConfig.url}/categories/${category.slug}`;
   const breadcrumbStructuredData = createBreadcrumbStructuredData(
     `${categoryUrl}#breadcrumb`,
@@ -133,6 +137,12 @@ export default async function CategoryPage({ params }: PageProps<"/categories/[s
             </div>
           </section>
         )}
+
+        <AmazonCategoryProducts
+          categoryName={category.name}
+          topics={category.topics}
+          excludedAsins={curatedAmazonAsins}
+        />
 
         {relatedGuides.length > 0 && (
           <section className="mx-auto max-w-6xl px-5 py-14 sm:px-8 md:py-20">

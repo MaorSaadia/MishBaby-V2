@@ -31,6 +31,12 @@ type AmazonGuideProductsProps = {
   excludedAsins?: string[];
 };
 
+type AmazonCategoryProductsProps = {
+  categoryName: string;
+  topics: string[];
+  excludedAsins?: string[];
+};
+
 type AmazonRecommendationsProps = {
   searchTerms: string[];
   excludedAsins?: string[];
@@ -71,6 +77,19 @@ export function AmazonGuideProducts({ guideTitle, categoryName, excludedAsins = 
       eyebrow="Related products on Amazon"
       heading="Amazon finds for this guide."
       description="Live Amazon results selected from this guide's topic and related category."
+    />
+  );
+}
+
+export function AmazonCategoryProducts({ categoryName, topics, excludedAsins = [] }: AmazonCategoryProductsProps) {
+  return (
+    <AmazonRecommendations
+      searchTerms={[categoryName, ...topics]}
+      excludedAsins={excludedAsins}
+      maximumResults={8}
+      eyebrow="More products on Amazon"
+      heading={`Amazon finds for ${categoryName}.`}
+      description={`Live Amazon results selected from ${categoryName.toLowerCase()} and its related topics.`}
     />
   );
 }
@@ -144,7 +163,7 @@ function AmazonRecommendations({ searchTerms, excludedAsins = [], maximumResults
                   </div>
                 </div>
               ))}
-              <span className="sr-only">Loading similar products from Amazon.</span>
+              <span className="sr-only">Loading products from Amazon.</span>
             </div>
           )}
 
@@ -156,7 +175,7 @@ function AmazonRecommendations({ searchTerms, excludedAsins = [], maximumResults
 
           {(status === "empty" || status === "error") && (
             <div className="mt-9 rounded-3xl border border-[#063f5b]/8 bg-white px-6 py-7 text-sm text-[#063f5b]/65">
-              Similar Amazon products aren&apos;t available right now. You can still browse with <Link href="/amazon-finds" className="font-extrabold text-[#009dcc] hover:underline">Amazon Finds</Link>.
+              Amazon products aren&apos;t available right now. You can still browse with <Link href="/amazon-finds" className="font-extrabold text-[#009dcc] hover:underline">Amazon Finds</Link>.
             </div>
           )}
         </div>

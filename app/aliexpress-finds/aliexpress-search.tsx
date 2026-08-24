@@ -8,28 +8,11 @@ type SearchStatus = "idle" | "loading" | "loading-more" | "success" | "error";
 
 const suggestedSearches = ["baby monitor", "bottle warmer", "diaper bag"];
 
-function formatUsd(amount: string) {
-  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(Number(amount));
-}
-
-function compactNumber(value: number) {
-  return new Intl.NumberFormat("en-US", { notation: "compact", maximumFractionDigits: 1 }).format(value);
-}
-
-function discountPercentage(item: AliExpressSearchItem) {
-  if (!item.salePrice || !item.originalPrice) return undefined;
-  const salePrice = Number(item.salePrice.amount);
-  const originalPrice = Number(item.originalPrice.amount);
-  if (!Number.isFinite(salePrice) || !Number.isFinite(originalPrice) || originalPrice <= salePrice) return undefined;
-  return Math.round((1 - salePrice / originalPrice) * 100);
-}
-
 export function AliExpressSearch() {
   const [query, setQuery] = useState("");
   const [activeQuery, setActiveQuery] = useState("");
   const [items, setItems] = useState<AliExpressSearchItem[]>([]);
   const [page, setPage] = useState(0);
-  const [totalResultCount, setTotalResultCount] = useState(0);
   const [hasMore, setHasMore] = useState(false);
   const [status, setStatus] = useState<SearchStatus>("idle");
   const [message, setMessage] = useState("");
@@ -69,7 +52,6 @@ export function AliExpressSearch() {
       });
       setActiveQuery(result.query);
       setPage(result.page);
-      setTotalResultCount(result.totalResultCount);
       setHasMore(result.hasMore);
       setStatus("success");
       if (result.items.length === 0 && !append) {
@@ -146,7 +128,7 @@ export function AliExpressSearch() {
         {initialLoading && "Searching AliExpress's baby-product catalog..."}
         {!initialLoading && message}
         {!initialLoading && !message && activeQuery && (
-          <>Showing {items.length} of {totalResultCount.toLocaleString("en-US")} results for &ldquo;{activeQuery}&rdquo;.</>
+          <>Showing {items.length} relevant results for &ldquo;{activeQuery}&rdquo;.</>
         )}
       </div>
 
@@ -166,22 +148,6 @@ export function AliExpressSearch() {
                   <div className="flex flex-1 flex-col border-t border-[#063f5b]/6 p-5">
                     <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-[#009dcc]">AliExpress result</p>
                     <h2 className="mt-2 line-clamp-3 text-base font-extrabold leading-6 text-[#063f5b]">{item.title}</h2>
-                    <div className="mt-4 min-h-7">
-                      {item.salePrice && (
-                        <p className="flex flex-wrap items-baseline gap-2">
-                          <span className="text-lg font-extrabold text-[#063f5b]">{formatUsd(item.salePrice.amount)}</span>
-                          {item.originalPrice && <span className="text-sm text-[#063f5b]/45 line-through">{formatUsd(item.originalPrice.amount)}</span>}
-                          {discountPercentage(item) !== undefined && <span className="rounded-full bg-[#e7f8ee] px-2 py-0.5 text-xs font-extrabold text-[#195b37]">{discountPercentage(item)}% off</span>}
-                        </p>
-                      )}
-                    </div>
-                    {(item.positiveFeedback !== undefined || item.recentSales !== undefined) && (
-                      <p className="mt-2 text-xs leading-5 text-[#063f5b]/60">
-                        {item.positiveFeedback !== undefined && `${item.positiveFeedback}% positive feedback`}
-                        {item.positiveFeedback !== undefined && item.recentSales !== undefined && " · "}
-                        {item.recentSales !== undefined && `${compactNumber(item.recentSales)} recent sales`}
-                      </p>
-                    )}
                     <span className="mt-auto pt-5 text-sm font-extrabold text-[#009dcc]">View on AliExpress ↗</span>
                   </div>
                 </a>
@@ -202,7 +168,7 @@ export function AliExpressSearch() {
       )}
 
       <aside className="mx-auto mt-10 max-w-3xl rounded-2xl bg-[#fff7df] px-5 py-4 text-center text-xs leading-5 text-[#735a16]">
-        Product titles, images, prices, feedback, sales information, and links are provided by AliExpress and may change. MishBaby may earn a commission from qualifying purchases at no additional cost to you.
+        Product titles, images, and links are provided by AliExpress and may change. Shipping, availability, local currency, and final terms are confirmed on AliExpress. MishBaby may earn a commission from qualifying purchases at no additional cost to you.
       </aside>
     </div>
   );

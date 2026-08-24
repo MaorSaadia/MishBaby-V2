@@ -1,6 +1,6 @@
 # AliExpress Affiliate API setup
 
-AliExpress Finds searches affiliate-eligible products through the server-only `aliexpress.affiliate.product.query` endpoint. The public experience is fixed to English, USD, and delivery to the United States for this phase.
+AliExpress Finds searches affiliate-eligible products through the server-only `aliexpress.affiliate.product.query` endpoint. The public experience requests English-language results but does not target or display a country-specific currency or shipping destination. AliExpress confirms local currency, shipping, and availability after a visitor opens a product.
 
 ## 1. Confirm the application permission
 

@@ -2,10 +2,11 @@ import "server-only";
 
 import { createHash, createHmac } from "node:crypto";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { rankAliExpressResults } from "@/lib/aliexpress-relevance";
 
 const aliexpressEndpoint = "https://api-sg.aliexpress.com/sync";
 const aliexpressMethod = "aliexpress.affiliate.product.query";
-const aliexpressSearchCacheVersion = "v2";
+const aliexpressSearchCacheVersion = "v5";
 const aliexpressSearchCacheHours = 1;
 const aliexpressSearchHourlyLimit = 10;
 const aliexpressSearchDailyLimit = 200;
@@ -16,10 +17,6 @@ export type AliExpressSearchItem = {
   title: string;
   promotionUrl: string;
   image?: { url: string };
-  salePrice?: { amount: string; currency: "USD" };
-  originalPrice?: { amount: string; currency: "USD" };
-  positiveFeedback?: number;
-  recentSales?: number;
 };
 
 export type AliExpressSearchResponse = {
@@ -44,16 +41,6 @@ type RawAliExpressProduct = {
   product_title?: unknown;
   product_main_image_url?: unknown;
   promotion_link?: unknown;
-  target_sale_price?: unknown;
-  target_sale_price_currency?: unknown;
-  sale_price?: unknown;
-  sale_price_currency?: unknown;
-  target_original_price?: unknown;
-  target_original_price_currency?: unknown;
-  original_price?: unknown;
-  original_price_currency?: unknown;
-  evaluate_rate?: unknown;
-  lastest_volume?: unknown;
 };
 
 type RawAliExpressResponse = {
@@ -100,7 +87,7 @@ export function createAliExpressVisitorHash(ipAddress: string, secret: string) {
 
 function createCacheKey(query: string, page: number) {
   return createHash("sha256")
-    .update(`${aliexpressSearchCacheVersion}:US:USD:EN:${page}:${query.toLocaleLowerCase("en-US")}`)
+    .update(`${aliexpressSearchCacheVersion}:GLOBAL:EN:${page}:${query.toLocaleLowerCase("en-US")}`)
     .digest("hex");
 }
 
@@ -151,21 +138,6 @@ function normalizedInteger(value: unknown) {
   return Number.isInteger(parsed) && parsed >= 0 && parsed <= 1_000_000_000 ? parsed : undefined;
 }
 
-function normalizedPercentage(value: unknown) {
-  if (typeof value !== "string" && typeof value !== "number") return undefined;
-  const parsed = Number(String(value).trim().replace(/%$/, ""));
-  return Number.isFinite(parsed) && parsed >= 0 && parsed <= 100 ? Math.round(parsed * 10) / 10 : undefined;
-}
-
-function normalizedUsdPrice(amount: unknown, currency: unknown) {
-  if (String(currency).trim().toUpperCase() !== "USD") return undefined;
-  const normalized = typeof amount === "number" ? String(amount) : typeof amount === "string" ? amount.trim() : "";
-  if (!/^(?:0|[1-9]\d{0,5})(?:\.\d{1,2})?$/.test(normalized)) return undefined;
-  const parsed = Number(normalized);
-  if (!Number.isFinite(parsed) || parsed <= 0 || parsed > 100_000) return undefined;
-  return { amount: parsed.toFixed(2), currency: "USD" as const };
-}
-
 function rawProducts(value: RawAliExpressResponse) {
   const products = value.aliexpress_affiliate_product_query_response?.resp_result?.result?.products;
   if (Array.isArray(products)) return products as RawAliExpressProduct[];
@@ -181,39 +153,22 @@ function parseAliExpressResponse(rawResponse: unknown, query: string, requestedP
   const responseRoot = response.aliexpress_affiliate_product_query_response?.resp_result;
   if (Number(responseRoot?.resp_code) !== 200 || !responseRoot?.result) return null;
 
-  const items = rawProducts(response).flatMap((rawItem): AliExpressSearchItem[] => {
+  const candidates = rawProducts(response).flatMap((rawItem): AliExpressSearchItem[] => {
     const productId = String(rawItem.product_id ?? "").trim();
     const title = normalizedText(rawItem.product_title, 320);
     const promotionUrl = normalizedText(rawItem.promotion_link, 2048);
     if (!/^\d{5,24}$/.test(productId) || !title || !isAliExpressPromotionUrl(promotionUrl)) return [];
 
     const imageUrl = normalizedText(rawItem.product_main_image_url, 2048);
-    const salePrice = normalizedUsdPrice(
-      rawItem.target_sale_price ?? rawItem.sale_price,
-      rawItem.target_sale_price_currency ?? rawItem.sale_price_currency,
-    );
-    const candidateOriginalPrice = normalizedUsdPrice(
-      rawItem.target_original_price ?? rawItem.original_price,
-      rawItem.target_original_price_currency ?? rawItem.original_price_currency,
-    );
-    const originalPrice = salePrice && candidateOriginalPrice && Number(candidateOriginalPrice.amount) > Number(salePrice.amount)
-      ? candidateOriginalPrice
-      : undefined;
-    const positiveFeedback = normalizedPercentage(rawItem.evaluate_rate);
-    const recentSales = normalizedInteger(rawItem.lastest_volume);
-
     return [{
       productId,
       title,
       promotionUrl,
       ...(isAliExpressImageUrl(imageUrl) ? { image: { url: imageUrl } } : {}),
-      ...(salePrice ? { salePrice } : {}),
-      ...(originalPrice ? { originalPrice } : {}),
-      ...(positiveFeedback !== undefined ? { positiveFeedback } : {}),
-      ...(recentSales !== undefined ? { recentSales } : {}),
     }];
   });
 
+  const items = rankAliExpressResults(candidates, query, 10);
   const result = responseRoot.result;
   const responsePage = normalizedInteger(result.current_page_no) ?? requestedPage;
   const totalResultCount = normalizedInteger(result.total_record_count) ?? items.length;
@@ -288,12 +243,10 @@ export async function fetchAndCacheAliExpressProducts(
     simplify: "false",
     keywords: query,
     page_no: String(page),
-    page_size: "10",
+    page_size: "50",
     platform_product_type: "ALL",
-    target_currency: "USD",
     target_language: "EN",
     tracking_id: config.trackingId,
-    ship_to_country: "US",
   };
   parameters.sign = signAliExpressTopRequest(parameters, config.appSecret);
 

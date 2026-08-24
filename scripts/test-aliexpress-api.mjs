@@ -50,10 +50,8 @@ try {
     page_no: "1",
     page_size: "3",
     platform_product_type: "ALL",
-    target_currency: "USD",
     target_language: "EN",
     tracking_id: trackingId,
-    ship_to_country: "US",
   };
   parameters.sign = sign(parameters, appSecret);
 
