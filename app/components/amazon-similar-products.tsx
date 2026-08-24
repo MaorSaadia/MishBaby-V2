@@ -46,6 +46,10 @@ type AmazonRecommendationsProps = {
   description: string;
 };
 
+const categoryAmazonSearchTerms: Record<string, string[]> = {
+  "Safety & Comfort": ["baby safety essentials"],
+};
+
 function buildSearchQuery(searchTerms: string[]) {
   const normalized = searchTerms.join(" ").trim().replace(/\s+/g, " ");
   if (normalized.length <= 80) return normalized;
@@ -82,9 +86,11 @@ export function AmazonGuideProducts({ guideTitle, categoryName, excludedAsins = 
 }
 
 export function AmazonCategoryProducts({ categoryName, topics, excludedAsins = [] }: AmazonCategoryProductsProps) {
+  const searchTerms = categoryAmazonSearchTerms[categoryName] ?? [categoryName, ...topics];
+
   return (
     <AmazonRecommendations
-      searchTerms={[categoryName, ...topics]}
+      searchTerms={searchTerms}
       excludedAsins={excludedAsins}
       maximumResults={8}
       eyebrow="More products on Amazon"
