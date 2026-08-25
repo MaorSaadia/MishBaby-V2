@@ -66,6 +66,63 @@ const babyMonitorSpecialtyTerms = new Set([
   "prenatal",
 ]);
 
+const bottleWarmerBabyTerms = new Set([
+  "baby",
+  "breastmilk",
+  "feeding",
+  "formula",
+  "infant",
+  "milk",
+  "newborn",
+]);
+
+const bottleWarmerUnrelatedTerms = new Set([
+  "battery",
+  "essential",
+  "massage",
+  "oil",
+  "sports",
+  "watch",
+]);
+
+const diaperBagBabyTerms = new Set([
+  "baby",
+  "changing",
+  "infant",
+  "maternity",
+  "mom",
+  "mommy",
+  "mum",
+  "mummy",
+  "nappy",
+  "newborn",
+  "nursery",
+  "parent",
+  "stroller",
+  "toddler",
+]);
+
+const diaperBagFashionTerms = new Set([
+  "clutch",
+  "designer",
+  "elegant",
+  "fashion",
+  "handbag",
+  "leather",
+  "luxury",
+  "messenger",
+  "purse",
+]);
+
+const diaperBagStrongBabyTerms = new Set([
+  "baby",
+  "maternity",
+  "mommy",
+  "mummy",
+  "nappy",
+  "stroller",
+]);
+
 function normalizeText(value: string) {
   return value
     .normalize("NFKD")
@@ -117,7 +174,21 @@ function scoreTitle(title: string, query: string) {
     if (hasAny(titleTerms, babyMonitorTransportTerms)) return null;
     if (hasAny(titleTerms, climateMonitorTerms) && !hasAny(titleTerms, babyMonitorPositiveTerms)) return null;
     if (hasAny(titleTerms, accessoryTerms) || hasAny(titleTerms, babyMonitorSpecialtyTerms)) return null;
+    if (!hasAny(titleTerms, babyMonitorPositiveTerms)) return null;
     score += [...babyMonitorPositiveTerms].filter((term) => titleTerms.has(term)).length * 10;
+  }
+
+  const isBottleWarmerSearch = queryTerms.includes("bottle") && queryTerms.includes("warmer");
+  if (isBottleWarmerSearch) {
+    if (!hasAny(titleTerms, bottleWarmerBabyTerms) || hasAny(titleTerms, bottleWarmerUnrelatedTerms)) return null;
+    score += [...bottleWarmerBabyTerms].filter((term) => titleTerms.has(term)).length * 10;
+  }
+
+  const isDiaperBagSearch = queryTerms.includes("diaper") && queryTerms.includes("bag");
+  if (isDiaperBagSearch) {
+    if (!hasAny(titleTerms, diaperBagBabyTerms)) return null;
+    if (hasAny(titleTerms, diaperBagFashionTerms) && !hasAny(titleTerms, diaperBagStrongBabyTerms)) return null;
+    score += [...diaperBagBabyTerms].filter((term) => titleTerms.has(term)).length * 10;
   }
 
   return score;

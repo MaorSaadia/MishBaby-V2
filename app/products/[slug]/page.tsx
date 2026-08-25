@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AmazonSimilarProducts } from "../../components/amazon-similar-products";
+import { AliExpressSimilarProducts } from "../../components/aliexpress-similar-products";
 import { GuideCard } from "../../components/guide-card";
 import { OfferComparison } from "../../components/offer-comparison";
 import { ProductImage } from "../../components/product-image";
@@ -67,6 +68,7 @@ export default async function ProductPage({ params }: PageProps<"/products/[slug
   const productUrl = `${siteConfig.url}/products/${product.slug}`;
   const categoryUrl = `${siteConfig.url}/categories/${category.slug}`;
   const currentAmazonAsin = product.offers.find((offer) => offer.merchant.id === "amazon")?.amazonAsin;
+  const currentAliExpressOfferUrl = product.offers.find((offer) => offer.merchant.id === "aliexpress")?.url;
   const structuredData = {
     "@context": "https://schema.org",
     "@graph": [
@@ -176,6 +178,11 @@ export default async function ProductPage({ params }: PageProps<"/products/[slug
           productName={product.name}
           categoryName={category.name}
           currentAsin={currentAmazonAsin}
+        />
+
+        <AliExpressSimilarProducts
+          productName={product.name}
+          currentOfferUrl={currentAliExpressOfferUrl}
         />
 
         {relatedGuides.length > 0 && (

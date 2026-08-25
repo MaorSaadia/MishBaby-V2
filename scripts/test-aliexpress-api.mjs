@@ -1,7 +1,7 @@
 import { createHmac } from "node:crypto";
 
 const endpoint = "https://api-sg.aliexpress.com/sync";
-const method = "aliexpress.affiliate.product.query";
+const method = "aliexpress.affiliate.hotproduct.query";
 
 function requiredEnvironment(name) {
   const value = process.env[name]?.trim();
@@ -23,7 +23,7 @@ function sign(parameters, secret) {
 }
 
 function productsFrom(response) {
-  const products = response?.aliexpress_affiliate_product_query_response?.resp_result?.result?.products;
+  const products = response?.aliexpress_affiliate_hotproduct_query_response?.resp_result?.result?.products;
   if (Array.isArray(products)) return products;
   if (products && typeof products === "object") {
     const values = products.product;
@@ -64,10 +64,10 @@ try {
   if (!result.ok) throw new Error(`The gateway returned HTTP ${result.status}.`);
 
   const response = await result.json();
-  const responseRoot = response?.aliexpress_affiliate_product_query_response?.resp_result;
+  const responseRoot = response?.aliexpress_affiliate_hotproduct_query_response?.resp_result;
   if (Number(responseRoot?.resp_code) !== 200) {
     const topCode = response?.error_response?.code;
-    throw new Error(`AliExpress rejected the request${topCode ? ` with code ${topCode}` : ""}. Confirm the gateway and product-query permission in the app console.`);
+    throw new Error(`AliExpress rejected the request${topCode ? ` with code ${topCode}` : ""}. Confirm the gateway and Advanced API permission in the app console.`);
   }
 
   const products = productsFrom(response);

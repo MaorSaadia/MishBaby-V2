@@ -5,8 +5,8 @@ import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { rankAliExpressResults } from "@/lib/aliexpress-relevance";
 
 const aliexpressEndpoint = "https://api-sg.aliexpress.com/sync";
-const aliexpressMethod = "aliexpress.affiliate.product.query";
-const aliexpressSearchCacheVersion = "v5";
+const aliexpressMethod = "aliexpress.affiliate.hotproduct.query";
+const aliexpressSearchCacheVersion = "v6";
 const aliexpressSearchCacheHours = 1;
 const aliexpressSearchHourlyLimit = 10;
 const aliexpressSearchDailyLimit = 200;
@@ -44,7 +44,7 @@ type RawAliExpressProduct = {
 };
 
 type RawAliExpressResponse = {
-  aliexpress_affiliate_product_query_response?: {
+  aliexpress_affiliate_hotproduct_query_response?: {
     resp_result?: {
       resp_code?: unknown;
       result?: {
@@ -139,7 +139,7 @@ function normalizedInteger(value: unknown) {
 }
 
 function rawProducts(value: RawAliExpressResponse) {
-  const products = value.aliexpress_affiliate_product_query_response?.resp_result?.result?.products;
+  const products = value.aliexpress_affiliate_hotproduct_query_response?.resp_result?.result?.products;
   if (Array.isArray(products)) return products as RawAliExpressProduct[];
   if (products && typeof products === "object" && "product" in products) {
     const entries = products.product;
@@ -150,7 +150,7 @@ function rawProducts(value: RawAliExpressResponse) {
 
 function parseAliExpressResponse(rawResponse: unknown, query: string, requestedPage: number): AliExpressSearchResponse | null {
   const response = rawResponse as RawAliExpressResponse;
-  const responseRoot = response.aliexpress_affiliate_product_query_response?.resp_result;
+  const responseRoot = response.aliexpress_affiliate_hotproduct_query_response?.resp_result;
   if (Number(responseRoot?.resp_code) !== 200 || !responseRoot?.result) return null;
 
   const candidates = rawProducts(response).flatMap((rawItem): AliExpressSearchItem[] => {

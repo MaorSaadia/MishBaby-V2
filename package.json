@@ -13,7 +13,8 @@
     "start": "next start",
     "lint": "eslint",
     "sync:marketing-contacts": "node --env-file=.env.local scripts/sync-resend-marketing-contacts.mjs",
-    "test:aliexpress-api": "node --env-file=.env.local scripts/test-aliexpress-api.mjs"
+    "test:aliexpress-api": "node --env-file=.env.local scripts/test-aliexpress-api.mjs",
+    "compare:aliexpress-api": "node --env-file=.env.local scripts/compare-aliexpress-advanced-api.mjs"
   },
   "dependencies": {
     "@amzn/creatorsapi-nodejs-sdk": "1.2.0",

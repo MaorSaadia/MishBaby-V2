@@ -1,12 +1,12 @@
 # AliExpress Affiliate API setup
 
-AliExpress Finds searches affiliate-eligible products through the server-only `aliexpress.affiliate.product.query` endpoint. The public experience requests English-language results but does not target or display a country-specific currency or shipping destination. AliExpress confirms local currency, shipping, and availability after a visitor opens a product.
+AliExpress Finds searches affiliate-eligible products through the server-only `aliexpress.affiliate.hotproduct.query` endpoint. The public experience requests English-language results but does not target or display a country-specific currency or shipping destination. AliExpress confirms local currency, shipping, and availability after a visitor opens a product.
 
 ## 1. Confirm the application permission
 
 In the AliExpress Open Platform console, confirm that the approved application belongs to the same account as AliExpress Portals and can call:
 
-`aliexpress.affiliate.product.query`
+`aliexpress.affiliate.hotproduct.query`
 
 The current integration uses the HTTPS TOP affiliate gateway documented for that method:
 
@@ -53,7 +53,17 @@ npm run test:aliexpress-api -- "baby monitor"
 
 The command prints only whether the call succeeded and how many returned records contain valid HTTPS promotion links. It never prints credentials, product URLs, or the raw AliExpress response.
 
-If the command reports a gateway, signing, or permission failure, stop before enabling `/aliexpress-finds`. Check the endpoint displayed by the approved Affiliate API application and the permission for `aliexpress.affiliate.product.query`; do not substitute seller or dropshipping API credentials.
+If the command reports a gateway, signing, or permission failure, stop before enabling `/aliexpress-finds`. Check the endpoint displayed by the approved Affiliate API application and the Advanced API permission for `aliexpress.affiliate.hotproduct.query`; do not substitute seller or dropshipping API credentials.
+
+### Compare the Advanced API methods
+
+After the Advanced API permission becomes active, compare its Smart Match and Hot Products methods with the standard product query:
+
+```bash
+npm run compare:aliexpress-api
+```
+
+The diagnostic uses the same three baby-product phrases for every method and reports returned products, relevant titles, and valid HTTPS affiliate links. Smart Match requires a device ID, so the diagnostic generates an ephemeral random value for each request; it does not read or store a visitor or device identifier. It also omits country and currency targeting. The command never prints credentials, affiliate URLs, or raw API responses, and it does not change the public AliExpress Finds implementation.
 
 ## 5. Run and deploy
 
