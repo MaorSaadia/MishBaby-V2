@@ -6,7 +6,7 @@ import { rankAliExpressResults } from "@/lib/aliexpress-relevance";
 
 const aliexpressEndpoint = "https://api-sg.aliexpress.com/sync";
 const aliexpressMethod = "aliexpress.affiliate.hotproduct.query";
-const aliexpressSearchCacheVersion = "v6";
+const aliexpressSearchCacheVersion = "v7";
 const aliexpressSearchCacheHours = 1;
 const aliexpressSearchHourlyLimit = 10;
 const aliexpressSearchDailyLimit = 200;

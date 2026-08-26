@@ -123,6 +123,23 @@ const diaperBagStrongBabyTerms = new Set([
   "stroller",
 ]);
 
+const toyPhotographyTerms = new Set([
+  "decoration",
+  "photo",
+  "photography",
+  "prop",
+  "props",
+  "studio",
+]);
+
+const clothingUnrelatedTerms = new Set([
+  "doll",
+  "laundry",
+  "machine",
+  "pet",
+  "washing",
+]);
+
 function normalizeText(value: string) {
   return value
     .normalize("NFKD")
@@ -190,6 +207,12 @@ function scoreTitle(title: string, query: string) {
     if (hasAny(titleTerms, diaperBagFashionTerms) && !hasAny(titleTerms, diaperBagStrongBabyTerms)) return null;
     score += [...diaperBagBabyTerms].filter((term) => titleTerms.has(term)).length * 10;
   }
+
+  const isInfantToySearch = queryTerms.includes("infant") && queryTerms.includes("toy");
+  if (isInfantToySearch && hasAny(titleTerms, toyPhotographyTerms)) return null;
+
+  const isInfantClothingSearch = queryTerms.includes("infant") && (queryTerms.includes("clothes") || queryTerms.includes("clothing"));
+  if (isInfantClothingSearch && hasAny(titleTerms, clothingUnrelatedTerms)) return null;
 
   return score;
 }

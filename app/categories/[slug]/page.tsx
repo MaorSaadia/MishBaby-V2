@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { GuideCard } from "../../components/guide-card";
 import { ProductCard } from "../../components/product-card";
 import { AmazonCategoryProducts } from "@/app/components/amazon-similar-products";
+import { AliExpressCategoryProducts } from "@/app/components/aliexpress-similar-products";
 import { getCategoryBySlug, getPublishedCategories } from "@/lib/categories";
 import { getCategoryThemeClass } from "@/lib/category-themes";
 import { getPublishedGuidesByCategorySlug } from "@/lib/guides";
@@ -45,6 +46,9 @@ export default async function CategoryPage({ params }: PageProps<"/categories/[s
   ]);
   const curatedAmazonAsins = featuredProducts.flatMap((product) =>
     product.offers.flatMap((offer) => offer.amazonAsin ? [offer.amazonAsin] : []),
+  );
+  const curatedAliExpressOfferUrls = featuredProducts.flatMap((product) =>
+    product.offers.flatMap((offer) => offer.merchant.id === "aliexpress" && offer.url ? [offer.url] : []),
   );
   const categoryUrl = `${siteConfig.url}/categories/${category.slug}`;
   const breadcrumbStructuredData = createBreadcrumbStructuredData(
@@ -142,6 +146,12 @@ export default async function CategoryPage({ params }: PageProps<"/categories/[s
           categoryName={category.name}
           topics={category.topics}
           excludedAsins={curatedAmazonAsins}
+        />
+
+        <AliExpressCategoryProducts
+          categoryName={category.name}
+          topics={category.topics}
+          excludedOfferUrls={curatedAliExpressOfferUrls}
         />
 
         {relatedGuides.length > 0 && (

@@ -16,6 +16,12 @@ type AliExpressGuideProductsProps = {
   excludedOfferUrls?: string[];
 };
 
+type AliExpressCategoryProductsProps = {
+  categoryName: string;
+  topics: string[];
+  excludedOfferUrls?: string[];
+};
+
 type AliExpressRecommendationsProps = {
   searchQuery: string;
   excludedOfferUrls?: string[];
@@ -52,6 +58,16 @@ const guideSearchStopWords = new Set([
   "your",
 ]);
 
+const categorySearchQueries: Record<string, string> = {
+  "Baby Essentials": "baby essentials",
+  "Feeding & Mealtime": "baby feeding",
+  "Nursery & Sleep": "baby sleep",
+  "Bath & Care": "baby bath",
+  "Safety & Comfort": "baby safety",
+  "Toys & Play": "infant toy",
+  "Baby Clothing": "infant clothes",
+};
+
 function buildSearchQuery(productName: string) {
   const normalized = productName.trim().replace(/\s+/g, " ");
   if (normalized.length <= 80) return normalized;
@@ -76,6 +92,16 @@ function buildGuideSearchQuery(guideTitle: string, categoryName: string) {
 
   const conciseTerms = uniqueTerms.slice(0, 4);
   return buildSearchQuery(conciseTerms.join(" ") || categoryName);
+}
+
+function buildCategorySearchQuery(categoryName: string, topics: string[]) {
+  const configuredQuery = categorySearchQueries[categoryName];
+  if (configuredQuery) return configuredQuery;
+
+  const normalizedName = categoryName.toLocaleLowerCase("en-US").includes("baby")
+    ? categoryName
+    : `baby ${categoryName}`;
+  return buildSearchQuery(normalizedName || topics[0] || "baby essentials");
 }
 
 function productIdFromOfferUrl(offerUrl?: string) {
@@ -114,6 +140,19 @@ export function AliExpressGuideProducts({ guideTitle, categoryName, excludedOffe
       eyebrow="Related products on AliExpress"
       heading="AliExpress finds for this guide."
       description="Live AliExpress results selected from this guide's topic."
+    />
+  );
+}
+
+export function AliExpressCategoryProducts({ categoryName, topics, excludedOfferUrls = [] }: AliExpressCategoryProductsProps) {
+  return (
+    <AliExpressRecommendations
+      searchQuery={buildCategorySearchQuery(categoryName, topics)}
+      excludedOfferUrls={excludedOfferUrls}
+      maximumResults={8}
+      eyebrow="More products on AliExpress"
+      heading={`AliExpress finds for ${categoryName}.`}
+      description={`Live AliExpress results selected for ${categoryName.toLowerCase()}.`}
     />
   );
 }
