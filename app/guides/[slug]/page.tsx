@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AmazonGuideProducts } from "@/app/components/amazon-similar-products";
+import { AliExpressGuideProducts } from "@/app/components/aliexpress-similar-products";
 import { GuideImage } from "@/app/components/guide-image";
 import { ProductCard } from "@/app/components/product-card";
 import { RecentlyViewedGuides } from "@/app/components/recently-viewed-guides";
@@ -71,6 +72,9 @@ export default async function GuidePage({ params }: PageProps<"/guides/[slug]">)
   const guideUrl = `${siteConfig.url}/guides/${guide.slug}`;
   const curatedAmazonAsins = guide.relatedProducts.flatMap((product) =>
     product.offers.flatMap((offer) => offer.amazonAsin ? [offer.amazonAsin] : []),
+  );
+  const curatedAliExpressOfferUrls = guide.relatedProducts.flatMap((product) =>
+    product.offers.flatMap((offer) => offer.merchant.id === "aliexpress" && offer.url ? [offer.url] : []),
   );
   const structuredData = {
     "@context": "https://schema.org",
@@ -224,6 +228,12 @@ export default async function GuidePage({ params }: PageProps<"/guides/[slug]">)
           guideTitle={guide.title}
           categoryName={guide.relatedCategory.label}
           excludedAsins={curatedAmazonAsins}
+        />
+
+        <AliExpressGuideProducts
+          guideTitle={guide.title}
+          categoryName={guide.relatedCategory.label}
+          excludedOfferUrls={curatedAliExpressOfferUrls}
         />
 
         {guide.relatedProducts.length > 0 && (

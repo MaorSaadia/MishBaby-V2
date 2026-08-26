@@ -10,6 +10,48 @@ type AliExpressSimilarProductsProps = {
   currentOfferUrl?: string;
 };
 
+type AliExpressGuideProductsProps = {
+  guideTitle: string;
+  categoryName: string;
+  excludedOfferUrls?: string[];
+};
+
+type AliExpressRecommendationsProps = {
+  searchQuery: string;
+  excludedOfferUrls?: string[];
+  maximumResults: number;
+  eyebrow: string;
+  heading: string;
+  description: string;
+};
+
+const guideSearchStopWords = new Set([
+  "a",
+  "an",
+  "and",
+  "before",
+  "checklist",
+  "choosing",
+  "comfortable",
+  "creating",
+  "everyday",
+  "first",
+  "for",
+  "guide",
+  "how",
+  "in",
+  "parents",
+  "practical",
+  "safe",
+  "setup",
+  "the",
+  "time",
+  "tips",
+  "to",
+  "what",
+  "your",
+]);
+
 function buildSearchQuery(productName: string) {
   const normalized = productName.trim().replace(/\s+/g, " ");
   if (normalized.length <= 80) return normalized;
@@ -17,6 +59,23 @@ function buildSearchQuery(productName: string) {
   const shortened = normalized.slice(0, 80);
   const lastSpace = shortened.lastIndexOf(" ");
   return (lastSpace >= 20 ? shortened.slice(0, lastSpace) : shortened).trim();
+}
+
+function buildGuideSearchQuery(guideTitle: string, categoryName: string) {
+  const terms = guideTitle
+    .normalize("NFKD")
+    .toLocaleLowerCase("en-US")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim()
+    .split(" ")
+    .filter((term) => term && !guideSearchStopWords.has(term));
+  const uniqueTerms = [...new Set(terms)];
+  if (uniqueTerms.includes("baby") && uniqueTerms.includes("nursery")) {
+    return "baby nursery essentials";
+  }
+
+  const conciseTerms = uniqueTerms.slice(0, 4);
+  return buildSearchQuery(conciseTerms.join(" ") || categoryName);
 }
 
 function productIdFromOfferUrl(offerUrl?: string) {
@@ -34,10 +93,38 @@ function productIdFromOfferUrl(offerUrl?: string) {
 }
 
 export function AliExpressSimilarProducts({ productName, currentOfferUrl }: AliExpressSimilarProductsProps) {
+  return (
+    <AliExpressRecommendations
+      searchQuery={buildSearchQuery(productName)}
+      excludedOfferUrls={currentOfferUrl ? [currentOfferUrl] : []}
+      maximumResults={4}
+      eyebrow="More to explore on AliExpress"
+      heading="Similar AliExpress products."
+      description="Live AliExpress results selected from this product's name."
+    />
+  );
+}
+
+export function AliExpressGuideProducts({ guideTitle, categoryName, excludedOfferUrls = [] }: AliExpressGuideProductsProps) {
+  return (
+    <AliExpressRecommendations
+      searchQuery={buildGuideSearchQuery(guideTitle, categoryName)}
+      excludedOfferUrls={excludedOfferUrls}
+      maximumResults={8}
+      eyebrow="Related products on AliExpress"
+      heading="AliExpress finds for this guide."
+      description="Live AliExpress results selected from this guide's topic."
+    />
+  );
+}
+
+function AliExpressRecommendations({ searchQuery, excludedOfferUrls = [], maximumResults, eyebrow, heading, description }: AliExpressRecommendationsProps) {
   const [items, setItems] = useState<AliExpressSearchItem[]>([]);
   const [status, setStatus] = useState<"loading" | "success" | "empty" | "error">("loading");
-  const searchQuery = buildSearchQuery(productName);
-  const currentProductId = productIdFromOfferUrl(currentOfferUrl);
+  const excludedProductIdKey = excludedOfferUrls
+    .flatMap((offerUrl) => productIdFromOfferUrl(offerUrl) ?? [])
+    .sort()
+    .join(",");
 
   useEffect(() => {
     const controller = new AbortController();
@@ -56,9 +143,10 @@ export function AliExpressSimilarProducts({ productName, currentOfferUrl }: AliE
         if (!response.ok) throw new Error("AliExpress search unavailable");
 
         const payload = await response.json() as AliExpressSearchResponse;
+        const excludedProductIds = new Set(excludedProductIdKey ? excludedProductIdKey.split(",") : []);
         const recommendations = payload.items
-          .filter((item) => item.productId !== currentProductId)
-          .slice(0, 4);
+          .filter((item) => !excludedProductIds.has(item.productId))
+          .slice(0, maximumResults);
 
         setItems(recommendations);
         setStatus(recommendations.length > 0 ? "success" : "empty");
@@ -69,16 +157,16 @@ export function AliExpressSimilarProducts({ productName, currentOfferUrl }: AliE
 
     void loadProducts();
     return () => controller.abort();
-  }, [currentProductId, searchQuery]);
+  }, [excludedProductIdKey, maximumResults, searchQuery]);
 
   return (
     <section className="border-b border-[#063f5b]/6 bg-[#f7fcfe] px-5 py-14 sm:px-8 md:py-20">
       <div className="mx-auto max-w-6xl">
         <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
           <div className="max-w-2xl">
-            <p className="text-sm font-extrabold uppercase tracking-[0.14em] text-[#009dcc]">More to explore on AliExpress</p>
-            <h2 className="mt-3 font-display text-4xl font-semibold tracking-[-0.045em] text-[#063f5b]">Similar AliExpress products.</h2>
-            <p className="mt-4 text-base leading-7 text-[#063f5b]/65">Live AliExpress results selected from this product&apos;s name.</p>
+            <p className="text-sm font-extrabold uppercase tracking-[0.14em] text-[#009dcc]">{eyebrow}</p>
+            <h2 className="mt-3 font-display text-4xl font-semibold tracking-[-0.045em] text-[#063f5b]">{heading}</h2>
+            <p className="mt-4 text-base leading-7 text-[#063f5b]/65">{description}</p>
           </div>
           <Link href="/aliexpress-finds" className="shrink-0 text-sm font-extrabold text-[#009dcc] transition-colors hover:text-[#0784b0]">Search AliExpress <span aria-hidden="true">→</span></Link>
         </div>
@@ -86,7 +174,7 @@ export function AliExpressSimilarProducts({ productName, currentOfferUrl }: AliE
         <div aria-live="polite" aria-busy={status === "loading"}>
           {status === "loading" && (
             <div className="mt-9 grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
-              {Array.from({ length: 4 }, (_, item) => (
+              {Array.from({ length: maximumResults }, (_, item) => (
                 <div key={item} className="overflow-hidden rounded-2xl border border-[#063f5b]/8 bg-white sm:rounded-[2rem]">
                   <div className="aspect-square animate-pulse bg-[#e4f6fa]" />
                   <div className="space-y-3 p-4 sm:p-5">
