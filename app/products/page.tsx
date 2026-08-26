@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { MobileProductFilters } from "@/app/products/mobile-product-filters";
 import { ProductResults } from "@/app/products/product-results";
 import { productsPerBatch } from "@/lib/catalog-display";
 import { getPublishedCategories } from "@/lib/categories";
+import { getHomepageFeaturedProducts } from "@/lib/homepage";
 import { getPublishedProducts } from "@/lib/products";
 import { siteConfig } from "@/lib/site";
 import { createItemListStructuredData, serializeStructuredData } from "@/lib/structured-data";
@@ -13,12 +15,12 @@ const productsMetadata: Metadata = {
 };
 
 type ProductsPageProps = {
-  searchParams: Promise<{ category?: string | string[]; q?: string | string[]; sort?: string | string[] }>;
+  searchParams: Promise<{ category?: string | string[]; merchant?: string | string[]; q?: string | string[]; sort?: string | string[] }>;
 };
 
 export async function generateMetadata({ searchParams }: ProductsPageProps): Promise<Metadata> {
   const resolvedSearchParams = await searchParams;
-  const hasFilteredParams = ["category", "q", "sort"].some((key) =>
+  const hasFilteredParams = ["category", "merchant", "q", "sort"].some((key) =>
     Object.prototype.hasOwnProperty.call(resolvedSearchParams, key),
   );
 
@@ -35,10 +37,11 @@ export async function generateMetadata({ searchParams }: ProductsPageProps): Pro
 }
 
 export default async function ProductsPage({ searchParams }: ProductsPageProps) {
-  const [resolvedSearchParams, categories, publishedProducts] = await Promise.all([
+  const [resolvedSearchParams, categories, publishedProducts, featuredProducts] = await Promise.all([
     searchParams,
     getPublishedCategories(),
     getPublishedProducts(),
+    getHomepageFeaturedProducts(),
   ]);
   const categoryParam = resolvedSearchParams.category;
   const requestedCategory = Array.isArray(categoryParam) ? categoryParam[0] : categoryParam;
@@ -46,27 +49,46 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
   const requestedSearch = Array.isArray(searchParam) ? searchParam[0] : searchParam;
   const searchQuery = requestedSearch?.trim() ?? "";
   const normalizedSearch = searchQuery.toLocaleLowerCase();
+  const merchantParam = resolvedSearchParams.merchant;
+  const requestedMerchant = Array.isArray(merchantParam) ? merchantParam[0] : merchantParam;
   const sortParam = resolvedSearchParams.sort;
   const requestedSort = Array.isArray(sortParam) ? sortParam[0] : sortParam;
-  const selectedSort = requestedSort === "name" ? "name" : "newest";
-  const hasCatalogParams = ["category", "q", "sort"].some((key) =>
+  const selectedSort = requestedSort === "name" || requestedSort === "featured" ? requestedSort : "newest";
+  const hasCatalogParams = ["category", "merchant", "q", "sort"].some((key) =>
     Object.prototype.hasOwnProperty.call(resolvedSearchParams, key),
   );
+  const merchantsById = new Map(
+    publishedProducts.flatMap((product) => product.offers.map((offer) => [offer.merchant.id, offer.merchant] as const)),
+  );
+  const merchants = [...merchantsById.values()].sort((firstMerchant, secondMerchant) => firstMerchant.name.localeCompare(secondMerchant.name));
+  const selectedMerchant = merchants.find((merchant) => merchant.id === requestedMerchant);
   const selectedCategory = categories.find((category) => category.slug === requestedCategory);
   const categoryProducts = selectedCategory
     ? publishedProducts.filter((product) => product.categorySlug === selectedCategory.slug)
     : publishedProducts;
+  const merchantProducts = selectedMerchant
+    ? categoryProducts.filter((product) => product.offers.some((offer) => offer.merchant.id === selectedMerchant.id))
+    : categoryProducts;
   const matchingProducts = normalizedSearch
-    ? categoryProducts.filter((product) =>
+    ? merchantProducts.filter((product) =>
         [product.name, product.summary, ...product.highlights].some((value) =>
           value.toLocaleLowerCase().includes(normalizedSearch),
         ),
       )
-    : categoryProducts;
+    : merchantProducts;
+  const featuredProductRanks = new Map(featuredProducts.map((product, index) => [product.id, index]));
   const visibleProducts = selectedSort === "name"
     ? [...matchingProducts].sort((firstProduct, secondProduct) => firstProduct.name.localeCompare(secondProduct.name))
-    : matchingProducts;
-  const selectedSortQuery = selectedSort === "name" ? { sort: "name" } : {};
+    : selectedSort === "featured"
+      ? [...matchingProducts].sort((firstProduct, secondProduct) =>
+          (featuredProductRanks.get(firstProduct.id) ?? Number.MAX_SAFE_INTEGER)
+          - (featuredProductRanks.get(secondProduct.id) ?? Number.MAX_SAFE_INTEGER),
+        )
+      : matchingProducts;
+  const selectedCategoryQuery = selectedCategory ? { category: selectedCategory.slug } : {};
+  const selectedMerchantQuery = selectedMerchant ? { merchant: selectedMerchant.id } : {};
+  const selectedSearchQuery = searchQuery ? { q: searchQuery } : {};
+  const selectedSortQuery = selectedSort === "newest" ? {} : { sort: selectedSort };
   const structuredData = !hasCatalogParams && visibleProducts.length > 0
     ? createItemListStructuredData({
         id: `${siteConfig.url}/products#product-list`,
@@ -101,15 +123,24 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
 
       <section className="mx-auto max-w-6xl px-5 py-14 sm:px-8 md:py-20">
         <div className="flex flex-col gap-5 border-b border-[#063f5b]/10 pb-8">
-          <div>
+          <MobileProductFilters
+            categories={categories.map((category) => ({ id: category.slug, name: category.name }))}
+            merchants={merchants.map((merchant) => ({ id: merchant.id, name: merchant.name }))}
+            selectedCategoryId={selectedCategory?.slug}
+            selectedMerchantId={selectedMerchant?.id}
+            searchQuery={searchQuery}
+            selectedSort={selectedSort}
+          />
+
+          <div className="hidden md:block">
             <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-[#063f5b]/45">Filter by category</p>
             <h2 className="mt-2 text-2xl font-extrabold tracking-[-0.035em] text-[#063f5b]">{selectedCategory?.name ?? "All products"}</h2>
           </div>
-          <nav className="flex flex-wrap gap-2" aria-label="Filter products by category">
+          <nav className="hidden flex-wrap gap-2 md:flex" aria-label="Filter products by category">
             <Link
               href={{
                 pathname: "/products",
-                query: { ...(searchQuery ? { q: searchQuery } : {}), ...selectedSortQuery },
+                query: { ...selectedMerchantQuery, ...selectedSearchQuery, ...selectedSortQuery },
               }}
               aria-current={!selectedCategory ? "page" : undefined}
               className={`rounded-full px-4 py-2.5 text-sm font-extrabold transition ${!selectedCategory ? "bg-[#009dcc] text-white" : "border border-[#063f5b]/10 bg-white text-[#063f5b]/70 hover:border-[#009dcc]/40 hover:text-[#009dcc]"}`}
@@ -126,7 +157,8 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                     pathname: "/products",
                     query: {
                       category: category.slug,
-                      ...(searchQuery ? { q: searchQuery } : {}),
+                      ...selectedMerchantQuery,
+                      ...selectedSearchQuery,
                       ...selectedSortQuery,
                     },
                   }}
@@ -138,21 +170,63 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
               );
             })}
           </nav>
+
+          {merchants.length > 0 && (
+            <div className="hidden md:block">
+              <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-[#063f5b]/45">Filter by merchant</p>
+              <nav className="mt-3 flex flex-wrap gap-2" aria-label="Filter products by merchant">
+                <Link
+                  href={{
+                    pathname: "/products",
+                    query: { ...selectedCategoryQuery, ...selectedSearchQuery, ...selectedSortQuery },
+                  }}
+                  aria-current={!selectedMerchant ? "page" : undefined}
+                  className={`rounded-full px-4 py-2.5 text-sm font-extrabold transition ${!selectedMerchant ? "bg-[#009dcc] text-white" : "border border-[#063f5b]/10 bg-white text-[#063f5b]/70 hover:border-[#009dcc]/40 hover:text-[#009dcc]"}`}
+                >
+                  All merchants
+                </Link>
+                {merchants.map((merchant) => {
+                  const isSelected = selectedMerchant?.id === merchant.id;
+
+                  return (
+                    <Link
+                      key={merchant.id}
+                      href={{
+                        pathname: "/products",
+                        query: {
+                          ...selectedCategoryQuery,
+                          merchant: merchant.id,
+                          ...selectedSearchQuery,
+                          ...selectedSortQuery,
+                        },
+                      }}
+                      aria-current={isSelected ? "page" : undefined}
+                      className={`rounded-full px-4 py-2.5 text-sm font-extrabold transition ${isSelected ? "bg-[#009dcc] text-white" : "border border-[#063f5b]/10 bg-white text-[#063f5b]/70 hover:border-[#009dcc]/40 hover:text-[#009dcc]"}`}
+                    >
+                      {merchant.name}
+                    </Link>
+                  );
+                })}
+              </nav>
+            </div>
+          )}
         </div>
 
         <div className="mt-8 flex flex-wrap items-center justify-between gap-4">
           <p className="text-sm font-semibold text-[#063f5b]/55">
             {visibleProducts.length} {visibleProducts.length === 1 ? "product" : "products"}
             {selectedCategory ? ` in ${selectedCategory.name}` : ""}
+            {selectedMerchant ? ` from ${selectedMerchant.name}` : ""}
             {searchQuery ? ` matching “${searchQuery}”` : ""}
           </p>
-          <div className="flex flex-wrap items-center gap-4">
+          <div className="flex w-full flex-wrap items-center gap-4 sm:w-auto">
             {searchQuery && (
               <Link
                 href={{
                   pathname: "/products",
                   query: {
-                    ...(selectedCategory ? { category: selectedCategory.slug } : {}),
+                    ...selectedCategoryQuery,
+                    ...selectedMerchantQuery,
                     ...selectedSortQuery,
                   },
                 }}
@@ -161,18 +235,34 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                 Clear search
               </Link>
             )}
-            <nav className="flex items-center gap-1 rounded-full border border-[#063f5b]/10 bg-white p-1" aria-label="Sort products">
+            <nav className="grid min-h-12 w-full grid-cols-[auto_1fr_1fr_1fr] items-center gap-1 rounded-2xl border border-[#063f5b]/10 bg-white p-1 sm:flex sm:w-auto sm:rounded-full" aria-label="Sort products">
               <span className="px-2 text-xs font-extrabold uppercase tracking-[0.1em] text-[#063f5b]/40">Sort</span>
               <Link
                 href={{
                   pathname: "/products",
                   query: {
-                    ...(selectedCategory ? { category: selectedCategory.slug } : {}),
-                    ...(searchQuery ? { q: searchQuery } : {}),
+                    ...selectedCategoryQuery,
+                    ...selectedMerchantQuery,
+                    ...selectedSearchQuery,
+                    sort: "featured",
+                  },
+                }}
+                aria-current={selectedSort === "featured" ? "page" : undefined}
+                className={`rounded-full px-3 py-2 text-center text-xs font-extrabold transition ${selectedSort === "featured" ? "bg-[#009dcc] text-white" : "text-[#063f5b]/60 hover:bg-[#e8f8fc] hover:text-[#009dcc]"}`}
+              >
+                Featured
+              </Link>
+              <Link
+                href={{
+                  pathname: "/products",
+                  query: {
+                    ...selectedCategoryQuery,
+                    ...selectedMerchantQuery,
+                    ...selectedSearchQuery,
                   },
                 }}
                 aria-current={selectedSort === "newest" ? "page" : undefined}
-                className={`rounded-full px-3 py-2 text-xs font-extrabold transition ${selectedSort === "newest" ? "bg-[#009dcc] text-white" : "text-[#063f5b]/60 hover:bg-[#e8f8fc] hover:text-[#009dcc]"}`}
+                className={`rounded-full px-3 py-2 text-center text-xs font-extrabold transition ${selectedSort === "newest" ? "bg-[#009dcc] text-white" : "text-[#063f5b]/60 hover:bg-[#e8f8fc] hover:text-[#009dcc]"}`}
               >
                 Newest
               </Link>
@@ -180,13 +270,14 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                 href={{
                   pathname: "/products",
                   query: {
-                    ...(selectedCategory ? { category: selectedCategory.slug } : {}),
-                    ...(searchQuery ? { q: searchQuery } : {}),
+                    ...selectedCategoryQuery,
+                    ...selectedMerchantQuery,
+                    ...selectedSearchQuery,
                     sort: "name",
                   },
                 }}
                 aria-current={selectedSort === "name" ? "page" : undefined}
-                className={`rounded-full px-3 py-2 text-xs font-extrabold transition ${selectedSort === "name" ? "bg-[#009dcc] text-white" : "text-[#063f5b]/60 hover:bg-[#e8f8fc] hover:text-[#009dcc]"}`}
+                className={`rounded-full px-3 py-2 text-center text-xs font-extrabold transition ${selectedSort === "name" ? "bg-[#009dcc] text-white" : "text-[#063f5b]/60 hover:bg-[#e8f8fc] hover:text-[#009dcc]"}`}
               >
                 A–Z
               </Link>
@@ -196,30 +287,24 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
 
         {visibleProducts.length > 0 ? (
           <ProductResults
-            key={`${selectedCategory?.slug ?? "all"}:${searchQuery}:${selectedSort}`}
+            key={`${selectedCategory?.slug ?? "all"}:${selectedMerchant?.id ?? "all"}:${searchQuery}:${selectedSort}`}
             products={visibleProducts}
           />
         ) : (
           <div className="mt-6 rounded-[2rem] border border-[#063f5b]/8 bg-[#f7fcfe] px-6 py-12 text-center sm:px-10">
             <h2 className="text-2xl font-extrabold tracking-[-0.035em] text-[#063f5b]">
-              {searchQuery ? "No products matched your search" : "More thoughtful finds are coming"}
+              {searchQuery || selectedMerchant ? "No products matched these filters" : "More thoughtful finds are coming"}
             </h2>
             <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-[#063f5b]/60">
-              {searchQuery
-                ? "Try a shorter product name, a different benefit, or clear the search to browse everything."
+              {searchQuery || selectedMerchant
+                ? "Try a different category, merchant, or search phrase—or clear the filters to browse everything."
                 : "We have not published products in this category yet. Explore the full collection while we carefully add more."}
             </p>
             <Link
-              href={{
-                pathname: "/products",
-                query: {
-                  ...(selectedCategory && searchQuery ? { category: selectedCategory.slug } : {}),
-                  ...selectedSortQuery,
-                },
-              }}
+              href="/products"
               className="mt-6 inline-flex rounded-full bg-[#009dcc] px-5 py-3 text-sm font-extrabold text-white transition hover:bg-[#0784b0]"
             >
-              {searchQuery ? "Clear search" : "View all products"}
+              {searchQuery || selectedMerchant ? "Clear filters" : "View all products"}
             </Link>
           </div>
         )}
