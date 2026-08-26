@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useNearViewport } from "@/app/hooks/use-near-viewport";
 
 type AmazonSimilarItem = {
   asin: string;
@@ -102,11 +103,14 @@ export function AmazonCategoryProducts({ categoryName, topics, excludedAsins = [
 
 function AmazonRecommendations({ searchTerms, excludedAsins = [], maximumResults, eyebrow, heading, description }: AmazonRecommendationsProps) {
   const [items, setItems] = useState<AmazonSimilarItem[]>([]);
-  const [status, setStatus] = useState<"loading" | "success" | "empty" | "error">("loading");
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "empty" | "error">("idle");
+  const { elementRef, isNearViewport } = useNearViewport<HTMLElement>();
   const searchQuery = buildSearchQuery(searchTerms);
   const excludedAsinKey = excludedAsins.map((asin) => asin.trim().toUpperCase()).sort().join(",");
 
   useEffect(() => {
+    if (!isNearViewport) return;
+
     const controller = new AbortController();
 
     async function loadSimilarProducts() {
@@ -142,10 +146,10 @@ function AmazonRecommendations({ searchTerms, excludedAsins = [], maximumResults
 
     void loadSimilarProducts();
     return () => controller.abort();
-  }, [excludedAsinKey, maximumResults, searchQuery]);
+  }, [excludedAsinKey, isNearViewport, maximumResults, searchQuery]);
 
   return (
-    <section className="border-y border-[#063f5b]/6 bg-[#f1fbfe] px-5 py-14 sm:px-8 md:py-20">
+    <section ref={elementRef} className="border-y border-[#063f5b]/6 bg-[#f1fbfe] px-5 py-14 sm:px-8 md:py-20">
       <div className="mx-auto max-w-6xl">
         <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
           <div className="max-w-2xl">
@@ -157,7 +161,7 @@ function AmazonRecommendations({ searchTerms, excludedAsins = [], maximumResults
         </div>
 
         <div aria-live="polite" aria-busy={status === "loading"}>
-          {status === "loading" && (
+          {(status === "idle" || status === "loading") && (
             <div className="mt-9 grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
               {Array.from({ length: maximumResults }, (_, item) => (
                 <div key={item} className="overflow-hidden rounded-2xl border border-[#063f5b]/8 bg-white sm:rounded-[2rem]">
