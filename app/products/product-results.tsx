@@ -33,7 +33,7 @@ export function ProductResults({ products }: ProductResultsProps) {
           >
             Load more products
           </button>
-          <p className="text-xs font-semibold text-[#063f5b]/50">
+          <p aria-live="polite" className="text-xs font-semibold text-[#063f5b]/50">
             Showing {visibleProducts.length} of {products.length} · {remainingProducts} remaining
           </p>
         </div>

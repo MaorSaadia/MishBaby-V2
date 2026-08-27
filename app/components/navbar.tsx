@@ -36,6 +36,10 @@ export function Navbar({ products }: { products: ProductSearchItem[] }) {
   const findsButtonRef = useRef<HTMLButtonElement>(null);
   const findsMenuRef = useRef<HTMLDivElement>(null);
 
+  function focusFirstFindsLink() {
+    window.requestAnimationFrame(() => findsMenuRef.current?.querySelector<HTMLAnchorElement>("a")?.focus());
+  }
+
   useEffect(() => {
     function closeFindsOnOutsideClick(event: PointerEvent) {
       if (findsMenuRef.current?.contains(event.target as Node)) return;
@@ -81,6 +85,17 @@ export function Navbar({ products }: { products: ProductSearchItem[] }) {
     });
   }
 
+  function handleFindsButtonKeyDown(event: React.KeyboardEvent<HTMLButtonElement>) {
+    if (event.key !== "ArrowDown") return;
+    event.preventDefault();
+    setFindsOpen(true);
+    focusFirstFindsLink();
+  }
+
+  function handleFindsBlur(event: React.FocusEvent<HTMLDivElement>) {
+    if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setFindsOpen(false);
+  }
+
   return (
     <header className="relative z-40 border-b border-[#063f5b]/10 bg-[#fbfeff]/95 backdrop-blur" onKeyDown={handleEscape}>
       <div className="mx-auto flex min-h-18 max-w-6xl flex-wrap items-center gap-x-3 gap-y-3 px-4 py-3 sm:px-8 lg:flex-nowrap lg:gap-x-5 lg:py-0">
@@ -100,11 +115,13 @@ export function Navbar({ products }: { products: ProductSearchItem[] }) {
 
             return <Link key={link.label} href={link.href} aria-current={active ? "page" : undefined} className={`rounded-md transition-colors hover:text-[#009dcc] ${active ? "text-[#009dcc]" : ""}`}>{link.label}</Link>;
           })}
-          <div ref={findsMenuRef} className="relative">
+          <div ref={findsMenuRef} className="relative" onBlur={handleFindsBlur}>
             <button
               ref={findsButtonRef}
               type="button"
               onClick={() => setFindsOpen((current) => !current)}
+              onKeyDown={handleFindsButtonKeyDown}
+              aria-haspopup="true"
               aria-expanded={findsOpen}
               aria-controls="finds-navigation"
               className={`flex items-center gap-1.5 rounded-md transition-colors hover:text-[#009dcc] ${pathname.startsWith("/amazon-finds") || pathname.startsWith("/aliexpress-finds") ? "text-[#009dcc]" : ""}`}

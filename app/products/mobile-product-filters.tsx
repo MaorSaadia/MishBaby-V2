@@ -57,7 +57,7 @@ export function MobileProductFilters({ categories, merchants, selectedCategoryId
       </button>
 
       {isOpen && (
-        <div id="mobile-product-filters" className="mt-3 rounded-3xl border border-[#063f5b]/10 bg-[#f7fcfe] p-4">
+        <div id="mobile-product-filters" role="region" aria-label="Product filters" className="mt-3 rounded-3xl border border-[#063f5b]/10 bg-[#f7fcfe] p-4">
           <div>
             <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-[#063f5b]/45">Category</p>
             <nav className="mt-3 flex flex-wrap gap-2" aria-label="Filter products by category">

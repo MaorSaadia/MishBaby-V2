@@ -157,6 +157,8 @@ export function NavbarSearch({
   const showSuggestions = isOpen && normalizedQuery.length >= 2;
   const showRecentSearches = isOpen && normalizedQuery.length === 0 && recentSearches.length > 0;
   const suggestionsId = "navbar-product-suggestions";
+  const recentSearchesId = "navbar-recent-searches";
+  const popupId = showSuggestions ? suggestionsId : showRecentSearches ? recentSearchesId : undefined;
 
   return (
     <div ref={containerRef} className="relative w-full">
@@ -196,8 +198,8 @@ export function NavbarSearch({
             }}
             role="combobox"
             aria-autocomplete="list"
-            aria-expanded={showSuggestions}
-            aria-controls={showSuggestions ? suggestionsId : undefined}
+            aria-expanded={Boolean(popupId)}
+            aria-controls={popupId}
             aria-activedescendant={activeSuggestionIndex >= 0 ? `navbar-product-suggestion-${activeSuggestionIndex}` : undefined}
             autoComplete="off"
             maxLength={120}
@@ -250,7 +252,7 @@ export function NavbarSearch({
       )}
 
       {showRecentSearches && (
-        <div id="navbar-recent-searches" className="absolute left-0 right-0 top-[calc(100%+.5rem)] z-50 overflow-hidden rounded-2xl border border-[#063f5b]/10 bg-white shadow-[0_20px_45px_-24px_rgba(6,63,91,.45)]">
+        <div id={recentSearchesId} className="absolute left-0 right-0 top-[calc(100%+.5rem)] z-50 overflow-hidden rounded-2xl border border-[#063f5b]/10 bg-white shadow-[0_20px_45px_-24px_rgba(6,63,91,.45)]">
           <div className="flex items-center justify-between border-b border-[#063f5b]/8 px-4 py-3">
             <p className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.1em] text-[#063f5b]/60">
               <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="size-4"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>

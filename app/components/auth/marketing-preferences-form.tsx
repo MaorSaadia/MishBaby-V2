@@ -27,5 +27,5 @@ export function MarketingPreferencesForm({ subscribed, occurredAt, syncEnabled, 
 function MarketingSyncRetry() {
   const [state, action] = useActionState(retryMarketingContactSyncAction, {});
   if (state.synced) return <ActionMessage state={state} />;
-  return <div className="mb-5 rounded-2xl bg-[#fff7df] p-4 text-sm leading-6 text-[#735a16]"><p>Your preference is saved, but our email service still needs synchronization.</p><form action={action} className="mt-3"><button className="font-extrabold underline">Retry synchronization</button></form>{state.message && <p role="status" className="mt-2">{state.message}</p>}</div>;
+  return <div className="mb-5 rounded-2xl bg-[#fff7df] p-4 text-sm leading-6 text-[#735a16]"><p>Your preference is saved, but our email service still needs synchronization.</p><form action={action} className="mt-3"><button type="submit" className="font-extrabold underline">Retry synchronization</button></form>{state.message && <p role="status" className="mt-2">{state.message}</p>}</div>;
 }

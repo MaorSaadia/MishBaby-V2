@@ -86,6 +86,43 @@ export function AccountMenu({ compact = false, onOpen }: { compact?: boolean; on
     if (nextOpen) onOpen?.();
   }
 
+  function focusMenuItem(position: "first" | "last") {
+    window.requestAnimationFrame(() => {
+      const items = containerRef.current?.querySelectorAll<HTMLElement>('[role="menuitem"]:not([disabled])');
+      if (!items?.length) return;
+      items[position === "first" ? 0 : items.length - 1]?.focus();
+    });
+  }
+
+  function handleAccountButtonKeyDown(event: React.KeyboardEvent<HTMLButtonElement>) {
+    if (!signedIn || (event.key !== "ArrowDown" && event.key !== "ArrowUp")) return;
+    event.preventDefault();
+    setOpen(true);
+    setFailed(false);
+    onOpen?.();
+    focusMenuItem(event.key === "ArrowDown" ? "first" : "last");
+  }
+
+  function handleMenuKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {
+    if (!["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key)) return;
+    const items = Array.from(event.currentTarget.querySelectorAll<HTMLElement>('[role="menuitem"]:not([disabled])'));
+    if (items.length === 0) return;
+    event.preventDefault();
+    const currentIndex = items.indexOf(document.activeElement as HTMLElement);
+    const nextIndex = event.key === "Home"
+      ? 0
+      : event.key === "End"
+        ? items.length - 1
+        : event.key === "ArrowDown"
+          ? (currentIndex + 1 + items.length) % items.length
+          : (currentIndex - 1 + items.length) % items.length;
+    items[nextIndex]?.focus();
+  }
+
+  function handleContainerBlur(event: React.FocusEvent<HTMLDivElement>) {
+    if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setOpen(false);
+  }
+
   async function handleSignOut() {
     setPending(true);
     setFailed(false);
@@ -109,22 +146,23 @@ export function AccountMenu({ compact = false, onOpen }: { compact?: boolean; on
   }
 
   return (
-    <div ref={containerRef} className="relative">
+    <div ref={containerRef} className="relative" onBlur={handleContainerBlur}>
       <button
         ref={buttonRef}
         type="button"
         onClick={handleAccountButton}
+        onKeyDown={handleAccountButtonKeyDown}
         disabled={authStatus === "loading"}
         aria-haspopup={signedIn ? "menu" : undefined}
         aria-expanded={signedIn ? open : undefined}
-        aria-label={signedIn ? "Open account menu" : authStatus === "loading" ? "Loading account" : "Sign in"}
+        aria-label={signedIn ? `${open ? "Close" : "Open"} account menu` : authStatus === "loading" ? "Loading account" : "Sign in"}
         className={`relative grid shrink-0 place-items-center overflow-hidden rounded-full border bg-white text-[#063f5b] transition-colors hover:border-[#009dcc]/40 hover:text-[#009dcc] disabled:cursor-wait ${compact ? "size-9 sm:size-10" : "size-10"} ${signedIn ? "border-[#009dcc]/40" : "border-[#063f5b]/15"}`}
       >
         {authStatus === "loading" ? <span className="size-4 animate-pulse rounded-full bg-[#a8e8f5]" /> : <UserAvatar key={avatarUrl ?? "default"} url={avatarUrl} />}
       </button>
 
       {open && signedIn && (
-        <div role="menu" aria-label="Account menu" className="absolute right-0 top-[calc(100%+.65rem)] z-50 w-64 overflow-hidden rounded-2xl border border-[#063f5b]/10 bg-white p-2 shadow-[0_22px_50px_-28px_rgba(6,63,91,.55)]">
+        <div role="menu" aria-label="Account menu" onKeyDown={handleMenuKeyDown} className="absolute right-0 top-[calc(100%+.65rem)] z-50 w-64 overflow-hidden rounded-2xl border border-[#063f5b]/10 bg-white p-2 shadow-[0_22px_50px_-28px_rgba(6,63,91,.55)]">
           <div className="border-b border-[#063f5b]/8 px-3 py-3">
             <p className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-[#009dcc]">Signed in as</p>
             <p className="mt-1 truncate text-sm font-bold text-[#063f5b]" title={user?.email}>{user?.email}</p>

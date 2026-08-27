@@ -76,6 +76,28 @@ body {
   outline-offset: 3px;
 }
 
+#main-content:focus {
+  outline: none;
+}
+
+/* Small supporting copy must remain readable in both themes. The original
+   opacity utilities become too faint on light cards and dark surfaces. */
+.text-\[\#063f5b\]\/35,
+.text-\[\#063f5b\]\/40,
+.text-\[\#063f5b\]\/45,
+.text-\[\#063f5b\]\/50,
+.text-\[\#063f5b\]\/55,
+.text-\[\#063f5b\]\/60,
+.text-\[\#063f5b\]\/65 {
+  color: color-mix(in srgb, var(--foreground) 72%, transparent);
+}
+
+.placeholder\:text-\[\#063f5b\]\/35::placeholder,
+.placeholder\:text-\[\#063f5b\]\/40::placeholder,
+.placeholder\:text-\[\#063f5b\]\/45::placeholder {
+  color: color-mix(in srgb, var(--foreground) 70%, transparent);
+}
+
 /* Keep the brighter cyan for decorative accents while giving text and
    interactive surfaces enough contrast against MishBaby's pale backgrounds. */
 .text-\[\#009dcc\] {
@@ -139,22 +161,22 @@ body {
 :root[data-theme="dark"] .text-\[\#063f5b\]\/75 { color: color-mix(in srgb, var(--foreground) 75%, transparent); }
 :root[data-theme="dark"] .text-\[\#063f5b\]\/72 { color: color-mix(in srgb, var(--foreground) 72%, transparent); }
 :root[data-theme="dark"] .text-\[\#063f5b\]\/70 { color: color-mix(in srgb, var(--foreground) 70%, transparent); }
-:root[data-theme="dark"] .text-\[\#063f5b\]\/65 { color: color-mix(in srgb, var(--foreground) 65%, transparent); }
-:root[data-theme="dark"] .text-\[\#063f5b\]\/60 { color: color-mix(in srgb, var(--foreground) 60%, transparent); }
-:root[data-theme="dark"] .text-\[\#063f5b\]\/55 { color: color-mix(in srgb, var(--foreground) 55%, transparent); }
-:root[data-theme="dark"] .text-\[\#063f5b\]\/50 { color: color-mix(in srgb, var(--foreground) 50%, transparent); }
-:root[data-theme="dark"] .text-\[\#063f5b\]\/45 { color: color-mix(in srgb, var(--foreground) 45%, transparent); }
-:root[data-theme="dark"] .text-\[\#063f5b\]\/40 { color: color-mix(in srgb, var(--foreground) 40%, transparent); }
-:root[data-theme="dark"] .text-\[\#063f5b\]\/35 { color: color-mix(in srgb, var(--foreground) 35%, transparent); }
+:root[data-theme="dark"] .text-\[\#063f5b\]\/65,
+:root[data-theme="dark"] .text-\[\#063f5b\]\/60,
+:root[data-theme="dark"] .text-\[\#063f5b\]\/55,
+:root[data-theme="dark"] .text-\[\#063f5b\]\/50,
+:root[data-theme="dark"] .text-\[\#063f5b\]\/45,
+:root[data-theme="dark"] .text-\[\#063f5b\]\/40,
+:root[data-theme="dark"] .text-\[\#063f5b\]\/35 { color: color-mix(in srgb, var(--foreground) 72%, transparent); }
 :root[data-theme="dark"] .text-\[\#007fa5\],
 :root[data-theme="dark"] .text-\[\#007fa8\],
 :root[data-theme="dark"] .text-\[\#007797\],
 :root[data-theme="dark"] .text-\[\#0784b0\] { color: var(--brand-cyan-accessible); }
 :root[data-theme="dark"] .text-\[\#a8e8f5\] { color: #b9eef7; }
 :root[data-theme="dark"] .text-\[\#376579\] { color: #a8d4df; }
-:root[data-theme="dark"] .placeholder\:text-\[\#063f5b\]\/45::placeholder { color: color-mix(in srgb, var(--foreground) 45%, transparent); }
-:root[data-theme="dark"] .placeholder\:text-\[\#063f5b\]\/40::placeholder { color: color-mix(in srgb, var(--foreground) 40%, transparent); }
-:root[data-theme="dark"] .placeholder\:text-\[\#063f5b\]\/35::placeholder { color: color-mix(in srgb, var(--foreground) 35%, transparent); }
+:root[data-theme="dark"] .placeholder\:text-\[\#063f5b\]\/45::placeholder,
+:root[data-theme="dark"] .placeholder\:text-\[\#063f5b\]\/40::placeholder,
+:root[data-theme="dark"] .placeholder\:text-\[\#063f5b\]\/35::placeholder { color: color-mix(in srgb, var(--foreground) 70%, transparent); }
 
 :root[data-theme="dark"] .border-\[\#063f5b\]\/15 { border-color: color-mix(in srgb, var(--border-color) 15%, transparent); }
 :root[data-theme="dark"] .border-\[\#063f5b\]\/12 { border-color: color-mix(in srgb, var(--border-color) 12%, transparent); }

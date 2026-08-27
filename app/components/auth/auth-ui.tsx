@@ -42,6 +42,7 @@ export function SubmitButton({
   const { pending } = useFormStatus();
   return (
     <button
+      type="submit"
       disabled={pending}
       className="w-full rounded-full bg-[#009dcc] px-5 py-3 text-sm font-extrabold text-white transition hover:bg-[#0784b0] disabled:cursor-wait disabled:opacity-60"
     >
@@ -54,8 +55,8 @@ export function ActionMessage({ state }: { state: AuthActionState }) {
   if (!state.message) return null;
   return (
     <p
-      role="status"
-      aria-live="polite"
+      role={state.status === "success" ? "status" : "alert"}
+      aria-live={state.status === "success" ? "polite" : "assertive"}
       className={`mb-5 rounded-xl px-4 py-3 text-sm leading-6 ${state.status === "success" ? "bg-[#e7f8ee] text-[#195b37]" : "bg-[#fff0f1] text-[#8a2430]"}`}
     >
       {state.message}
