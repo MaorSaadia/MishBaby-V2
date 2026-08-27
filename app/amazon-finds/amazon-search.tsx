@@ -42,11 +42,11 @@ export function AmazonSearch() {
     Record<string, AmazonOfferLink>
   >({});
   const [offersUpdatedAt, setOffersUpdatedAt] = useState("");
-  const [minPrice, setMinPrice] = useState("");
-  const [maxPrice, setMaxPrice] = useState("");
-  const [primeOnly, setPrimeOnly] = useState(false);
-  const [minRating, setMinRating] = useState<"" | "3" | "4">("");
-  const [sortBy, setSortBy] = useState("Relevance");
+  const minPrice = "";
+  const maxPrice = "";
+  const primeOnly = false;
+  const minRating: "" | "3" | "4" = "";
+  const sortBy = "Relevance";
   const [activeFilters, setActiveFilters] =
     useState<SearchFilters>(defaultFilters);
   const controllerRef = useRef<AbortController | null>(null);
@@ -214,25 +214,14 @@ export function AmazonSearch() {
     };
   }
 
-  function clearFilters() {
-    setMinPrice("");
-    setMaxPrice("");
-    setPrimeOnly(false);
-    setMinRating("");
-    setSortBy("Relevance");
-  }
-
   const initialLoading = status === "loading";
   const loadingMore = status === "loading-more";
-  const filtersActive = Boolean(
-    minPrice || maxPrice || primeOnly || minRating || sortBy !== "Relevance",
-  );
 
   return (
     <div>
       <form
         onSubmit={submitSearch}
-        className="rounded-[2rem] border border-[#063f5b]/8 bg-white p-5 shadow-[0_18px_45px_-32px_rgba(6,63,91,.4)] sm:p-7"
+        className="rounded-3xl border border-[#063f5b]/8 bg-white p-4 shadow-[0_18px_45px_-32px_rgba(6,63,91,.4)] sm:rounded-[2rem] sm:p-7"
       >
         <label
           htmlFor="amazon-search-query"
@@ -269,7 +258,7 @@ export function AmazonSearch() {
           <button
             type="submit"
             disabled={initialLoading || loadingMore}
-            className="h-13 rounded-2xl bg-[#009dcc] px-7 text-sm font-extrabold text-white transition hover:bg-[#0784b0] disabled:cursor-wait disabled:opacity-60"
+            className="h-13 w-full rounded-2xl bg-[#009dcc] px-7 text-sm font-extrabold text-white transition hover:bg-[#0784b0] disabled:cursor-wait disabled:opacity-60 sm:w-auto"
           >
             {initialLoading ? "Searching…" : "Search Amazon"}
           </button>
@@ -282,7 +271,7 @@ export function AmazonSearch() {
               type="button"
               onClick={() => chooseSuggestion(suggestion)}
               disabled={initialLoading || loadingMore}
-              className="rounded-full bg-[#e8f8fc] px-3 py-1.5 font-bold transition hover:bg-[#d2f2f9] disabled:opacity-50"
+              className="min-h-10 rounded-full bg-[#e8f8fc] px-3 py-1.5 font-bold transition hover:bg-[#d2f2f9] disabled:opacity-50"
             >
               {suggestion}
             </button>
@@ -386,7 +375,7 @@ export function AmazonSearch() {
       <div
         aria-live="polite"
         aria-atomic="true"
-        className="mt-5 min-h-6 text-sm text-[#063f5b]/65"
+        className={`mt-5 min-h-6 rounded-2xl text-sm leading-6 ${status === "error" ? "bg-[#fff0f1] px-4 py-3 text-[#8a2430]" : "text-[#063f5b]/65"}`}
       >
         {message ||
           (initialLoading
@@ -395,6 +384,21 @@ export function AmazonSearch() {
               ? `Showing ${items.length} of ${totalResultCount.toLocaleString()} results for “${activeQuery}”.`
               : "")}
       </div>
+
+      {initialLoading && (
+        <div className="mt-6 grid grid-cols-2 gap-3 sm:mt-7 sm:gap-5 lg:grid-cols-4" aria-hidden="true">
+          {Array.from({ length: 8 }, (_, index) => (
+            <div key={index} className="overflow-hidden rounded-2xl border border-[#063f5b]/8 bg-white sm:rounded-[2rem]">
+              <div className="aspect-square animate-pulse bg-[#e4f6fa] sm:aspect-[4/3]" />
+              <div className="space-y-3 p-3 sm:p-5">
+                <div className="h-3 w-20 animate-pulse rounded bg-[#d4eff5]" />
+                <div className="h-4 w-full animate-pulse rounded bg-[#e4f6fa]" />
+                <div className="h-4 w-3/4 animate-pulse rounded bg-[#e4f6fa]" />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       {items.length > 0 && (
         <>
@@ -407,7 +411,7 @@ export function AmazonSearch() {
               />
             ))}
           </div>
-          <div className="mt-10 text-center">
+          <div className="mt-8 text-center sm:mt-10">
             {hasMore && page < 3 ? (
               <button
                 type="button"
@@ -415,7 +419,7 @@ export function AmazonSearch() {
                   void requestSearch(activeQuery, page + 1, true, activeFilters)
                 }
                 disabled={loadingMore}
-                className="rounded-full border border-[#063f5b]/15 bg-white px-7 py-3.5 text-sm font-extrabold text-[#063f5b] transition hover:border-[#009dcc] hover:bg-[#e8f8fc] disabled:cursor-wait disabled:opacity-60"
+                className="w-full rounded-full border border-[#063f5b]/15 bg-white px-7 py-3.5 text-sm font-extrabold text-[#063f5b] transition hover:border-[#009dcc] hover:bg-[#e8f8fc] disabled:cursor-wait disabled:opacity-60 sm:w-auto"
               >
                 {loadingMore ? "Loading more…" : "Load more Amazon results"}
               </button>
@@ -425,7 +429,7 @@ export function AmazonSearch() {
               </p>
             )}
           </div>
-          <p className="mx-auto mt-8 max-w-3xl rounded-2xl bg-[#fff7df] px-5 py-4 text-center text-xs leading-5 text-[#735a16]">
+          <p className="mx-auto mt-7 max-w-3xl rounded-2xl bg-[#fff7df] px-4 py-4 text-left text-xs leading-5 text-[#735a16] sm:mt-8 sm:px-5 sm:text-center">
             Amazon product titles, images, links, prices, and availability are
             provided by Amazon. Prices and availability may change; the
             information shown on Amazon when you purchase applies. As an Amazon

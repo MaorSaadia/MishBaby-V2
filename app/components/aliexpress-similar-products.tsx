@@ -156,6 +156,7 @@ export function AliExpressCategoryProducts({ categoryName, topics, excludedOffer
       eyebrow="More products on AliExpress"
       heading={`AliExpress finds for ${categoryName}.`}
       description={`Live AliExpress results selected for ${categoryName.toLowerCase()}.`}
+      compactOnMobile
     />
   );
 }

@@ -40,7 +40,7 @@ export function ProductImage({ product, variant = "card", preload = false }: Pro
             ? "(max-width: 1024px) 100vw, 528px"
             : variant === "featured"
               ? "(max-width: 1024px) 50vw, 272px"
-              : "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 352px"
+              : "(max-width: 1024px) 50vw, 352px"
         }
         className="object-cover"
       />

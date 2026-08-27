@@ -88,7 +88,7 @@ export function AliExpressSearch() {
 
   return (
     <div>
-      <form onSubmit={submitSearch} className="rounded-[2rem] border border-[#063f5b]/8 bg-white p-5 shadow-[0_18px_45px_-32px_rgba(6,63,91,.4)] sm:p-7">
+      <form onSubmit={submitSearch} className="rounded-3xl border border-[#063f5b]/8 bg-white p-4 shadow-[0_18px_45px_-32px_rgba(6,63,91,.4)] sm:rounded-[2rem] sm:p-7">
         <label htmlFor="aliexpress-search-query" className="text-sm font-extrabold text-[#063f5b]">
           What are you looking for?
         </label>
@@ -110,21 +110,21 @@ export function AliExpressSearch() {
               className="h-13 w-full rounded-2xl border border-[#063f5b]/15 bg-[#fbfeff] pl-12 pr-4 text-[#063f5b] outline-none transition focus:border-[#009dcc] focus:ring-3 focus:ring-[#009dcc]/15"
             />
           </div>
-          <button type="submit" disabled={initialLoading || loadingMore} className="h-13 rounded-2xl bg-[#009dcc] px-7 text-sm font-extrabold text-white transition hover:bg-[#0784b0] disabled:cursor-wait disabled:opacity-60">
+          <button type="submit" disabled={initialLoading || loadingMore} className="h-13 w-full rounded-2xl bg-[#009dcc] px-7 text-sm font-extrabold text-white transition hover:bg-[#0784b0] disabled:cursor-wait disabled:opacity-60 sm:w-auto">
             {initialLoading ? "Searching..." : "Search AliExpress"}
           </button>
         </div>
         <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-[#063f5b]/55">
           <span className="font-bold">Popular:</span>
           {suggestedSearches.map((suggestion) => (
-            <button key={suggestion} type="button" onClick={() => startSearch(suggestion)} disabled={initialLoading || loadingMore} className="rounded-full bg-[#e8f8fc] px-3 py-1.5 font-bold transition hover:bg-[#d2f2f9] disabled:opacity-50">
+            <button key={suggestion} type="button" onClick={() => startSearch(suggestion)} disabled={initialLoading || loadingMore} className="min-h-10 rounded-full bg-[#e8f8fc] px-3 py-1.5 font-bold transition hover:bg-[#d2f2f9] disabled:opacity-50">
               {suggestion}
             </button>
           ))}
         </div>
       </form>
 
-      <div aria-live="polite" aria-atomic="true" className="min-h-16 pt-6 text-sm text-[#063f5b]/70">
+      <div aria-live="polite" aria-atomic="true" className={`mt-5 min-h-6 rounded-2xl text-sm leading-6 ${status === "error" ? "bg-[#fff0f1] px-4 py-3 text-[#8a2430]" : "text-[#063f5b]/70"}`}>
         {initialLoading && "Searching AliExpress's baby-product catalog..."}
         {!initialLoading && message}
         {!initialLoading && !message && activeQuery && (
@@ -132,22 +132,37 @@ export function AliExpressSearch() {
         )}
       </div>
 
+      {initialLoading && (
+        <div className="mt-6 grid grid-cols-2 gap-3 sm:mt-7 sm:gap-5 lg:grid-cols-4" aria-hidden="true">
+          {Array.from({ length: 8 }, (_, index) => (
+            <div key={index} className="overflow-hidden rounded-2xl border border-[#063f5b]/8 bg-white sm:rounded-[2rem]">
+              <div className="aspect-square animate-pulse bg-[#e4f6fa]" />
+              <div className="space-y-3 p-3 sm:p-5">
+                <div className="h-3 w-20 animate-pulse rounded bg-[#d4eff5]" />
+                <div className="h-4 w-full animate-pulse rounded bg-[#e4f6fa]" />
+                <div className="h-4 w-3/4 animate-pulse rounded bg-[#e4f6fa]" />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
       {items.length > 0 && (
         <>
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-6 grid grid-cols-2 gap-3 sm:mt-7 sm:gap-5 lg:grid-cols-4">
             {items.map((item) => (
-              <article key={item.productId} className="flex min-w-0 flex-col overflow-hidden rounded-[2rem] border border-[#063f5b]/8 bg-white shadow-[0_20px_45px_-35px_rgba(6,63,91,.5)]">
+              <article key={item.productId} className="flex min-w-0 flex-col overflow-hidden rounded-2xl border border-[#063f5b]/8 bg-white shadow-[0_20px_45px_-35px_rgba(6,63,91,.5)] sm:rounded-[2rem]">
                 <a href={item.promotionUrl} target="_blank" rel="sponsored nofollow noopener noreferrer" className="group flex h-full flex-col" aria-label={`${item.title} on AliExpress (opens in a new tab)`}>
                   <div className="relative aspect-square overflow-hidden bg-white">
                     {item.image ? (
-                      <Image src={item.image.url} alt="" fill sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw" className="object-contain p-5 transition duration-300 group-hover:scale-[1.03]" />
+                      <Image src={item.image.url} alt="" fill sizes="(max-width: 1024px) 50vw, 272px" className="object-contain p-3 transition duration-300 group-hover:scale-[1.03] sm:p-5" />
                     ) : (
                       <div className="grid h-full place-items-center bg-[#f1fbfe] p-8 text-center text-sm font-bold text-[#063f5b]/45">Image unavailable</div>
                     )}
                   </div>
-                  <div className="flex flex-1 flex-col border-t border-[#063f5b]/6 p-5">
-                    <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-[#009dcc]">AliExpress result</p>
-                    <h2 className="mt-2 line-clamp-3 text-base font-extrabold leading-6 text-[#063f5b]">{item.title}</h2>
+                  <div className="flex flex-1 flex-col border-t border-[#063f5b]/6 p-3 sm:p-5">
+                    <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-[#009dcc] sm:text-xs">AliExpress result</p>
+                    <h2 className="mt-2 line-clamp-4 text-sm font-extrabold leading-5 text-[#063f5b] sm:line-clamp-3 sm:text-base sm:leading-6">{item.title}</h2>
                     <span className="mt-auto pt-5 text-sm font-extrabold text-[#009dcc]">View on AliExpress ↗</span>
                   </div>
                 </a>
@@ -157,7 +172,7 @@ export function AliExpressSearch() {
 
           <div className="mt-8 flex justify-center">
             {hasMore ? (
-              <button type="button" onClick={() => void requestSearch(activeQuery, page + 1, true)} disabled={loadingMore} className="rounded-full border border-[#009dcc]/35 bg-white px-7 py-3 text-sm font-extrabold text-[#009dcc] transition hover:bg-[#e8f8fc] disabled:cursor-wait disabled:opacity-60">
+              <button type="button" onClick={() => void requestSearch(activeQuery, page + 1, true)} disabled={loadingMore} className="w-full rounded-full border border-[#009dcc]/35 bg-white px-7 py-3.5 text-sm font-extrabold text-[#009dcc] transition hover:bg-[#e8f8fc] disabled:cursor-wait disabled:opacity-60 sm:w-auto">
                 {loadingMore ? "Loading more..." : "Load more"}
               </button>
             ) : (
@@ -167,7 +182,7 @@ export function AliExpressSearch() {
         </>
       )}
 
-      <aside className="mx-auto mt-10 max-w-3xl rounded-2xl bg-[#fff7df] px-5 py-4 text-center text-xs leading-5 text-[#735a16]">
+      <aside className="mx-auto mt-8 max-w-3xl rounded-2xl bg-[#fff7df] px-4 py-4 text-left text-xs leading-5 text-[#735a16] sm:mt-10 sm:px-5 sm:text-center">
         Product titles, images, and links are provided by AliExpress and may change. Shipping, availability, local currency, and final terms are confirmed on AliExpress. MishBaby may earn a commission from qualifying purchases at no additional cost to you.
       </aside>
     </div>

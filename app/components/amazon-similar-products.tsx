@@ -99,6 +99,7 @@ export function AmazonCategoryProducts({ categoryName, topics, excludedAsins = [
       eyebrow="More products on Amazon"
       heading={`Amazon finds for ${categoryName}.`}
       description={`Live Amazon results selected from ${categoryName.toLowerCase()} and its related topics.`}
+      compactOnMobile
     />
   );
 }
