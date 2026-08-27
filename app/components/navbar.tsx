@@ -98,7 +98,7 @@ export function Navbar({ products }: { products: ProductSearchItem[] }) {
 
   return (
     <header className="relative z-40 border-b border-[#063f5b]/10 bg-[#fbfeff]/95 backdrop-blur" onKeyDown={handleEscape}>
-      <div className="mx-auto flex min-h-18 max-w-6xl flex-wrap items-center gap-x-3 gap-y-3 px-4 py-3 sm:px-8 lg:flex-nowrap lg:gap-x-5 lg:py-0">
+      <div className="mx-auto flex min-h-18 max-w-6xl flex-wrap items-center gap-x-2 gap-y-3 px-4 py-3 sm:gap-x-3 sm:px-8 lg:flex-nowrap lg:gap-x-5 lg:py-0">
         <Brand />
         <div id="navbar-search-panel" className={`${searchOpen ? "block" : "hidden"} order-3 w-full basis-full lg:order-none lg:block lg:basis-auto lg:max-w-md lg:flex-1`}>
           <NavbarSearch
@@ -158,8 +158,8 @@ export function Navbar({ products }: { products: ProductSearchItem[] }) {
         </nav>
         <div className="hidden lg:block"><ThemeToggle /></div>
         <div className="hidden lg:block"><AccountMenu /></div>
-        <div className="ml-auto flex items-center gap-1.5 lg:hidden">
-          <button ref={searchButtonRef} type="button" onClick={toggleSearch} className="grid size-9 shrink-0 place-items-center rounded-full border border-[#063f5b]/15 bg-white text-[#063f5b] transition-colors hover:border-[#009dcc]/40 hover:text-[#009dcc] sm:size-10" aria-expanded={searchOpen} aria-controls="navbar-search-panel">
+        <div className="ml-auto flex items-center gap-1 lg:hidden sm:gap-1.5">
+          <button ref={searchButtonRef} type="button" onClick={toggleSearch} className="grid size-10 shrink-0 place-items-center rounded-full border border-[#063f5b]/15 bg-white text-[#063f5b] transition-colors hover:border-[#009dcc]/40 hover:text-[#009dcc] sm:size-11" aria-expanded={searchOpen} aria-controls="navbar-search-panel">
             <span className="sr-only">{searchOpen ? "Close" : "Open"} product search</span>
             <svg viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
               {searchOpen ? <path d="m6 6 12 12M18 6 6 18" /> : <><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></>}
@@ -167,18 +167,18 @@ export function Navbar({ products }: { products: ProductSearchItem[] }) {
           </button>
           <ThemeToggle compact />
           <AccountMenu compact onOpen={() => { setSearchOpen(false); setIsOpen(false); }} />
-          <button ref={menuButtonRef} type="button" onClick={toggleMenu} className="grid size-9 shrink-0 place-items-center rounded-full border border-[#063f5b]/15 bg-white text-[#063f5b] transition-colors hover:border-[#009dcc]/40 hover:text-[#009dcc] sm:size-10" aria-expanded={isOpen} aria-controls="mobile-navigation">
+          <button ref={menuButtonRef} type="button" onClick={toggleMenu} className="grid size-10 shrink-0 place-items-center rounded-full border border-[#063f5b]/15 bg-white text-[#063f5b] transition-colors hover:border-[#009dcc]/40 hover:text-[#009dcc] sm:size-11" aria-expanded={isOpen} aria-controls="mobile-navigation">
             <span className="sr-only">{isOpen ? "Close" : "Open"} navigation menu</span>
             <svg viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><path d={isOpen ? "m6 6 12 12M18 6 6 18" : "M4 7h16M4 12h16M4 17h16"} /></svg>
           </button>
         </div>
       </div>
       {isOpen && (
-        <nav id="mobile-navigation" className="border-t border-[#063f5b]/10 px-5 py-4 lg:hidden" aria-label="Mobile navigation">
+        <nav id="mobile-navigation" className="border-t border-[#063f5b]/10 px-4 py-3 lg:hidden sm:px-8 sm:py-4" aria-label="Mobile navigation">
           <div className="mx-auto flex max-w-6xl flex-col gap-1">
             {mobileLinks.map((link) => {
               const active = isActive(link.href);
-              return <Link key={link.label} href={link.href} aria-current={active ? "page" : undefined} onClick={() => setIsOpen(false)} className={`rounded-xl px-3 py-3 font-bold hover:bg-[#a8e8f5]/40 ${active ? "bg-[#e2f7fc] text-[#007fa5]" : ""}`}>{link.label}</Link>;
+              return <Link key={link.label} href={link.href} aria-current={active ? "page" : undefined} onClick={() => setIsOpen(false)} className={`flex min-h-12 items-center rounded-xl px-3 py-3 font-bold hover:bg-[#a8e8f5]/40 ${active ? "bg-[#e2f7fc] text-[#007fa5]" : ""}`}>{link.label}</Link>;
             })}
           </div>
         </nav>

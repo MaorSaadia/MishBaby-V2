@@ -10,7 +10,7 @@ export function SignupForms({ next }: { next: string }) {
   const [marketingConsent, setMarketingConsent] = useState(false);
 
   return <>
-    <label className="mb-5 flex items-start gap-3 rounded-2xl bg-[#f1fbfe] p-4 text-sm leading-6 text-[#063f5b]/70"><input type="checkbox" checked={marketingConsent} onChange={(event) => setMarketingConsent(event.target.checked)} className="mt-1 size-4 shrink-0 accent-[#009dcc]" /><span>Yes, send me occasional MishBaby product discoveries, helpful guides, and website updates by email. This is optional, and I can unsubscribe anytime from my Account page.</span></label>
+    <label className="mb-5 flex cursor-pointer items-start gap-3 rounded-2xl bg-[#f1fbfe] p-4 text-sm leading-6 text-[#063f5b]/70"><input type="checkbox" checked={marketingConsent} onChange={(event) => setMarketingConsent(event.target.checked)} className="mt-0.5 size-5 shrink-0 accent-[#009dcc]" /><span>Yes, send me occasional MishBaby product discoveries, helpful guides, and website updates by email. This is optional, and I can unsubscribe anytime from my Account page.</span></label>
     <GoogleButton next={next} marketingConsent={marketingConsent} />
     <div className="my-6 flex items-center gap-3 text-xs text-[#063f5b]/45"><span className="h-px flex-1 bg-[#063f5b]/10" />or use email<span className="h-px flex-1 bg-[#063f5b]/10" /></div>
     <StatefulForm action={signUpAction} submitText="Create account" pendingText="Creating account…">

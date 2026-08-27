@@ -28,7 +28,7 @@ const socialLinks = [
 export function Footer() {
   return (
     <footer className="border-t border-[#063f5b]/10 bg-[#e8f8fc]">
-      <div className="mx-auto grid max-w-6xl gap-10 px-5 py-12 sm:px-8 md:grid-cols-[1.4fr_1fr_1fr]">
+      <div className="mx-auto grid max-w-6xl gap-8 px-4 py-10 sm:px-8 sm:py-12 md:grid-cols-[1.4fr_1fr_1fr] md:gap-10">
         <div>
           <Brand />
           <p className="mt-4 max-w-xs text-sm leading-6 text-[#063f5b]/65">
@@ -63,16 +63,16 @@ export function Footer() {
           <h2 className="text-sm font-extrabold uppercase tracking-[0.14em]">
             Explore
           </h2>
-          <div className="mt-4 grid gap-2 text-sm text-[#063f5b]/70">
-            <Link href="/categories">Product categories</Link>
-            <Link href="/amazon-finds">Amazon Finds</Link>
-            <Link href="/aliexpress-finds">AliExpress Finds</Link>
+          <div className="mt-3 grid text-sm text-[#063f5b]/70 sm:mt-4">
+            <Link className="flex min-h-10 items-center" href="/categories">Product categories</Link>
+            <Link className="flex min-h-10 items-center" href="/amazon-finds">Amazon Finds</Link>
+            <Link className="flex min-h-10 items-center" href="/aliexpress-finds">AliExpress Finds</Link>
             {/* <Link href="/collections">Curated collections</Link> */}
-            <Link href="/guides">Parenting guides</Link>
-            <Link href="/about">Our approach</Link>
-            <Link href="/affiliate-disclosure">Affiliate disclosure</Link>
-            <Link href="/privacy">Privacy policy</Link>
-            <Link href="/terms">Terms of use</Link>
+            <Link className="flex min-h-10 items-center" href="/guides">Parenting guides</Link>
+            <Link className="flex min-h-10 items-center" href="/about">Our approach</Link>
+            <Link className="flex min-h-10 items-center" href="/affiliate-disclosure">Affiliate disclosure</Link>
+            <Link className="flex min-h-10 items-center" href="/privacy">Privacy policy</Link>
+            <Link className="flex min-h-10 items-center" href="/terms">Terms of use</Link>
           </div>
         </div>
         <div>
@@ -87,7 +87,7 @@ export function Footer() {
           </p>
         </div>
       </div>
-      <div className="border-t border-[#063f5b]/10 px-5 py-5 text-center text-xs text-[#063f5b]/55">
+      <div className="border-t border-[#063f5b]/10 px-4 py-5 text-center text-xs leading-5 text-[#063f5b]/55 sm:px-5">
         © {new Date().getFullYear()} MishBaby. Made with care for growing
         families.
       </div>

@@ -23,5 +23,5 @@ export function SignOutButton() {
     router.refresh();
   }
 
-  return <div className="mt-6"><button type="button" onClick={handleSignOut} disabled={pending} className="rounded-full border border-[#063f5b]/15 px-5 py-3 text-sm font-extrabold transition hover:bg-[#e8f8fc] disabled:cursor-wait disabled:opacity-60">{pending ? "Signing out…" : "Sign out"}</button>{failed && <p role="status" className="mt-3 text-sm text-[#8a2430]">We couldn’t sign you out. Please try again.</p>}</div>;
+  return <div className="mt-6"><button type="button" onClick={handleSignOut} disabled={pending} className="min-h-12 w-full rounded-full border border-[#063f5b]/15 px-5 py-3 text-sm font-extrabold transition hover:bg-[#e8f8fc] disabled:cursor-wait disabled:opacity-60 sm:w-auto">{pending ? "Signing out…" : "Sign out"}</button>{failed && <p role="status" className="mt-3 text-sm text-[#8a2430]">We couldn’t sign you out. Please try again.</p>}</div>;
 }

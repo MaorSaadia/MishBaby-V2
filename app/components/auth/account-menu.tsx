@@ -156,7 +156,7 @@ export function AccountMenu({ compact = false, onOpen }: { compact?: boolean; on
         aria-haspopup={signedIn ? "menu" : undefined}
         aria-expanded={signedIn ? open : undefined}
         aria-label={signedIn ? `${open ? "Close" : "Open"} account menu` : authStatus === "loading" ? "Loading account" : "Sign in"}
-        className={`relative grid shrink-0 place-items-center overflow-hidden rounded-full border bg-white text-[#063f5b] transition-colors hover:border-[#009dcc]/40 hover:text-[#009dcc] disabled:cursor-wait ${compact ? "size-9 sm:size-10" : "size-10"} ${signedIn ? "border-[#009dcc]/40" : "border-[#063f5b]/15"}`}
+        className={`relative grid shrink-0 place-items-center overflow-hidden rounded-full border bg-white text-[#063f5b] transition-colors hover:border-[#009dcc]/40 hover:text-[#009dcc] disabled:cursor-wait ${compact ? "size-10 sm:size-11" : "size-10"} ${signedIn ? "border-[#009dcc]/40" : "border-[#063f5b]/15"}`}
       >
         {authStatus === "loading" ? <span className="size-4 animate-pulse rounded-full bg-[#a8e8f5]" /> : <UserAvatar key={avatarUrl ?? "default"} url={avatarUrl} />}
       </button>

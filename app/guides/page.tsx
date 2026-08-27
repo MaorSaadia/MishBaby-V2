@@ -91,18 +91,18 @@ export default async function GuidesPage({ searchParams }: GuidesPageProps) {
           dangerouslySetInnerHTML={{ __html: serializeStructuredData(structuredData) }}
         />
       )}
-      <section className="relative isolate overflow-hidden bg-[#f1fbfe] px-5 py-16 sm:px-8 md:py-22">
+      <section className="relative isolate overflow-hidden bg-[#f1fbfe] px-5 py-10 sm:px-8 sm:py-14 md:py-22">
         <div className="absolute -right-20 -top-20 -z-10 size-96 rounded-full bg-[#a8e8f5]/70 blur-3xl" />
         <div className="absolute -bottom-24 -left-20 -z-10 size-72 rounded-full bg-[#d9f4ee]/70 blur-2xl" />
         <div className="mx-auto max-w-6xl">
-          <p className="text-sm font-extrabold uppercase tracking-[0.14em] text-[#009dcc]">MishBaby guides</p>
-          <h1 className="mt-3 max-w-3xl font-display text-5xl font-semibold leading-[1.05] tracking-[-0.055em] text-[#063f5b] sm:text-6xl">Practical guidance, minus the noise.</h1>
-          <p className="mt-5 max-w-2xl text-lg leading-8 text-[#063f5b]/70">Clear buying guides, useful checklists, and friendly ideas to help you make confident choices for your family.</p>
+          <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-[#009dcc] sm:text-sm">MishBaby guides</p>
+          <h1 className="mt-3 max-w-3xl font-display text-4xl font-semibold leading-[1.08] tracking-[-0.05em] text-[#063f5b] sm:text-6xl sm:leading-[1.05]">Practical guidance, minus the noise.</h1>
+          <p className="mt-4 max-w-2xl text-base leading-7 text-[#063f5b]/70 sm:mt-5 sm:text-lg sm:leading-8">Clear buying guides, useful checklists, and friendly ideas to help you make confident choices for your family.</p>
         </div>
       </section>
 
-      <section className="mx-auto max-w-6xl px-5 pt-12 sm:px-8 md:pt-16">
-        <div className="rounded-[2rem] border border-[#063f5b]/8 bg-white p-5 shadow-[0_18px_40px_-34px_rgba(6,63,91,.4)] sm:p-7">
+      <section className="mx-auto max-w-6xl px-4 pt-10 sm:px-8 sm:pt-12 md:pt-16">
+        <div className="rounded-3xl border border-[#063f5b]/8 bg-white p-4 shadow-[0_18px_40px_-34px_rgba(6,63,91,.4)] sm:rounded-[2rem] sm:p-7">
           <form action="/guides" className="flex flex-col gap-3 sm:flex-row" role="search">
             <label htmlFor="guide-search" className="sr-only">Search guides</label>
             <div className="relative flex-1">
@@ -121,16 +121,16 @@ export default async function GuidesPage({ searchParams }: GuidesPageProps) {
               />
               {selectedCategory && <input type="hidden" name="category" value={selectedCategory} />}
             </div>
-            <button type="submit" className="h-13 rounded-2xl bg-[#009dcc] px-6 text-sm font-extrabold text-white transition hover:bg-[#0784b0]">Search guides</button>
+            <button type="submit" className="h-13 w-full rounded-2xl bg-[#009dcc] px-6 text-sm font-extrabold text-white transition hover:bg-[#0784b0] sm:w-auto">Search guides</button>
           </form>
 
           <div className="mt-6 border-t border-[#063f5b]/8 pt-5">
             <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-[#063f5b]/45">Filter by topic</p>
-            <nav className="mt-3 flex flex-wrap gap-2" aria-label="Filter guides by topic">
+            <nav className="-mx-1 mt-3 flex snap-x gap-2 overflow-x-auto px-1 pb-2 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0" aria-label="Filter guides by topic">
               <Link
                 href={{ pathname: "/guides", query: searchQuery ? { q: searchQuery } : {} }}
                 aria-current={!selectedCategory ? "page" : undefined}
-                className={`rounded-full px-4 py-2.5 text-sm font-extrabold transition ${!selectedCategory ? "bg-[#009dcc] text-white" : "border border-[#063f5b]/10 bg-white text-[#063f5b]/70 hover:border-[#009dcc]/40 hover:text-[#009dcc]"}`}
+                className={`min-h-11 shrink-0 snap-start rounded-full px-4 py-2.5 text-sm font-extrabold transition ${!selectedCategory ? "bg-[#009dcc] text-white" : "border border-[#063f5b]/10 bg-white text-[#063f5b]/70 hover:border-[#009dcc]/40 hover:text-[#009dcc]"}`}
               >
                 All guides
               </Link>
@@ -145,7 +145,7 @@ export default async function GuidesPage({ searchParams }: GuidesPageProps) {
                       query: { category: categoryLabel, ...(searchQuery ? { q: searchQuery } : {}) },
                     }}
                     aria-current={isSelected ? "page" : undefined}
-                    className={`rounded-full px-4 py-2.5 text-sm font-extrabold transition ${isSelected ? "bg-[#009dcc] text-white" : "border border-[#063f5b]/10 bg-white text-[#063f5b]/70 hover:border-[#009dcc]/40 hover:text-[#009dcc]"}`}
+                    className={`min-h-11 shrink-0 snap-start rounded-full px-4 py-2.5 text-sm font-extrabold transition ${isSelected ? "bg-[#009dcc] text-white" : "border border-[#063f5b]/10 bg-white text-[#063f5b]/70 hover:border-[#009dcc]/40 hover:text-[#009dcc]"}`}
                   >
                     {categoryLabel}
                   </Link>
@@ -156,7 +156,7 @@ export default async function GuidesPage({ searchParams }: GuidesPageProps) {
         </div>
       </section>
 
-      <section className="mx-auto max-w-6xl px-5 py-12 sm:px-8 md:py-16">
+      <section className="mx-auto max-w-6xl px-5 py-10 sm:px-8 sm:py-12 md:py-16">
         <div className="mb-7 flex flex-wrap items-center justify-between gap-4">
           <p className="text-sm font-semibold text-[#063f5b]/55">
             {matchingGuides.length} {matchingGuides.length === 1 ? "guide" : "guides"}
@@ -167,16 +167,16 @@ export default async function GuidesPage({ searchParams }: GuidesPageProps) {
         </div>
 
         {featuredGuide && (
-          <div className="group relative grid overflow-hidden rounded-[2rem] border border-[#063f5b]/8 bg-white shadow-[0_20px_48px_-34px_rgba(6,63,91,.4)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_26px_52px_-32px_rgba(6,63,91,.38)] md:grid-cols-[.85fr_1.15fr]">
+          <div className="group relative grid overflow-hidden rounded-3xl border border-[#063f5b]/8 bg-white shadow-[0_20px_48px_-34px_rgba(6,63,91,.4)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_26px_52px_-32px_rgba(6,63,91,.38)] sm:rounded-[2rem] md:grid-cols-[.85fr_1.15fr]">
             {featuredGuide.status === "published" && <Link href={`/guides/${featuredGuide.slug}`} aria-label={`Read ${featuredGuide.title}`} className="absolute inset-0 z-10 rounded-[inherit] focus-visible:outline-3 focus-visible:outline-offset-[-3px] focus-visible:outline-[#009dcc]" />}
             {featuredGuide.status === "published" && <div className="absolute right-4 top-4 z-20"><CardFavoriteButton kind="guide" id={featuredGuide.id} label={featuredGuide.title} /></div>}
             <GuideImage guide={featuredGuide} variant="featured" preload />
-            <div className="flex flex-col justify-center p-7 sm:p-10">
+            <div className="flex flex-col justify-center p-5 sm:p-10">
               <div className="flex flex-wrap items-center gap-3">
                 <span className="rounded-full bg-[#e8f8fc] px-3 py-1.5 text-xs font-extrabold uppercase tracking-[0.1em] text-[#009dcc]">Featured guide</span>
                 <span className="text-xs font-bold text-[#063f5b]/45">{featuredGuide.categoryLabel}</span>
               </div>
-              <h2 className="mt-5 font-display text-4xl font-semibold leading-tight tracking-[-0.045em] text-[#063f5b]">{featuredGuide.title}</h2>
+              <h2 className="mt-4 font-display text-3xl font-semibold leading-tight tracking-[-0.045em] text-[#063f5b] sm:mt-5 sm:text-4xl">{featuredGuide.title}</h2>
               <p className="mt-4 max-w-xl text-base leading-7 text-[#063f5b]/65">{featuredGuide.description}</p>
               {featuredGuide.status === "published" && (
                 <span className="mt-6 inline-flex items-center gap-2 text-sm font-extrabold text-[#009dcc] transition-colors group-hover:text-[#0784b0]">
@@ -188,27 +188,27 @@ export default async function GuidesPage({ searchParams }: GuidesPageProps) {
         )}
 
         {moreGuides.length > 0 && (
-          <div className={`${featuredGuide ? "mt-10" : ""} grid gap-5 sm:grid-cols-2 lg:grid-cols-3`}>
+          <div className={`${featuredGuide ? "mt-8 sm:mt-10" : ""} grid gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3`}>
             {moreGuides.map((guide) => <GuideCard key={guide.id} guide={guide} />)}
           </div>
         )}
 
         {matchingGuides.length === 0 && (
-          <div className="rounded-[2rem] border border-[#063f5b]/8 bg-[#f7fcfe] px-6 py-12 text-center sm:px-10">
+          <div className="rounded-3xl border border-[#063f5b]/8 bg-[#f7fcfe] px-5 py-10 text-center sm:rounded-[2rem] sm:px-10 sm:py-12">
             <h2 className="text-2xl font-extrabold tracking-[-0.035em] text-[#063f5b]">No guides matched your search</h2>
             <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-[#063f5b]/60">Try a shorter topic, choose another category, or clear the filters to browse every guide.</p>
-            <Link href="/guides" className="mt-6 inline-flex rounded-full bg-[#009dcc] px-5 py-3 text-sm font-extrabold text-white transition hover:bg-[#0784b0]">View all guides</Link>
+            <Link href="/guides" className="mt-6 inline-flex min-h-12 w-full items-center justify-center rounded-full bg-[#009dcc] px-5 py-3 text-sm font-extrabold text-white transition hover:bg-[#0784b0] sm:w-auto">View all guides</Link>
           </div>
         )}
       </section>
 
-      <section className="bg-[#f7fcfe] px-5 py-16 sm:px-8 md:py-22">
-        <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-6 rounded-[2rem] bg-[#063f5b] px-7 py-10 text-white sm:px-10 md:flex-row md:items-center">
+      <section className="bg-[#f7fcfe] px-5 py-14 sm:px-8 sm:py-16 md:py-22">
+        <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-6 rounded-3xl bg-[#063f5b] px-6 py-8 text-white sm:rounded-[2rem] sm:px-10 sm:py-10 md:flex-row md:items-center">
           <div>
             <p className="text-sm font-extrabold uppercase tracking-[0.14em] text-[#a8e8f5]">Prefer to browse products?</p>
-            <h2 className="mt-2 font-display text-3xl font-semibold tracking-[-0.04em]">Discover thoughtful finds by category.</h2>
+            <h2 className="mt-2 font-display text-2xl font-semibold leading-tight tracking-[-0.04em] sm:text-3xl">Discover thoughtful finds by category.</h2>
           </div>
-          <Link href="/categories" className="shrink-0 rounded-full bg-white px-5 py-3 text-sm font-extrabold text-[#063f5b] transition hover:bg-[#e8f8fc]">Explore categories</Link>
+          <Link href="/categories" className="inline-flex min-h-12 w-full shrink-0 items-center justify-center rounded-full bg-white px-5 py-3 text-sm font-extrabold text-[#063f5b] transition hover:bg-[#e8f8fc] sm:w-auto">Explore categories</Link>
         </div>
       </section>
     </>
