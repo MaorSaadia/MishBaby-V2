@@ -21,7 +21,7 @@ export function ProductCard({ product, variant = "default" }: ProductCardProps) 
         <div className="absolute -right-12 -top-12 size-40 rounded-full bg-[#a8e8f5]/75 transition-transform duration-300 group-hover:scale-110" />
         <div className="absolute -bottom-16 -left-10 size-36 rounded-full bg-white/75" />
         {product.badge && (
-          <span className={`absolute left-2 top-2 z-10 max-w-[calc(100%-3.5rem)] truncate rounded-full bg-white px-2 py-1 text-[10px] font-extrabold text-[#009dcc] shadow-sm sm:px-3 sm:py-1.5 sm:text-xs ${compact ? "sm:left-4 sm:top-4" : "sm:left-5 sm:top-5"}`}>
+          <span className={`absolute left-2 top-2 z-10 hidden max-w-[calc(100%-3.5rem)] truncate rounded-full bg-white px-2 py-1 text-[10px] font-extrabold text-[#009dcc] shadow-sm sm:inline-flex sm:px-3 sm:py-1.5 sm:text-xs ${compact ? "sm:left-4 sm:top-4" : "sm:left-5 sm:top-5"}`}>
             {product.badge}
           </span>
         )}

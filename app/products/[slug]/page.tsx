@@ -5,7 +5,9 @@ import { AmazonSimilarProducts } from "../../components/amazon-similar-products"
 import { AliExpressSimilarProducts } from "../../components/aliexpress-similar-products";
 import { GuideCard } from "../../components/guide-card";
 import { OfferComparison } from "../../components/offer-comparison";
+import { HeroMerchantLinks, MobileMerchantTray } from "../../components/merchant-quick-actions";
 import { ProductImage } from "../../components/product-image";
+import { ProductOffersProvider } from "../../components/product-offers-context";
 import { RecentlyViewedProducts } from "../../components/recently-viewed-products";
 import { ShareControls } from "../../components/share-controls";
 import { FavoriteProductButton } from "../../components/favorite-product-button";
@@ -116,7 +118,7 @@ export default async function ProductPage({ params }: PageProps<"/products/[slug
   };
 
   return (
-    <>
+    <ProductOffersProvider key={product.id} offers={product.offers}>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -135,7 +137,7 @@ export default async function ProductPage({ params }: PageProps<"/products/[slug
               <span className="text-[#063f5b]">{product.name}</span>
             </nav>
 
-            <div className="mt-9 grid gap-10 lg:grid-cols-[.9fr_1.1fr] lg:items-center">
+            <div className="mt-9 grid gap-10 lg:grid-cols-[.9fr_1.1fr] lg:items-start">
               <div className="relative grid aspect-square max-w-xl place-items-center overflow-hidden rounded-[2.5rem] bg-[#dff4f8] shadow-[0_24px_55px_-38px_rgba(6,63,91,.45)]">
                 <div className="absolute -right-16 -top-16 size-64 rounded-full bg-[#a8e8f5]/80" />
                 <div className="absolute -bottom-20 -left-14 size-56 rounded-full bg-white/70" />
@@ -147,6 +149,7 @@ export default async function ProductPage({ params }: PageProps<"/products/[slug
                 <p className="mt-6 text-sm font-extrabold uppercase tracking-[0.14em] text-[#009dcc]">{category.name}</p>
                 <h1 className="mt-3 font-display text-5xl font-semibold leading-[1.05] tracking-[-0.055em] text-[#063f5b] sm:text-6xl">{product.name}</h1>
                 <p className="mt-5 max-w-2xl text-lg leading-8 text-[#063f5b]/70">{product.summary}</p>
+                <HeroMerchantLinks />
                 <FavoriteProductButton productId={product.id} productSlug={product.slug} />
                 <ShareControls
                   url={productUrl}
@@ -171,7 +174,7 @@ export default async function ProductPage({ params }: PageProps<"/products/[slug
             <h2 className="mt-3 font-display text-4xl font-semibold tracking-[-0.045em] text-[#063f5b]">One product, multiple offers.</h2>
             <p className="mx-auto mt-4 max-w-xl text-base leading-7 text-[#063f5b]/65">This is the foundation for comparing merchant options while keeping the product itself independent.</p>
           </div>
-          <OfferComparison offers={product.offers} />
+          <OfferComparison />
         </section>
 
         <AmazonSimilarProducts
@@ -209,6 +212,7 @@ export default async function ProductPage({ params }: PageProps<"/products/[slug
             image: product.image,
           }}
         />
-    </>
+        <MobileMerchantTray />
+    </ProductOffersProvider>
   );
 }

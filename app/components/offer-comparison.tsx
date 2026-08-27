@@ -2,13 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
-import type { AmazonOfferLink, AmazonOfferLinkResponse } from "@/lib/amazon-creators";
-import type { ActiveOffer } from "@/lib/products";
-
-type OfferComparisonProps = {
-  offers: ActiveOffer[];
-};
+import type { AmazonOfferLink } from "@/lib/amazon-creators";
+import { useProductOffers } from "./product-offers-context";
 
 function formatVerifiedDate(value: string) {
   return new Intl.DateTimeFormat("en-US", {
@@ -19,43 +14,9 @@ function formatVerifiedDate(value: string) {
   }).format(new Date(`${value}T00:00:00Z`));
 }
 
-export function OfferComparison({ offers }: OfferComparisonProps) {
-  const asinKey = useMemo(
-    () => offers.flatMap((offer) => !offer.url && offer.amazonAsin ? [offer.amazonAsin] : []).sort().join(","),
-    [offers],
-  );
-  const [amazonOffers, setAmazonOffers] = useState<Record<string, AmazonOfferLink>>({});
-  const [offersUpdatedAt, setOffersUpdatedAt] = useState("");
-  const [resolvingAmazonLinks, setResolvingAmazonLinks] = useState(Boolean(asinKey));
-
-  useEffect(() => {
-    const asins = asinKey ? asinKey.split(",") : [];
-    if (asins.length === 0) return;
-
-    const controller = new AbortController();
-    fetch("/api/amazon/items", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ asins }),
-      signal: controller.signal,
-    })
-      .then(async (response) => {
-        if (!response.ok) throw new Error("Amazon offers are unavailable.");
-        return response.json() as Promise<AmazonOfferLinkResponse>;
-      })
-      .then((response) => {
-        setAmazonOffers(Object.fromEntries(response.items.map((item) => [item.asin, item])));
-        setOffersUpdatedAt(response.offersUpdatedAt ?? "");
-      })
-      .catch(() => {
-        if (!controller.signal.aborted) setAmazonOffers({});
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) setResolvingAmazonLinks(false);
-      });
-
-    return () => controller.abort();
-  }, [asinKey]);
+export function OfferComparison() {
+  const { offers, offersUpdatedAt } = useProductOffers();
+  const hasAmazonOffers = offers.some((offer) => Boolean(offer.amazonAsin));
 
   return (
     <div className="overflow-hidden rounded-[2rem] border border-[#063f5b]/10 bg-white shadow-[0_18px_42px_-30px_rgba(6,63,91,.4)]">
@@ -72,8 +33,8 @@ export function OfferComparison({ offers }: OfferComparisonProps) {
         )}
         {offers.map((offer) => {
           const merchant = offer.merchant;
-          const amazonOffer = offer.amazonAsin ? amazonOffers[offer.amazonAsin] : undefined;
-          const resolvedUrl = offer.url ?? amazonOffer?.detailPageUrl;
+          const amazonOffer = offer.amazonOffer;
+          const resolvedUrl = offer.resolvedUrl;
           const availability = availabilityLabel(amazonOffer);
 
           return (
@@ -109,7 +70,7 @@ export function OfferComparison({ offers }: OfferComparisonProps) {
                 </a>
               ) : (
                 <span className="inline-flex w-fit shrink-0 rounded-full bg-[#e8f8fc] px-5 py-3 text-sm font-extrabold text-[#063f5b]/55" role="status">
-                  {offer.amazonAsin && resolvingAmazonLinks ? "Loading offer…" : "Offer unavailable"}
+                  {offer.resolution === "loading" ? "Loading offer…" : "Offer unavailable"}
                 </span>
               )}
             </div>
@@ -118,7 +79,7 @@ export function OfferComparison({ offers }: OfferComparisonProps) {
       </div>
       <p className="border-t border-[#063f5b]/8 px-6 py-4 text-xs leading-5 text-[#063f5b]/50 sm:px-8">
         Affiliate disclosure: MishBaby may earn a commission from qualifying purchases.
-        {asinKey && <> Amazon prices and availability may change; the information shown on Amazon when you purchase applies.</>} <Link href="/affiliate-disclosure" className="font-bold text-[#007fa8] hover:underline">Learn more</Link>.
+        {hasAmazonOffers && <> Amazon prices and availability may change; the information shown on Amazon when you purchase applies.</>} <Link href="/affiliate-disclosure" className="font-bold text-[#007fa8] hover:underline">Learn more</Link>.
         {offersUpdatedAt && <> Amazon offer information checked {formatOfferTime(offersUpdatedAt)}.</>}
       </p>
     </div>

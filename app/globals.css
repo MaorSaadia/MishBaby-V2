@@ -80,6 +80,12 @@ body {
   outline: none;
 }
 
+@media (max-width: 639px) {
+  body:has([data-mobile-offer-tray]) footer {
+    padding-bottom: calc(5.25rem + env(safe-area-inset-bottom));
+  }
+}
+
 /* Small supporting copy must remain readable in both themes. The original
    opacity utilities become too faint on light cards and dark surfaces. */
 .text-\[\#063f5b\]\/35,
