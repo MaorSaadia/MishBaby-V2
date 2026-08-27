@@ -30,6 +30,7 @@ type AliExpressRecommendationsProps = {
   eyebrow: string;
   heading: string;
   description: string;
+  compactOnMobile?: boolean;
 };
 
 const guideSearchStopWords = new Set([
@@ -141,6 +142,7 @@ export function AliExpressGuideProducts({ guideTitle, categoryName, excludedOffe
       eyebrow="Related products on AliExpress"
       heading="AliExpress finds for this guide."
       description="Live AliExpress results selected from this guide's topic."
+      compactOnMobile
     />
   );
 }
@@ -158,7 +160,7 @@ export function AliExpressCategoryProducts({ categoryName, topics, excludedOffer
   );
 }
 
-function AliExpressRecommendations({ searchQuery, excludedOfferUrls = [], maximumResults, eyebrow, heading, description }: AliExpressRecommendationsProps) {
+function AliExpressRecommendations({ searchQuery, excludedOfferUrls = [], maximumResults, eyebrow, heading, description, compactOnMobile = false }: AliExpressRecommendationsProps) {
   const [items, setItems] = useState<AliExpressSearchItem[]>([]);
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "empty" | "error">("idle");
   const { elementRef, isNearViewport } = useNearViewport<HTMLElement>();
@@ -203,12 +205,12 @@ function AliExpressRecommendations({ searchQuery, excludedOfferUrls = [], maximu
   }, [excludedProductIdKey, isNearViewport, maximumResults, searchQuery]);
 
   return (
-    <section ref={elementRef} className="border-b border-[#063f5b]/6 bg-[#f7fcfe] px-5 py-14 sm:px-8 md:py-20">
+    <section ref={elementRef} className={`border-b border-[#063f5b]/6 bg-[#f7fcfe] px-5 sm:px-8 md:py-20 ${compactOnMobile ? "py-12 sm:py-16" : "py-14"}`}>
       <div className="mx-auto max-w-6xl">
         <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
           <div className="max-w-2xl">
             <p className="text-sm font-extrabold uppercase tracking-[0.14em] text-[#009dcc]">{eyebrow}</p>
-            <h2 className="mt-3 font-display text-4xl font-semibold tracking-[-0.045em] text-[#063f5b]">{heading}</h2>
+            <h2 className={`mt-3 font-display font-semibold tracking-[-0.045em] text-[#063f5b] sm:text-4xl ${compactOnMobile ? "break-words text-3xl leading-tight" : "text-4xl"}`}>{heading}</h2>
             <p className="mt-4 text-base leading-7 text-[#063f5b]/65">{description}</p>
           </div>
           <Link href="/aliexpress-finds" className="shrink-0 text-sm font-extrabold text-[#009dcc] transition-colors hover:text-[#0784b0]">Search AliExpress <span aria-hidden="true">→</span></Link>
@@ -216,7 +218,7 @@ function AliExpressRecommendations({ searchQuery, excludedOfferUrls = [], maximu
 
         <div aria-live="polite" aria-busy={status === "loading"}>
           {(status === "idle" || status === "loading") && (
-            <div className="mt-9 grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
+            <div className={`grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4 ${compactOnMobile ? "mt-7 sm:mt-9" : "mt-9"}`}>
               {Array.from({ length: maximumResults }, (_, item) => (
                 <div key={item} className="overflow-hidden rounded-2xl border border-[#063f5b]/8 bg-white sm:rounded-[2rem]">
                   <div className="aspect-square animate-pulse bg-[#e4f6fa]" />
@@ -232,7 +234,7 @@ function AliExpressRecommendations({ searchQuery, excludedOfferUrls = [], maximu
           )}
 
           {status === "success" && (
-            <div className="mt-9 grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
+            <div className={`grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4 ${compactOnMobile ? "mt-7 sm:mt-9" : "mt-9"}`}>
               {items.map((item) => <AliExpressRecommendationCard key={item.productId} item={item} />)}
             </div>
           )}
@@ -245,7 +247,7 @@ function AliExpressRecommendations({ searchQuery, excludedOfferUrls = [], maximu
         </div>
 
         {status === "success" && (
-          <p className="mx-auto mt-8 max-w-3xl rounded-2xl bg-[#fff7df] px-5 py-4 text-center text-xs leading-5 text-[#735a16]">
+          <p className={`mx-auto max-w-3xl rounded-2xl bg-[#fff7df] py-4 text-xs leading-5 text-[#735a16] ${compactOnMobile ? "mt-6 px-4 text-left sm:mt-8 sm:px-5 sm:text-center" : "mt-8 px-5 text-center"}`}>
             Product titles, images, and links are provided by AliExpress and may change. Shipping, availability, local currency, and final terms are confirmed on AliExpress. MishBaby may earn a commission from qualifying purchases at no additional cost to you.
           </p>
         )}

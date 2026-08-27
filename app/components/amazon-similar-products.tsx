@@ -45,6 +45,7 @@ type AmazonRecommendationsProps = {
   eyebrow: string;
   heading: string;
   description: string;
+  compactOnMobile?: boolean;
 };
 
 const categoryAmazonSearchTerms: Record<string, string[]> = {
@@ -82,6 +83,7 @@ export function AmazonGuideProducts({ guideTitle, categoryName, excludedAsins = 
       eyebrow="Related products on Amazon"
       heading="Amazon finds for this guide."
       description="Live Amazon results selected from this guide's topic and related category."
+      compactOnMobile
     />
   );
 }
@@ -101,7 +103,7 @@ export function AmazonCategoryProducts({ categoryName, topics, excludedAsins = [
   );
 }
 
-function AmazonRecommendations({ searchTerms, excludedAsins = [], maximumResults, eyebrow, heading, description }: AmazonRecommendationsProps) {
+function AmazonRecommendations({ searchTerms, excludedAsins = [], maximumResults, eyebrow, heading, description, compactOnMobile = false }: AmazonRecommendationsProps) {
   const [items, setItems] = useState<AmazonSimilarItem[]>([]);
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "empty" | "error">("idle");
   const { elementRef, isNearViewport } = useNearViewport<HTMLElement>();
@@ -149,12 +151,12 @@ function AmazonRecommendations({ searchTerms, excludedAsins = [], maximumResults
   }, [excludedAsinKey, isNearViewport, maximumResults, searchQuery]);
 
   return (
-    <section ref={elementRef} className="border-y border-[#063f5b]/6 bg-[#f1fbfe] px-5 py-14 sm:px-8 md:py-20">
+    <section ref={elementRef} className={`border-y border-[#063f5b]/6 bg-[#f1fbfe] px-5 sm:px-8 md:py-20 ${compactOnMobile ? "py-12 sm:py-16" : "py-14"}`}>
       <div className="mx-auto max-w-6xl">
         <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
           <div className="max-w-2xl">
             <p className="text-sm font-extrabold uppercase tracking-[0.14em] text-[#009dcc]">{eyebrow}</p>
-            <h2 className="mt-3 font-display text-4xl font-semibold tracking-[-0.045em] text-[#063f5b]">{heading}</h2>
+            <h2 className={`mt-3 font-display font-semibold tracking-[-0.045em] text-[#063f5b] sm:text-4xl ${compactOnMobile ? "break-words text-3xl leading-tight" : "text-4xl"}`}>{heading}</h2>
             <p className="mt-4 text-base leading-7 text-[#063f5b]/65">{description}</p>
           </div>
           <Link href="/amazon-finds" className="shrink-0 text-sm font-extrabold text-[#009dcc] transition-colors hover:text-[#0784b0]">Search Amazon <span aria-hidden="true">→</span></Link>
@@ -162,7 +164,7 @@ function AmazonRecommendations({ searchTerms, excludedAsins = [], maximumResults
 
         <div aria-live="polite" aria-busy={status === "loading"}>
           {(status === "idle" || status === "loading") && (
-            <div className="mt-9 grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
+            <div className={`grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4 ${compactOnMobile ? "mt-7 sm:mt-9" : "mt-9"}`}>
               {Array.from({ length: maximumResults }, (_, item) => (
                 <div key={item} className="overflow-hidden rounded-2xl border border-[#063f5b]/8 bg-white sm:rounded-[2rem]">
                   <div className="aspect-square animate-pulse bg-[#e4f6fa] sm:aspect-[4/3]" />
@@ -178,7 +180,7 @@ function AmazonRecommendations({ searchTerms, excludedAsins = [], maximumResults
           )}
 
           {status === "success" && (
-            <div className="mt-9 grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
+            <div className={`grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4 ${compactOnMobile ? "mt-7 sm:mt-9" : "mt-9"}`}>
               {items.map((item) => <AmazonSimilarProductCard key={item.asin} item={item} />)}
             </div>
           )}
@@ -191,7 +193,7 @@ function AmazonRecommendations({ searchTerms, excludedAsins = [], maximumResults
         </div>
 
         {status === "success" && (
-          <p className="mx-auto mt-8 max-w-3xl rounded-2xl bg-[#fff7df] px-5 py-4 text-center text-xs leading-5 text-[#735a16]">
+          <p className={`mx-auto max-w-3xl rounded-2xl bg-[#fff7df] py-4 text-xs leading-5 text-[#735a16] ${compactOnMobile ? "mt-6 px-4 text-left sm:mt-8 sm:px-5 sm:text-center" : "mt-8 px-5 text-center"}`}>
             Product titles, images, and links are provided by Amazon and may change. As an Amazon Associate, MishBaby earns from qualifying purchases.
           </p>
         )}

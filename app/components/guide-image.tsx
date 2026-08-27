@@ -12,7 +12,7 @@ const variantClasses = {
   featured: "min-h-72 text-7xl",
   card: "h-36 text-4xl",
   related: "h-32 text-4xl",
-  detail: "mt-10 aspect-[16/9] overflow-hidden rounded-[2rem] text-7xl shadow-[0_24px_55px_-38px_rgba(6,63,91,.45)]",
+  detail: "mt-8 aspect-[4/3] overflow-hidden rounded-3xl text-7xl shadow-[0_24px_55px_-38px_rgba(6,63,91,.45)] sm:mt-10 sm:aspect-[16/9] sm:rounded-[2rem]",
 };
 
 const variantSizes = {

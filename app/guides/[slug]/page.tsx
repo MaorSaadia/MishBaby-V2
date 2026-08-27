@@ -137,22 +137,22 @@ export default async function GuidePage({ params }: PageProps<"/guides/[slug]">)
             __html: JSON.stringify(structuredData).replace(/</g, "\\u003c"),
           }}
         />
-        <header className="relative isolate overflow-hidden bg-[#f1fbfe] px-5 py-12 sm:px-8 md:py-20">
+        <header className="relative isolate overflow-hidden bg-[#f1fbfe] px-5 py-10 sm:px-8 sm:py-14 md:py-20">
           <div className="absolute -right-20 -top-20 -z-10 size-96 rounded-full bg-[#a8e8f5]/70 blur-3xl" />
           <div className="mx-auto max-w-4xl">
-            <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-2 text-sm font-bold text-[#063f5b]/55">
-              <Link href="/" className="hover:text-[#009dcc]">Home</Link>
+            <nav aria-label="Breadcrumb" className="flex min-w-0 items-center gap-2 overflow-hidden text-xs font-bold text-[#063f5b]/55 sm:text-sm">
+              <Link href="/" className="shrink-0 hover:text-[#009dcc]">Home</Link>
               <span aria-hidden="true">/</span>
-              <Link href="/guides" className="hover:text-[#009dcc]">Guides</Link>
+              <Link href="/guides" className="shrink-0 hover:text-[#009dcc]">Guides</Link>
               <span aria-hidden="true">/</span>
-              <span className="text-[#063f5b]">{guide.title}</span>
+              <span aria-current="page" className="min-w-0 truncate text-[#063f5b]">{guide.title}</span>
             </nav>
-            <div className="mt-10 flex items-center gap-3 text-xs font-extrabold uppercase tracking-[0.12em]">
+            <div className="mt-7 flex flex-wrap items-center gap-3 text-[11px] font-extrabold uppercase tracking-[0.12em] sm:mt-10 sm:text-xs">
               <span className="rounded-full bg-white px-3 py-1.5 text-[#009dcc] shadow-sm">{guide.categoryLabel}</span>
               <span className="text-[#063f5b]/45">{guide.readingMinutes} min read</span>
             </div>
-            <h1 className="mt-5 font-display text-5xl font-semibold leading-[1.05] tracking-[-0.055em] text-[#063f5b] sm:text-6xl">{guide.title}</h1>
-            <p className="mt-6 max-w-3xl text-xl leading-8 text-[#063f5b]/70">{guide.description}</p>
+            <h1 className="mt-4 break-words font-display text-4xl font-semibold leading-[1.08] tracking-[-0.05em] text-[#063f5b] sm:mt-5 sm:text-6xl sm:leading-[1.05]">{guide.title}</h1>
+            <p className="mt-5 max-w-3xl text-lg leading-7 text-[#063f5b]/70 sm:mt-6 sm:text-xl sm:leading-8">{guide.description}</p>
             <FavoriteGuideButton guideId={guide.id} guideSlug={guide.slug} />
             <ShareControls
               url={guideUrl}
@@ -164,20 +164,20 @@ export default async function GuidePage({ params }: PageProps<"/guides/[slug]">)
           </div>
         </header>
 
-        <article className="mx-auto max-w-3xl px-5 py-14 sm:px-8 md:py-20">
-          <p className="font-display text-2xl leading-10 text-[#063f5b]">{guide.introduction}</p>
+        <article className="mx-auto max-w-3xl px-5 py-12 sm:px-8 sm:py-16 md:py-20">
+          <p className="font-display text-[1.35rem] leading-8 text-[#063f5b] sm:text-2xl sm:leading-10">{guide.introduction}</p>
 
-          <aside className="mt-10 rounded-3xl border border-[#009dcc]/15 bg-[#e8f8fc] p-6 text-sm leading-6 text-[#063f5b]/70">
+          <aside className="mt-8 rounded-2xl border border-[#009dcc]/15 bg-[#e8f8fc] p-5 text-sm leading-6 text-[#063f5b]/70 sm:mt-10 sm:rounded-3xl sm:p-6">
             Every baby, family, and home is different. Use this guide as a starting point, follow the product instructions and current safety guidance, and ask a qualified professional when you need advice for your baby’s specific needs.
           </aside>
 
-          <nav id="guide-contents" aria-labelledby="guide-contents-heading" className="mt-10 rounded-[2rem] border border-[#063f5b]/8 bg-[#f7fcfe] p-6 sm:p-8">
+          <nav id="guide-contents" aria-labelledby="guide-contents-heading" className="mt-8 scroll-mt-6 rounded-3xl border border-[#063f5b]/8 bg-[#f7fcfe] p-5 sm:mt-10 sm:rounded-[2rem] sm:p-8">
             <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-[#009dcc]">In this guide</p>
-            <h2 id="guide-contents-heading" className="mt-2 font-display text-3xl font-semibold tracking-[-0.04em] text-[#063f5b]">Jump to a section.</h2>
-            <ol className="mt-6 grid gap-2 sm:grid-cols-2">
+            <h2 id="guide-contents-heading" className="mt-2 font-display text-2xl font-semibold tracking-[-0.04em] text-[#063f5b] sm:text-3xl">Jump to a section.</h2>
+            <ol className="mt-5 grid gap-2 sm:mt-6 sm:grid-cols-2">
               {guide.sections.map((section, index) => (
                 <li key={section.key || section.heading}>
-                  <a href={`#${createSectionId(section.heading, index)}`} className="group flex h-full items-start gap-3 rounded-2xl bg-white px-4 py-3.5 text-sm font-extrabold leading-5 text-[#063f5b]/75 transition hover:text-[#009dcc]">
+                  <a href={`#${createSectionId(section.heading, index)}`} className="group flex min-h-12 items-start gap-3 rounded-2xl bg-white px-4 py-3.5 text-sm font-extrabold leading-5 text-[#063f5b]/75 transition hover:text-[#009dcc]">
                     <span className="grid size-6 shrink-0 place-items-center rounded-full bg-[#e2f7fc] text-[11px] text-[#009dcc] transition group-hover:bg-[#009dcc] group-hover:text-white">{index + 1}</span>
                     <span>{section.heading}</span>
                   </a>
@@ -186,18 +186,18 @@ export default async function GuidePage({ params }: PageProps<"/guides/[slug]">)
             </ol>
           </nav>
 
-          <div className="mt-14 grid gap-14">
+          <div className="mt-12 grid gap-11 sm:mt-14 sm:gap-14">
             {guide.sections.map((section, index) => (
-              <section id={createSectionId(section.heading, index)} key={section.key || section.heading} className="scroll-mt-8">
-                <div className="flex items-start gap-4">
-                  <span className="grid size-9 shrink-0 place-items-center rounded-full bg-[#e2f7fc] text-sm font-extrabold text-[#009dcc]">{index + 1}</span>
-                  <h2 className="font-display text-3xl font-semibold leading-tight tracking-[-0.04em] text-[#063f5b]">{section.heading}</h2>
+              <section id={createSectionId(section.heading, index)} key={section.key || section.heading} className="scroll-mt-6 sm:scroll-mt-8">
+                <div className="flex items-start gap-3 sm:gap-4">
+                  <span className="grid size-8 shrink-0 place-items-center rounded-full bg-[#e2f7fc] text-xs font-extrabold text-[#009dcc] sm:size-9 sm:text-sm">{index + 1}</span>
+                  <h2 className="break-words font-display text-2xl font-semibold leading-tight tracking-[-0.04em] text-[#063f5b] sm:text-3xl">{section.heading}</h2>
                 </div>
-                <div className="mt-5 grid gap-5 text-base leading-8 text-[#063f5b]/70">
+                <div className="mt-4 grid gap-4 text-[15px] leading-7 text-[#063f5b]/70 sm:mt-5 sm:gap-5 sm:text-base sm:leading-8">
                   {section.paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
                 </div>
                 {section.items && (
-                  <ul className="mt-6 grid gap-3 rounded-3xl bg-[#f7fcfe] p-6">
+                  <ul className="mt-5 grid gap-3 rounded-2xl bg-[#f7fcfe] p-4 sm:mt-6 sm:rounded-3xl sm:p-6">
                     {section.items.map((item) => (
                       <li key={item} className="flex gap-3 text-sm leading-6 text-[#063f5b]/70">
                         <span className="mt-1.5 grid size-4 shrink-0 place-items-center rounded-full bg-[#009dcc] text-white" aria-hidden="true">
@@ -210,16 +210,16 @@ export default async function GuidePage({ params }: PageProps<"/guides/[slug]">)
                     ))}
                   </ul>
                 )}
-                <a href="#guide-contents" className="mt-6 inline-flex items-center gap-2 text-xs font-extrabold text-[#063f5b]/45 transition hover:text-[#009dcc]">
+                <a href="#guide-contents" className="mt-5 inline-flex min-h-11 items-center gap-2 text-xs font-extrabold text-[#063f5b]/45 transition hover:text-[#009dcc] sm:mt-6">
                   Back to contents <span aria-hidden="true">↑</span>
                 </a>
               </section>
             ))}
           </div>
 
-          <section className="mt-16 rounded-[2rem] bg-[#063f5b] px-7 py-9 text-white sm:px-9">
+          <section className="mt-14 rounded-3xl bg-[#063f5b] px-6 py-8 text-white sm:mt-16 sm:rounded-[2rem] sm:px-9 sm:py-9">
             <p className="text-sm font-extrabold uppercase tracking-[0.14em] text-[#a8e8f5]">Ready to explore?</p>
-            <h2 className="mt-2 font-display text-3xl font-semibold tracking-[-0.04em]">Find thoughtful products for your family’s routine.</h2>
+            <h2 className="mt-2 font-display text-2xl font-semibold leading-tight tracking-[-0.04em] sm:text-3xl">Find thoughtful products for your family’s routine.</h2>
             <Link href={`/categories/${guide.relatedCategory.slug}`} className="mt-6 inline-flex rounded-full bg-white px-5 py-3 text-sm font-extrabold text-[#063f5b] transition hover:bg-[#e8f8fc]">Explore {guide.relatedCategory.label}</Link>
           </section>
         </article>
@@ -237,18 +237,18 @@ export default async function GuidePage({ params }: PageProps<"/guides/[slug]">)
         />
 
         {guide.relatedProducts.length > 0 && (
-          <section className="border-y border-[#063f5b]/6 bg-white px-5 py-14 sm:px-8 md:py-20">
+          <section className="border-y border-[#063f5b]/6 bg-white px-5 py-12 sm:px-8 sm:py-16 md:py-20">
             <div className="mx-auto max-w-6xl">
               <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
                 <div className="max-w-2xl">
                   <p className="text-sm font-extrabold uppercase tracking-[0.14em] text-[#009dcc]">Related products</p>
-                  <h2 className="mt-3 font-display text-4xl font-semibold tracking-[-0.045em] text-[#063f5b]">Thoughtful finds for this guide.</h2>
+                  <h2 className="mt-3 font-display text-3xl font-semibold leading-tight tracking-[-0.045em] text-[#063f5b] sm:text-4xl">Thoughtful finds for this guide.</h2>
                   <p className="mt-4 text-base leading-7 text-[#063f5b]/65">Explore selected products and compare the active merchant offers currently available.</p>
                 </div>
                 <Link href={`/categories/${guide.relatedCategory.slug}`} className="shrink-0 text-sm font-extrabold text-[#009dcc] transition-colors hover:text-[#0784b0]">View all in {guide.relatedCategory.label} <span aria-hidden="true">→</span></Link>
               </div>
 
-              <div className="mt-9 grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
+              <div className="mt-7 grid grid-cols-2 gap-3 sm:mt-9 sm:gap-5 lg:grid-cols-4">
                 {guide.relatedProducts.map((product) => <ProductCard key={product.id} product={product} variant="compact" />)}
               </div>
             </div>
@@ -256,18 +256,18 @@ export default async function GuidePage({ params }: PageProps<"/guides/[slug]">)
         )}
 
         {relatedGuides.length > 0 && (
-          <section className="border-t border-[#063f5b]/6 bg-white px-5 py-14 sm:px-8 md:py-20">
+          <section className="border-t border-[#063f5b]/6 bg-white px-5 py-12 sm:px-8 sm:py-16 md:py-20">
             <div className="mx-auto max-w-6xl">
               <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
                 <div className="max-w-2xl">
                   <p className="text-sm font-extrabold uppercase tracking-[0.14em] text-[#009dcc]">Keep learning</p>
-                  <h2 className="mt-3 font-display text-4xl font-semibold tracking-[-0.045em] text-[#063f5b]">More guides for {guide.relatedCategory.label}.</h2>
+                  <h2 className="mt-3 font-display text-3xl font-semibold leading-tight tracking-[-0.045em] text-[#063f5b] sm:text-4xl">More guides for {guide.relatedCategory.label}.</h2>
                   <p className="mt-4 text-base leading-7 text-[#063f5b]/65">Continue with practical, parent-friendly guidance related to the same stage or routine.</p>
                 </div>
                 <Link href="/guides" className="shrink-0 text-sm font-extrabold text-[#009dcc] transition-colors hover:text-[#0784b0]">Browse all guides →</Link>
               </div>
 
-              <div className="mt-9 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="mt-7 grid gap-4 sm:mt-9 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
                 {relatedGuides.map((relatedGuide) => <GuideCard key={relatedGuide.id} guide={relatedGuide} variant="related" />)}
               </div>
             </div>
