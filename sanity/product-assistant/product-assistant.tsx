@@ -12,6 +12,7 @@ import {
   validateProductSuggestion,
 } from "@/lib/product-assistant";
 import type { AmazonSearchItem, AmazonSearchResponse } from "@/lib/amazon-creators";
+import { useStudioSessionToken } from "@/sanity/lib/use-studio-session-token";
 import styles from "./product-assistant.module.css";
 
 const apiVersion = "2026-08-16";
@@ -54,6 +55,7 @@ function isValidHttpsUrl(value: string) {
 
 export function ProductAssistant() {
   const client = useClient({ apiVersion });
+  const studioToken = useStudioSessionToken();
   const router = useRouter();
   const [categories, setCategories] = useState<CategoryOption[]>([]);
   const [merchants, setMerchants] = useState<MerchantOption[]>([]);
@@ -252,9 +254,12 @@ export function ProductAssistant() {
       return;
     }
 
-    const token = client.config().token;
-    if (!token) {
-      setError("Your Studio session token is unavailable. Refresh Studio and sign in again.");
+    if (studioToken === undefined) {
+      setError("Your Studio session is still loading. Please wait a moment and try again.");
+      return;
+    }
+    if (!studioToken) {
+      setError("Studio could not verify your session. Sign out of Studio, then sign in again.");
       return;
     }
 
@@ -267,7 +272,7 @@ export function ProductAssistant() {
     try {
       const response = await fetch("/api/studio/product-copy", {
         method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${studioToken}` },
         body: formData,
       });
       const result = (await response.json()) as AssistantResponse;
@@ -536,7 +541,7 @@ export function ProductAssistant() {
               </Card>
 
               <Flex justify="flex-end">
-                <Button type="submit" text={suggestion ? "Regenerate copy" : "Generate copy"} tone="primary" loading={generating} disabled={generating || creating || loadingOptions} />
+                <Button type="submit" text={suggestion ? "Regenerate copy" : "Generate copy"} tone="primary" loading={generating} disabled={generating || creating || loadingOptions || studioToken === undefined} />
               </Flex>
             </div>
           </form>

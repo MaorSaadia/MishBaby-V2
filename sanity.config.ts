@@ -26,6 +26,10 @@ export default defineConfig({
   projectId: studioProjectId,
   dataset: sanityDataset,
   basePath: "/studio",
+  auth: {
+    // Assistant endpoints verify the current editor with a bearer token.
+    loginMethod: "token",
+  },
   plugins: [
     structureTool({
       structure: (structure) =>

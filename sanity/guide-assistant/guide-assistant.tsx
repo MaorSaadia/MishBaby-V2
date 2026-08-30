@@ -11,6 +11,7 @@ import {
   type GuideSuggestion,
   validateGuideSuggestion,
 } from "@/lib/guide-assistant";
+import { useStudioSessionToken } from "@/sanity/lib/use-studio-session-token";
 import styles from "../product-assistant/product-assistant.module.css";
 
 const apiVersion = "2026-08-18";
@@ -34,6 +35,7 @@ type AssistantResponse = {
 
 export function GuideAssistant() {
   const client = useClient({ apiVersion });
+  const studioToken = useStudioSessionToken();
   const router = useRouter();
   const [categories, setCategories] = useState<CategoryOption[]>([]);
   const [products, setProducts] = useState<ProductOption[]>([]);
@@ -124,9 +126,12 @@ export function GuideAssistant() {
       return;
     }
 
-    const token = client.config().token;
-    if (!token) {
-      setError("Your Studio session token is unavailable. Refresh Studio and sign in again.");
+    if (studioToken === undefined) {
+      setError("Your Studio session is still loading. Please wait a moment and try again.");
+      return;
+    }
+    if (!studioToken) {
+      setError("Studio could not verify your session. Sign out of Studio, then sign in again.");
       return;
     }
 
@@ -135,7 +140,7 @@ export function GuideAssistant() {
       const response = await fetch("/api/studio/guide-copy", {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${studioToken}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ topic: trimmedTopic, sourceNotes: trimmedNotes, audience: audience.trim() }),
@@ -315,7 +320,7 @@ export function GuideAssistant() {
               </Card>
 
               <Flex justify="flex-end">
-                <Button type="submit" text={suggestion ? "Regenerate guide" : "Generate guide"} tone="primary" loading={generating} disabled={generating || creating || loadingOptions} />
+                <Button type="submit" text={suggestion ? "Regenerate guide" : "Generate guide"} tone="primary" loading={generating} disabled={generating || creating || loadingOptions || studioToken === undefined} />
               </Flex>
             </div>
           </form>
