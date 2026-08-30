@@ -41,6 +41,21 @@ type AssistantResponse = {
   error?: string;
 };
 
+function deduplicateMerchants(options: MerchantOption[]) {
+  const seen = new Set<string>();
+
+  return options.filter((merchant) => {
+    const identity = merchant.name
+      .normalize("NFKC")
+      .toLocaleLowerCase()
+      .replace(/[^\p{L}\p{N}]+/gu, "");
+
+    if (seen.has(identity)) return false;
+    seen.add(identity);
+    return true;
+  });
+}
+
 function newOffer(): OfferInput {
   return { key: crypto.randomUUID(), merchantId: "", url: "", amazonAsin: "" };
 }
@@ -105,7 +120,7 @@ export function ProductAssistant() {
       .then(([categoryOptions, merchantOptions]) => {
         if (!active) return;
         setCategories(categoryOptions);
-        setMerchants(merchantOptions);
+        setMerchants(deduplicateMerchants(merchantOptions));
       })
       .catch(() => {
         if (active) setError("Categories and merchants could not be loaded from Sanity.");
