@@ -28,9 +28,13 @@ export async function generateMetadata({ params }: PageProps<"/products/[slug]">
   if (!product) return {};
 
   const productUrl = `${siteConfig.url}/products/${product.slug}`;
-  const socialImages = product.image
-    ? [{ url: product.image.src, alt: product.image.alt }]
-    : undefined;
+  const socialImageUrl = `${productUrl}/opengraph-image`;
+  const socialImages = [{
+    url: socialImageUrl,
+    width: 1200,
+    height: 630,
+    alt: `${product.name} — a MishBaby product find`,
+  }];
 
   return {
     title: product.name,
@@ -156,6 +160,7 @@ export default async function ProductPage({ params }: PageProps<"/products/[slug
                   title={product.name}
                   text={product.summary}
                   label={`Share ${product.name}`}
+                  imageUrl={product.image?.src}
                 />
                 <div className="mt-8 rounded-3xl border border-[#063f5b]/8 bg-white/75 p-6">
                   <h2 className="font-extrabold text-[#063f5b]">Why it may be useful</h2>
