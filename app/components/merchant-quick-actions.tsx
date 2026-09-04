@@ -4,6 +4,7 @@ import Image from "next/image";
 import type { Merchant } from "@/lib/products";
 import type { ResolvedProductOffer } from "./product-offers-context";
 import { useProductOffers } from "./product-offers-context";
+import { TrackedMerchantLink } from "./tracked-merchant-link";
 
 function MerchantMark({ merchant, compact = false }: { merchant: Merchant; compact?: boolean }) {
   return (
@@ -40,9 +41,11 @@ export function HeroMerchantLinks() {
       <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-[#063f5b]/55">Shop at</p>
       <div className="mt-3 flex flex-wrap gap-2">
         {visibleOffers.map((offer) => offer.resolvedUrl ? (
-          <a
+          <TrackedMerchantLink
             key={offer.id}
             href={offer.resolvedUrl}
+            trackingToken={offer.trackingToken}
+            trackingSurface="hero"
             target="_blank"
             rel={offerRel(offer)}
             aria-label={`Shop ${offer.merchant.name} for this product (opens in a new tab)`}
@@ -51,7 +54,7 @@ export function HeroMerchantLinks() {
             <MerchantMark merchant={offer.merchant} compact />
             <span>Shop {offer.merchant.name}</span>
             <ExternalLinkIcon />
-          </a>
+          </TrackedMerchantLink>
         ) : (
           <span key={offer.id} role="status" className="inline-flex min-h-12 items-center gap-2.5 rounded-full border border-[#063f5b]/10 bg-white/70 px-3 py-2 text-sm font-extrabold text-[#063f5b]/55">
             <MerchantMark merchant={offer.merchant} compact />
@@ -79,9 +82,11 @@ export function MobileMerchantTray() {
     >
       <div className={`mx-auto flex max-w-lg gap-2 ${scrollable ? "snap-x overflow-x-auto" : ""}`}>
         {visibleOffers.map((offer) => offer.resolvedUrl ? (
-          <a
+          <TrackedMerchantLink
             key={offer.id}
             href={offer.resolvedUrl}
+            trackingToken={offer.trackingToken}
+            trackingSurface="mobile_tray"
             target="_blank"
             rel={offerRel(offer)}
             aria-label={`Shop ${offer.merchant.name} for this product (opens in a new tab)`}
@@ -90,7 +95,7 @@ export function MobileMerchantTray() {
             <MerchantMark merchant={offer.merchant} compact />
             <span className="truncate">Shop {offer.merchant.name}</span>
             <ExternalLinkIcon />
-          </a>
+          </TrackedMerchantLink>
         ) : (
           <span
             key={offer.id}

@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { AmazonOfferLink } from "@/lib/amazon-creators";
 import { useProductOffers } from "./product-offers-context";
+import { TrackedMerchantLink } from "./tracked-merchant-link";
 
 function formatVerifiedDate(value: string) {
   return new Intl.DateTimeFormat("en-US", {
@@ -58,8 +59,10 @@ export function OfferComparison() {
                 </div>
               </div>
               {resolvedUrl ? (
-                <a
+                <TrackedMerchantLink
                   href={resolvedUrl}
+                  trackingToken={offer.trackingToken}
+                  trackingSurface="comparison"
                   target="_blank"
                   rel={offer.affiliate ? "sponsored nofollow noopener noreferrer" : "noopener noreferrer"}
                   className="inline-flex w-fit shrink-0 items-center gap-2 rounded-full bg-[#009dcc] px-5 py-3 text-sm font-extrabold text-white transition hover:bg-[#0784b0]"
@@ -67,7 +70,7 @@ export function OfferComparison() {
                 >
                   View offer
                   <span aria-hidden="true">↗</span>
-                </a>
+                </TrackedMerchantLink>
               ) : (
                 <span className="inline-flex w-fit shrink-0 rounded-full bg-[#e8f8fc] px-5 py-3 text-sm font-extrabold text-[#063f5b]/55" role="status">
                   {offer.resolution === "loading" ? "Loading offer…" : "Offer unavailable"}

@@ -1,0 +1,78 @@
+.summaryGrid,
+.detailGrid {
+  display: grid;
+  gap: 1rem;
+}
+
+.stackSmall,
+.stackLarge {
+  display: grid;
+}
+
+.stackSmall {
+  gap: 0.5rem;
+}
+
+.stackLarge {
+  gap: 1rem;
+}
+
+.summaryGrid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.detailGrid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.ranking {
+  display: grid;
+  gap: 1rem;
+}
+
+.rankingItem {
+  min-width: 0;
+}
+
+.barTrack {
+  height: 0.4rem;
+  margin-top: 0.55rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--card-border-color);
+}
+
+.bar {
+  height: 100%;
+  border-radius: inherit;
+  background: #009dcc;
+}
+
+.chart {
+  display: flex;
+  min-height: 175px;
+  align-items: flex-end;
+  gap: 0.6rem;
+  overflow-x: auto;
+  padding: 0.5rem 0 0.25rem;
+}
+
+.chartColumn {
+  display: grid;
+  min-width: 2.25rem;
+  justify-items: center;
+  gap: 0.35rem;
+}
+
+.chartBar {
+  width: 1.5rem;
+  border-radius: 0.4rem 0.4rem 0 0;
+  background: linear-gradient(180deg, #24c4e9, #009dcc);
+}
+
+@media (max-width: 800px) {
+  .summaryGrid,
+  .detailGrid {
+    grid-template-columns: 1fr;
+  }
+}

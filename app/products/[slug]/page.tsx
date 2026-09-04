@@ -15,6 +15,7 @@ import { getCategoryBySlug } from "@/lib/categories";
 import { getPublishedGuidesByProductId } from "@/lib/guides";
 import { getProductBySlug, getPublishedProducts } from "@/lib/products";
 import { siteConfig } from "@/lib/site";
+import { createMerchantClickToken } from "@/lib/merchant-clicks";
 
 export async function generateStaticParams() {
   const products = await getPublishedProducts();
@@ -79,6 +80,12 @@ export default async function ProductPage({ params }: PageProps<"/products/[slug
   const keyFacts = product.keyFacts.filter((fact) => fact.label.trim() && fact.value.trim());
   const considerations = product.considerations.filter((consideration) => consideration.trim());
   const hasBuyingDetails = Boolean(bestFor || keyFacts.length > 0 || considerations.length > 0);
+  const merchantClickTokens = Object.fromEntries(
+    product.offers.flatMap((offer) => {
+      const token = createMerchantClickToken(product, offer);
+      return token ? [[offer.id, token]] : [];
+    }),
+  );
   const structuredData = {
     "@context": "https://schema.org",
     "@graph": [
@@ -126,7 +133,7 @@ export default async function ProductPage({ params }: PageProps<"/products/[slug
   };
 
   return (
-    <ProductOffersProvider key={product.id} offers={product.offers}>
+    <ProductOffersProvider key={product.id} offers={product.offers} trackingTokens={merchantClickTokens}>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{

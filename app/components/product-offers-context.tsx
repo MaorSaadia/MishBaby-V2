@@ -8,6 +8,7 @@ export type ResolvedProductOffer = ActiveOffer & {
   amazonOffer?: AmazonOfferLink;
   resolvedUrl?: string;
   resolution: "ready" | "loading" | "unavailable";
+  trackingToken?: string;
 };
 
 type ProductOffersContextValue = {
@@ -19,9 +20,11 @@ const ProductOffersContext = createContext<ProductOffersContextValue | null>(nul
 
 export function ProductOffersProvider({
   offers,
+  trackingTokens = {},
   children,
 }: {
   offers: ActiveOffer[];
+  trackingTokens?: Record<string, string>;
   children: React.ReactNode;
 }) {
   const asinKey = useMemo(
@@ -71,8 +74,8 @@ export function ProductOffersProvider({
         ? "loading"
         : "unavailable";
 
-    return { ...offer, amazonOffer, resolvedUrl, resolution };
-  }), [amazonOffers, offers, resolvingAmazonLinks]);
+    return { ...offer, amazonOffer, resolvedUrl, resolution, trackingToken: trackingTokens[offer.id] };
+  }), [amazonOffers, offers, resolvingAmazonLinks, trackingTokens]);
 
   const value = useMemo(
     () => ({ offers: resolvedOffers, offersUpdatedAt }),

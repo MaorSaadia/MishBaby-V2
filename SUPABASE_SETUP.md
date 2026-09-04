@@ -137,3 +137,17 @@ npm run sync:marketing-contacts -- --apply
 ```
 
 The command adds only users whose latest Supabase consent event is `subscribed`. It does not send an email. Run the production smoke tests above after the backfill.
+
+## 11. Enable merchant click insights
+
+Run [`supabase/migrations/20260904000000_create_merchant_click_insights.sql`](./supabase/migrations/20260904000000_create_merchant_click_insights.sql) in the Supabase SQL Editor (or apply it through the Supabase CLI). It creates anonymous daily aggregate counters, a short-lived hourly abuse-limit table, and service-role-only functions. It does not store individual click events, affiliate URLs, account IDs, email addresses, or raw IP addresses.
+
+Generate a random secret containing at least 32 characters and add it to `.env.local` and Vercel:
+
+```text
+MERCHANT_CLICK_RATE_LIMIT_SECRET=
+```
+
+This value is server-only. Never give it a `NEXT_PUBLIC_` prefix. Redeploy after adding the migration and environment variable so published product pages receive signed tracking identities.
+
+Open a curated product and test one link from each available surface: the desktop hero shortcut, mobile merchant tray, and full offer comparison. The merchant destination must open normally even if recording fails. Then open **Click Insights** in Sanity Studio and verify the totals appear in the 7-, 30-, and 90-day reports. The report uses UTC dates and can take one refresh to show a newly recorded click.

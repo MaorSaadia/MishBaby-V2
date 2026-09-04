@@ -2,6 +2,7 @@ import { defineConfig } from "sanity";
 import { structureTool } from "sanity/structure";
 import { GuideAssistant } from "./sanity/guide-assistant/guide-assistant";
 import { ProductAssistant } from "./sanity/product-assistant/product-assistant";
+import { ClickInsights } from "./sanity/click-insights/click-insights";
 import { sanityDataset, studioProjectId } from "./sanity/env";
 import { schemaTypes } from "./sanity/schemaTypes";
 import { offerFreshnessWarningDays } from "./sanity/schemaTypes/product-offer";
@@ -80,6 +81,11 @@ export default defineConfig({
       name: "guide-assistant",
       title: "Guide Assistant",
       component: GuideAssistant,
+    },
+    {
+      name: "click-insights",
+      title: "Click Insights",
+      component: ClickInsights,
     },
   ],
   document: {
