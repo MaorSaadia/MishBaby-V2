@@ -75,6 +75,10 @@ export default async function ProductPage({ params }: PageProps<"/products/[slug
   const categoryUrl = `${siteConfig.url}/categories/${category.slug}`;
   const currentAmazonAsin = product.offers.find((offer) => offer.merchant.id === "amazon")?.amazonAsin;
   const currentAliExpressOfferUrl = product.offers.find((offer) => offer.merchant.id === "aliexpress")?.url;
+  const bestFor = product.bestFor?.trim();
+  const keyFacts = product.keyFacts.filter((fact) => fact.label.trim() && fact.value.trim());
+  const considerations = product.considerations.filter((consideration) => consideration.trim());
+  const hasBuyingDetails = Boolean(bestFor || keyFacts.length > 0 || considerations.length > 0);
   const structuredData = {
     "@context": "https://schema.org",
     "@graph": [
@@ -172,6 +176,57 @@ export default async function ProductPage({ params }: PageProps<"/products/[slug
             </div>
           </div>
         </section>
+
+        {hasBuyingDetails && (
+          <section className="bg-[#fbfeff] px-5 py-12 sm:px-8 sm:py-16 md:py-20">
+            <div className="mx-auto max-w-6xl">
+              <div className="max-w-2xl">
+                <p className="text-sm font-extrabold uppercase tracking-[0.14em] text-[#009dcc]">Buying details</p>
+                <h2 className="mt-3 font-display text-3xl font-semibold tracking-[-0.045em] text-[#063f5b] sm:text-4xl">A clearer look before you choose.</h2>
+              </div>
+
+              <div className="mt-8 grid gap-5 lg:grid-cols-2 lg:items-start">
+                <div className="grid gap-5">
+                  {bestFor && (
+                    <div className="rounded-3xl border border-[#009dcc]/15 bg-[#e8f8fc] p-5 sm:p-7">
+                      <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-[#009dcc]">Best for</p>
+                      <p className="mt-3 text-lg font-bold leading-7 text-[#063f5b]">{bestFor}</p>
+                    </div>
+                  )}
+
+                  {keyFacts.length > 0 && (
+                    <div className="rounded-3xl border border-[#063f5b]/8 bg-white p-5 sm:p-7">
+                      <h3 className="text-xl font-extrabold text-[#063f5b]">At a glance</h3>
+                      <dl className="mt-5 grid gap-3 sm:grid-cols-2">
+                        {keyFacts.map((fact) => (
+                          <div key={`${fact.label}:${fact.value}`} className="rounded-2xl bg-[#f7fcfe] p-4">
+                            <dt className="text-xs font-extrabold uppercase tracking-[0.1em] text-[#009dcc]">{fact.label}</dt>
+                            <dd className="mt-2 text-sm font-bold leading-6 text-[#063f5b]">{fact.value}</dd>
+                          </div>
+                        ))}
+                      </dl>
+                    </div>
+                  )}
+                </div>
+
+                {considerations.length > 0 && (
+                  <div className="rounded-3xl border border-[#063f5b]/8 bg-white p-5 sm:p-7">
+                    <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-[#009dcc]">Before you choose</p>
+                    <h3 className="mt-2 font-display text-2xl font-semibold tracking-[-0.035em] text-[#063f5b]">A few things worth checking.</h3>
+                    <ul className="mt-5 grid gap-4">
+                      {considerations.map((consideration) => (
+                        <li key={consideration} className="flex gap-3 text-sm leading-6 text-[#063f5b]/70">
+                          <span className="mt-0.5 grid size-5 shrink-0 place-items-center rounded-full bg-[#e8f8fc] text-[11px] font-black text-[#009dcc]" aria-hidden="true">✓</span>
+                          <span>{consideration}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            </div>
+          </section>
+        )}
 
         <section className="mx-auto max-w-4xl px-5 py-14 sm:px-8 md:py-20">
           <div className="mb-8 text-center">

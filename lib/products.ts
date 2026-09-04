@@ -25,6 +25,11 @@ export type ActiveOffer = {
   merchant: Merchant;
 };
 
+export type ProductKeyFact = {
+  label: string;
+  value: string;
+};
+
 export type Product = {
   id: string;
   slug: string;
@@ -32,6 +37,9 @@ export type Product = {
   name: string;
   summary: string;
   highlights: string[];
+  bestFor?: string;
+  keyFacts: ProductKeyFact[];
+  considerations: string[];
   image?: ProductImage;
   badge?: string;
   offers: ActiveOffer[];
@@ -54,6 +62,9 @@ const publishedProductsQuery = `
     name,
     summary,
     "highlights": coalesce(highlights, []),
+    bestFor,
+    "keyFacts": coalesce(keyFacts[]{label, value}, []),
+    "considerations": coalesce(considerations, []),
     badge,
     "image": {
       "src": image.asset->url,

@@ -50,6 +50,67 @@ export const productType = defineType({
       validation: (rule) => rule.required().min(1).max(5),
     }),
     defineField({
+      name: "bestFor",
+      title: "Best for",
+      type: "string",
+      description: "A concise, practical sentence explaining who or what situation this product may suit.",
+      validation: (rule) => rule.min(20).max(160),
+    }),
+    defineField({
+      name: "keyFacts",
+      title: "Key facts",
+      type: "array",
+      description: "Flexible, source-supported details such as material, size, design, care, or intended use.",
+      of: [
+        defineField({
+          name: "keyFact",
+          title: "Key fact",
+          type: "object",
+          fields: [
+            defineField({
+              name: "label",
+              title: "Label",
+              type: "string",
+              validation: (rule) => rule.required().min(2).max(40),
+            }),
+            defineField({
+              name: "value",
+              title: "Value",
+              type: "string",
+              validation: (rule) => rule.required().min(3).max(140),
+            }),
+          ],
+          preview: {
+            select: { title: "label", subtitle: "value" },
+          },
+        }),
+      ],
+      validation: (rule) =>
+        rule.max(6).custom((value) => {
+          if (!Array.isArray(value)) return true;
+
+          const labels = value
+            .map((fact) => (fact as { label?: string }).label?.trim().toLocaleLowerCase())
+            .filter((label): label is string => Boolean(label));
+
+          return new Set(labels).size === labels.length || "Each key fact must use a different label.";
+        }),
+    }),
+    defineField({
+      name: "considerations",
+      title: "Before you choose",
+      type: "array",
+      description: "Add up to four balanced checks or limitations that may help a parent decide.",
+      of: [
+        defineField({
+          name: "consideration",
+          type: "string",
+          validation: (rule) => rule.required().min(10).max(180),
+        }),
+      ],
+      validation: (rule) => rule.max(4),
+    }),
+    defineField({
       name: "badge",
       title: "Badge",
       type: "string",

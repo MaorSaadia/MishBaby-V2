@@ -374,6 +374,14 @@ export function ProductAssistant() {
         category: { _type: "reference", _ref: category.id },
         summary: confirmedSuggestion.summary,
         highlights: confirmedSuggestion.highlights,
+        bestFor: confirmedSuggestion.bestFor,
+        keyFacts: confirmedSuggestion.keyFacts.map((fact, index) => ({
+          _key: `fact${index + 1}`,
+          _type: "keyFact",
+          label: fact.label,
+          value: fact.value,
+        })),
+        considerations: confirmedSuggestion.considerations,
         ...(confirmedSuggestion.badge ? { badge: confirmedSuggestion.badge } : {}),
         image: {
           _type: "image",
@@ -593,6 +601,71 @@ export function ProductAssistant() {
                           setSuggestion({ ...suggestion, highlights });
                         }}
                         aria-label={`Product highlight ${index + 1}`}
+                      />
+                    ))}
+                  </div>
+                </fieldset>
+                <label className={styles.field}>
+                  <span>Best for</span>
+                  <textarea
+                    rows={3}
+                    minLength={productAssistantLimits.bestForMin}
+                    maxLength={productAssistantLimits.bestForMax}
+                    value={suggestion.bestFor}
+                    onChange={(event) => setSuggestion({ ...suggestion, bestFor: event.target.value })}
+                  />
+                </label>
+                <fieldset className={styles.fieldset}>
+                  <legend>Key facts</legend>
+                  <div className={styles.stack3}>
+                    {suggestion.keyFacts.map((fact, index) => (
+                      <div className={styles.offerDestinations} key={index}>
+                        <label className={styles.field}>
+                          <span>Fact {index + 1} label</span>
+                          <input
+                            minLength={productAssistantLimits.factLabelMin}
+                            maxLength={productAssistantLimits.factLabelMax}
+                            value={fact.label}
+                            onChange={(event) => {
+                              const keyFacts = [...suggestion.keyFacts] as typeof suggestion.keyFacts;
+                              keyFacts[index] = { ...fact, label: event.target.value };
+                              setSuggestion({ ...suggestion, keyFacts });
+                            }}
+                          />
+                        </label>
+                        <label className={styles.field}>
+                          <span>Fact {index + 1} value</span>
+                          <input
+                            minLength={productAssistantLimits.factValueMin}
+                            maxLength={productAssistantLimits.factValueMax}
+                            value={fact.value}
+                            onChange={(event) => {
+                              const keyFacts = [...suggestion.keyFacts] as typeof suggestion.keyFacts;
+                              keyFacts[index] = { ...fact, value: event.target.value };
+                              setSuggestion({ ...suggestion, keyFacts });
+                            }}
+                          />
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </fieldset>
+                <fieldset className={styles.fieldset}>
+                  <legend>Before you choose</legend>
+                  <div className={styles.stack3}>
+                    {suggestion.considerations.map((consideration, index) => (
+                      <textarea
+                        key={index}
+                        rows={2}
+                        minLength={productAssistantLimits.considerationMin}
+                        maxLength={productAssistantLimits.considerationMax}
+                        value={consideration}
+                        onChange={(event) => {
+                          const considerations = [...suggestion.considerations] as typeof suggestion.considerations;
+                          considerations[index] = event.target.value;
+                          setSuggestion({ ...suggestion, considerations });
+                        }}
+                        aria-label={`Product consideration ${index + 1}`}
                       />
                     ))}
                   </div>

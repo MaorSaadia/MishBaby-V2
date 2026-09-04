@@ -51,7 +51,8 @@
 .field input,
 .field textarea,
 .field select,
-.fieldset input {
+.fieldset input,
+.fieldset textarea {
   width: 100%;
   box-sizing: border-box;
   border: 1px solid var(--card-border-color);
@@ -72,10 +73,16 @@
 .field input:focus,
 .field textarea:focus,
 .field select:focus,
-.fieldset input:focus {
+.fieldset input:focus,
+.fieldset textarea:focus {
   border-color: #009dcc;
   box-shadow: 0 0 0 2px rgba(0, 157, 204, 0.2);
   outline: none;
+}
+
+.fieldset textarea {
+  resize: vertical;
+  line-height: 1.5;
 }
 
 .field small {
