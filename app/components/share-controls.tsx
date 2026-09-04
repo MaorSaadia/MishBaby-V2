@@ -8,6 +8,7 @@ type ShareControlsProps = {
   text: string;
   label: string;
   imageUrl?: string;
+  kind?: "product" | "guide";
 };
 
 type Feedback = "copied" | "shared" | "failed" | null;
@@ -77,7 +78,7 @@ function CopyIcon() {
   );
 }
 
-export function ShareControls({ url, title, text, label, imageUrl }: ShareControlsProps) {
+export function ShareControls({ url, title, text, label, imageUrl, kind = "product" }: ShareControlsProps) {
   const [feedback, setFeedback] = useState<Feedback>(null);
   const [isOpen, setIsOpen] = useState(false);
   const feedbackTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -219,7 +220,9 @@ export function ShareControls({ url, title, text, label, imageUrl }: ShareContro
           >
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-[#009dcc]">Share this find</p>
+                <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-[#009dcc]">
+                  {kind === "guide" ? "Share this guide" : "Share this find"}
+                </p>
                 <p className="mt-1 line-clamp-2 font-display text-xl font-semibold text-[#063f5b]">{title}</p>
               </div>
               <button
@@ -269,7 +272,7 @@ export function ShareControls({ url, title, text, label, imageUrl }: ShareContro
               className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full border border-[#063f5b]/10 bg-white px-4 py-3 text-xs font-extrabold text-[#063f5b] transition hover:border-[#009dcc]/35 hover:text-[#009dcc]"
             >
               <CopyIcon />
-              Copy product link
+              Copy {kind} link
             </button>
           </div>
         </>

@@ -35,9 +35,13 @@ export async function generateMetadata({ params }: PageProps<"/guides/[slug]">):
   if (!guide) return {};
 
   const guideUrl = `${siteConfig.url}/guides/${guide.slug}`;
-  const socialImages = guide.coverImage
-    ? [{ url: guide.coverImage.src, alt: guide.coverImage.alt }]
-    : undefined;
+  const socialImageUrl = `${guideUrl}/opengraph-image`;
+  const socialImages = [{
+    url: socialImageUrl,
+    width: 1200,
+    height: 630,
+    alt: `${guide.title} — a MishBaby parenting guide`,
+  }];
 
   return {
     title: guide.title,
@@ -54,7 +58,7 @@ export async function generateMetadata({ params }: PageProps<"/guides/[slug]">):
       images: socialImages,
     },
     twitter: {
-      card: guide.coverImage ? "summary_large_image" : "summary",
+      card: "summary_large_image",
       title: guide.title,
       description: guide.description,
       images: socialImages,
@@ -159,6 +163,8 @@ export default async function GuidePage({ params }: PageProps<"/guides/[slug]">)
               title={guide.title}
               text={guide.description}
               label={`Share ${guide.title}`}
+              imageUrl={guide.coverImage?.src ?? `${guideUrl}/opengraph-image`}
+              kind="guide"
             />
             <GuideImage guide={guide} variant="detail" preload />
           </div>
