@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Footer } from "./components/footer";
 import { Navbar } from "./components/navbar";
 import { getProductSearchItems } from "@/lib/products";
+import { getPublishedCategories } from "@/lib/categories";
 import { siteConfig } from "@/lib/site";
 import { FavoritesProvider } from "./components/favorites-provider";
 import "./globals.css";
@@ -47,7 +48,10 @@ export const metadata: Metadata = {
 };
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
-  const productSearchItems = await getProductSearchItems();
+  const [productSearchItems, categories] = await Promise.all([
+    getProductSearchItems(),
+    getPublishedCategories(),
+  ]);
 
   return (
     <html
@@ -59,7 +63,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       <body className="flex min-h-full flex-col">
         <FavoritesProvider>
           <a href="#main-content" className="skip-link">Skip to main content</a>
-          <Navbar products={productSearchItems} />
+          <Navbar products={productSearchItems} categories={categories} />
           <main id="main-content" tabIndex={-1} className="flex-1">{children}</main>
           <Footer />
         </FavoritesProvider>

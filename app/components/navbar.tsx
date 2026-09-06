@@ -6,13 +6,12 @@ import { useEffect, useRef, useState } from "react";
 import { Brand } from "./brand";
 import { NavbarSearch } from "./navbar-search";
 import type { ProductSearchItem } from "@/lib/products";
+import type { Category } from "@/lib/categories";
+import { getCategoryThemeClass } from "@/lib/category-themes";
 import { AccountMenu } from "./auth/account-menu";
 import { ThemeToggle } from "./theme-toggle";
 
-const linksBeforeFinds = [
-  { label: "Products", href: "/products" },
-  { label: "Discover", href: "/categories" },
-];
+const linksBeforeCategories = [{ label: "Products", href: "/products" }];
 
 const findsLinks = [
   { label: "Amazon Finds", href: "/amazon-finds", description: "Search Amazon's Baby catalog" },
@@ -24,15 +23,19 @@ const linksAfterFinds = [
   { label: "About", href: "/about" },
 ];
 
-const mobileLinks = [...linksBeforeFinds, ...findsLinks, ...linksAfterFinds];
+type NavbarCategory = Pick<Category, "id" | "slug" | "name" | "symbol" | "colorTheme">;
 
-export function Navbar({ products }: { products: ProductSearchItem[] }) {
+export function Navbar({ products, categories }: { products: ProductSearchItem[]; categories: NavbarCategory[] }) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [categoriesOpen, setCategoriesOpen] = useState(false);
+  const [mobileCategoriesOpen, setMobileCategoriesOpen] = useState(false);
   const [findsOpen, setFindsOpen] = useState(false);
   const pathname = usePathname();
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const searchButtonRef = useRef<HTMLButtonElement>(null);
+  const categoriesButtonRef = useRef<HTMLButtonElement>(null);
+  const categoriesMenuRef = useRef<HTMLDivElement>(null);
   const findsButtonRef = useRef<HTMLButtonElement>(null);
   const findsMenuRef = useRef<HTMLDivElement>(null);
 
@@ -40,10 +43,15 @@ export function Navbar({ products }: { products: ProductSearchItem[] }) {
     window.requestAnimationFrame(() => findsMenuRef.current?.querySelector<HTMLAnchorElement>("a")?.focus());
   }
 
+  function focusFirstCategoryLink() {
+    window.requestAnimationFrame(() => categoriesMenuRef.current?.querySelector<HTMLAnchorElement>("a")?.focus());
+  }
+
   useEffect(() => {
     function closeFindsOnOutsideClick(event: PointerEvent) {
-      if (findsMenuRef.current?.contains(event.target as Node)) return;
-      setFindsOpen(false);
+      const target = event.target as Node;
+      if (!findsMenuRef.current?.contains(target)) setFindsOpen(false);
+      if (!categoriesMenuRef.current?.contains(target)) setCategoriesOpen(false);
     }
 
     document.addEventListener("pointerdown", closeFindsOnOutsideClick);
@@ -59,6 +67,9 @@ export function Navbar({ products }: { products: ProductSearchItem[] }) {
     if (searchOpen) {
       setSearchOpen(false);
       searchButtonRef.current?.focus();
+    } else if (categoriesOpen) {
+      setCategoriesOpen(false);
+      categoriesButtonRef.current?.focus();
     } else if (findsOpen) {
       setFindsOpen(false);
       findsButtonRef.current?.focus();
@@ -80,6 +91,7 @@ export function Navbar({ products }: { products: ProductSearchItem[] }) {
       if (!current) {
         setSearchOpen(false);
         setFindsOpen(false);
+        setCategoriesOpen(false);
       }
       return !current;
     });
@@ -88,8 +100,21 @@ export function Navbar({ products }: { products: ProductSearchItem[] }) {
   function handleFindsButtonKeyDown(event: React.KeyboardEvent<HTMLButtonElement>) {
     if (event.key !== "ArrowDown") return;
     event.preventDefault();
+    setCategoriesOpen(false);
     setFindsOpen(true);
     focusFirstFindsLink();
+  }
+
+  function handleCategoriesButtonKeyDown(event: React.KeyboardEvent<HTMLButtonElement>) {
+    if (event.key !== "ArrowDown") return;
+    event.preventDefault();
+    setFindsOpen(false);
+    setCategoriesOpen(true);
+    focusFirstCategoryLink();
+  }
+
+  function handleCategoriesBlur(event: React.FocusEvent<HTMLDivElement>) {
+    if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setCategoriesOpen(false);
   }
 
   function handleFindsBlur(event: React.FocusEvent<HTMLDivElement>) {
@@ -110,16 +135,74 @@ export function Navbar({ products }: { products: ProductSearchItem[] }) {
           />
         </div>
         <nav className="ml-auto hidden shrink-0 items-center gap-6 text-sm font-bold text-[#063f5b]/75 lg:flex" aria-label="Primary navigation">
-          {linksBeforeFinds.map((link) => {
+          {linksBeforeCategories.map((link) => {
             const active = isActive(link.href);
 
             return <Link key={link.label} href={link.href} aria-current={active ? "page" : undefined} className={`rounded-md transition-colors hover:text-[#009dcc] ${active ? "text-[#009dcc]" : ""}`}>{link.label}</Link>;
           })}
+          <div ref={categoriesMenuRef} className="relative" onBlur={handleCategoriesBlur}>
+            <button
+              ref={categoriesButtonRef}
+              type="button"
+              onClick={() => {
+                setFindsOpen(false);
+                setCategoriesOpen((current) => !current);
+              }}
+              onKeyDown={handleCategoriesButtonKeyDown}
+              aria-haspopup="true"
+              aria-expanded={categoriesOpen}
+              aria-controls="categories-navigation"
+              className={`flex items-center gap-1.5 rounded-md transition-colors hover:text-[#009dcc] ${pathname.startsWith("/categories") ? "text-[#009dcc]" : ""}`}
+            >
+              Categories
+              <svg viewBox="0 0 20 20" aria-hidden="true" className={`size-4 transition-transform ${categoriesOpen ? "rotate-180" : ""}`} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <path d="m6 8 4 4 4-4" />
+              </svg>
+            </button>
+            {categoriesOpen && (
+              <div id="categories-navigation" className="absolute left-1/2 top-[calc(100%+1rem)] w-80 -translate-x-1/2 overflow-hidden rounded-2xl border border-[#063f5b]/10 bg-white p-2 shadow-[0_22px_55px_-28px_rgba(6,63,91,.55)]">
+                <div className="max-h-[min(70vh,34rem)] overflow-y-auto">
+                  <Link
+                    href="/products"
+                    onClick={() => setCategoriesOpen(false)}
+                    className="flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-[#e8f8fc]"
+                  >
+                    <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#dff4f8] text-[#007fa5]" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" /></svg>
+                    </span>
+                    <span className="font-extrabold text-[#063f5b]">All products</span>
+                  </Link>
+                  {categories.map((category) => {
+                    const href = `/categories/${category.slug}`;
+                    const active = isActive(href);
+                    return (
+                      <Link
+                        key={category.id}
+                        href={href}
+                        aria-current={active ? "page" : undefined}
+                        onClick={() => setCategoriesOpen(false)}
+                        className={`flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-[#e8f8fc] ${active ? "bg-[#e2f7fc]" : ""}`}
+                      >
+                        <span className={`grid size-10 shrink-0 place-items-center rounded-xl ${getCategoryThemeClass(category.colorTheme)} text-xl`} aria-hidden="true">{category.symbol}</span>
+                        <span className="font-extrabold text-[#063f5b]">{category.name}</span>
+                      </Link>
+                    );
+                  })}
+                </div>
+                <div className="mt-1 border-t border-[#063f5b]/10 px-3 pt-2">
+                  <Link href="/categories" onClick={() => setCategoriesOpen(false)} className="inline-flex min-h-10 items-center font-extrabold text-[#007fa5] hover:text-[#009dcc]">Browse all categories <span aria-hidden="true">&nbsp;→</span></Link>
+                </div>
+              </div>
+            )}
+          </div>
           <div ref={findsMenuRef} className="relative" onBlur={handleFindsBlur}>
             <button
               ref={findsButtonRef}
               type="button"
-              onClick={() => setFindsOpen((current) => !current)}
+              onClick={() => {
+                setCategoriesOpen(false);
+                setFindsOpen((current) => !current);
+              }}
               onKeyDown={handleFindsButtonKeyDown}
               aria-haspopup="true"
               aria-expanded={findsOpen}
@@ -176,7 +259,33 @@ export function Navbar({ products }: { products: ProductSearchItem[] }) {
       {isOpen && (
         <nav id="mobile-navigation" className="border-t border-[#063f5b]/10 px-4 py-3 lg:hidden sm:px-8 sm:py-4" aria-label="Mobile navigation">
           <div className="mx-auto flex max-w-6xl flex-col gap-1">
-            {mobileLinks.map((link) => {
+            <Link href="/products" aria-current={isActive("/products") ? "page" : undefined} onClick={() => setIsOpen(false)} className={`flex min-h-12 items-center rounded-xl px-3 py-3 font-bold hover:bg-[#a8e8f5]/40 ${isActive("/products") ? "bg-[#e2f7fc] text-[#007fa5]" : ""}`}>Products</Link>
+            <button
+              type="button"
+              onClick={() => setMobileCategoriesOpen((current) => !current)}
+              aria-expanded={mobileCategoriesOpen}
+              aria-controls="mobile-categories-navigation"
+              className={`flex min-h-12 items-center justify-between rounded-xl px-3 py-3 text-left font-bold hover:bg-[#a8e8f5]/40 ${pathname.startsWith("/categories") ? "text-[#007fa5]" : ""}`}
+            >
+              Categories
+              <svg viewBox="0 0 20 20" aria-hidden="true" className={`size-4 transition-transform ${mobileCategoriesOpen ? "rotate-180" : ""}`} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="m6 8 4 4 4-4" /></svg>
+            </button>
+            {mobileCategoriesOpen && (
+              <div id="mobile-categories-navigation" className="ml-3 flex flex-col gap-1 border-l-2 border-[#009dcc]/35 pl-3">
+                <Link href="/categories" onClick={() => setIsOpen(false)} className="flex min-h-11 items-center rounded-xl px-3 py-2 font-bold hover:bg-[#a8e8f5]/40">Browse all categories</Link>
+                {categories.map((category) => {
+                  const href = `/categories/${category.slug}`;
+                  const active = isActive(href);
+                  return (
+                    <Link key={category.id} href={href} aria-current={active ? "page" : undefined} onClick={() => setIsOpen(false)} className={`flex min-h-11 items-center gap-3 rounded-xl px-3 py-2 font-bold hover:bg-[#a8e8f5]/40 ${active ? "bg-[#e2f7fc] text-[#007fa5]" : ""}`}>
+                      <span className={`grid size-8 shrink-0 place-items-center rounded-lg ${getCategoryThemeClass(category.colorTheme)}`} aria-hidden="true">{category.symbol}</span>
+                      {category.name}
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
+            {[...findsLinks, ...linksAfterFinds].map((link) => {
               const active = isActive(link.href);
               return <Link key={link.label} href={link.href} aria-current={active ? "page" : undefined} onClick={() => setIsOpen(false)} className={`flex min-h-12 items-center rounded-xl px-3 py-3 font-bold hover:bg-[#a8e8f5]/40 ${active ? "bg-[#e2f7fc] text-[#007fa5]" : ""}`}>{link.label}</Link>;
             })}
