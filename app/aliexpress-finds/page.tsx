@@ -4,7 +4,7 @@ import { AliExpressSearch } from "./aliexpress-search";
 export const metadata: Metadata = {
   title: "AliExpress Baby Product Search",
   description:
-    "Search AliExpress baby products through MishBaby and open attributed AliExpress product links.",
+    "Explore trending AliExpress baby products by category or search for a specific product through MishBaby.",
   alternates: { canonical: "/aliexpress-finds" },
   robots: { index: false, follow: false, noarchive: true },
 };
@@ -22,9 +22,9 @@ export default function AliExpressFindsPage() {
             Search more baby products on AliExpress.
           </h1>
           <p className="mt-4 max-w-2xl text-base leading-7 text-[#063f5b]/70 sm:mt-5 sm:text-lg sm:leading-8">
-            Explore live AliExpress results without mixing them into
-            MishBaby&apos;s carefully curated collection. AliExpress confirms
-            local shipping, availability, and currency after you open a product.
+            Explore trending baby-category products or search AliExpress without
+            mixing third-party results into MishBaby&apos;s carefully curated collection.
+            AliExpress confirms local shipping, availability, and currency after you open a product.
           </p>
         </div>
       </section>

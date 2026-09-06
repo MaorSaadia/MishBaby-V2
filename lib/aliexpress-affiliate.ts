@@ -7,8 +7,11 @@ import { rankAliExpressResults } from "@/lib/aliexpress-relevance";
 const aliexpressEndpoint = "https://api-sg.aliexpress.com/sync";
 const aliexpressMethod = "aliexpress.affiliate.hotproduct.query";
 const aliexpressSearchCacheVersion = "v7";
+const aliexpressTrendingCacheVersion = "v2";
 const aliexpressSearchCacheHours = 1;
+const aliexpressTrendingCacheHours = 6;
 const aliexpressSearchHourlyLimit = 10;
+const aliexpressTrendingHourlyLimit = 24;
 const aliexpressSearchDailyLimit = 200;
 export const aliexpressSearchMaximumPage = 3;
 
@@ -27,7 +30,40 @@ export type AliExpressSearchResponse = {
   items: AliExpressSearchItem[];
 };
 
+export const aliexpressTrendingCategoryKeys = ["trending", "care", "nursery", "feeding", "clothing", "toys"] as const;
+export type AliExpressTrendingCategoryKey = (typeof aliexpressTrendingCategoryKeys)[number];
+
+export type AliExpressTrendingResponse = {
+  categoryKey: AliExpressTrendingCategoryKey;
+  categoryLabel: string;
+  page: number;
+  hasMore: boolean;
+  items: AliExpressSearchItem[];
+};
+
+type AliExpressTrendingCategory = {
+  label: string;
+  categoryIds: readonly string[];
+  keywords: string;
+  relevanceQuery: string;
+};
+
+const aliexpressTrendingCategories: Record<AliExpressTrendingCategoryKey, AliExpressTrendingCategory> = {
+  trending: {
+    label: "Trending",
+    categoryIds: ["200001330", "200332158", "201678201", "310", "100001698", "201671802", "201273175"],
+    keywords: "baby",
+    relevanceQuery: "baby",
+  },
+  care: { label: "Baby Care", categoryIds: ["200001330", "201671802"], keywords: "baby", relevanceQuery: "baby" },
+  nursery: { label: "Nursery", categoryIds: ["200332158"], keywords: "crib", relevanceQuery: "crib" },
+  feeding: { label: "Feeding", categoryIds: ["201678201"], keywords: "baby bottle", relevanceQuery: "baby bottle" },
+  clothing: { label: "Baby Clothing", categoryIds: ["310"], keywords: "baby", relevanceQuery: "baby" },
+  toys: { label: "Toys", categoryIds: ["100001698"], keywords: "baby toy", relevanceQuery: "baby toy" },
+};
+
 type CachedAliExpressSearchResponse = Omit<AliExpressSearchResponse, "query">;
+type CachedAliExpressTrendingResponse = Omit<AliExpressTrendingResponse, "categoryKey" | "categoryLabel">;
 
 type AliExpressConfig = {
   appKey: string;
@@ -81,14 +117,27 @@ export function getAliExpressConfig(): AliExpressConfig | null {
   return { appKey, appSecret, trackingId, rateLimitSecret };
 }
 
-export function createAliExpressVisitorHash(ipAddress: string, secret: string) {
-  return createHash("sha256").update(`${secret}:${ipAddress}`).digest("hex");
+export function createAliExpressVisitorHash(ipAddress: string, secret: string, scope?: "trending") {
+  const scopePrefix = scope ? `${scope}:` : "";
+  return createHash("sha256").update(`${secret}:${scopePrefix}${ipAddress}`).digest("hex");
 }
 
 function createCacheKey(query: string, page: number) {
   return createHash("sha256")
     .update(`${aliexpressSearchCacheVersion}:GLOBAL:EN:${page}:${query.toLocaleLowerCase("en-US")}`)
     .digest("hex");
+}
+
+function createTrendingCacheKey(categoryKey: AliExpressTrendingCategoryKey, page: number) {
+  return createHash("sha256")
+    .update(`${aliexpressTrendingCacheVersion}:TRENDING:GLOBAL:EN:${categoryKey}:${page}`)
+    .digest("hex");
+}
+
+export function parseAliExpressTrendingCategory(value: unknown) {
+  return typeof value === "string" && aliexpressTrendingCategoryKeys.includes(value as AliExpressTrendingCategoryKey)
+    ? value as AliExpressTrendingCategoryKey
+    : null;
 }
 
 function formatIopTimestamp(date = new Date()) {
@@ -183,6 +232,48 @@ function parseAliExpressResponse(rawResponse: unknown, query: string, requestedP
   };
 }
 
+function parseAliExpressTrendingResponse(
+  rawResponse: unknown,
+  categoryKey: AliExpressTrendingCategoryKey,
+  requestedPage: number,
+): AliExpressTrendingResponse | null {
+  const response = rawResponse as RawAliExpressResponse;
+  const responseRoot = response.aliexpress_affiliate_hotproduct_query_response?.resp_result;
+  if (Number(responseRoot?.resp_code) !== 200 || !responseRoot?.result) return null;
+
+  const candidates = rawProducts(response).flatMap((rawItem): AliExpressSearchItem[] => {
+    const productId = String(rawItem.product_id ?? "").trim();
+    const title = normalizedText(rawItem.product_title, 320);
+    const promotionUrl = normalizedText(rawItem.promotion_link, 2048);
+    if (!/^\d{5,24}$/.test(productId) || !title || !isAliExpressPromotionUrl(promotionUrl)) return [];
+
+    const imageUrl = normalizedText(rawItem.product_main_image_url, 2048);
+    return [{
+      productId,
+      title,
+      promotionUrl,
+      ...(isAliExpressImageUrl(imageUrl) ? { image: { url: imageUrl } } : {}),
+    }];
+  });
+  const items = rankAliExpressResults(
+    candidates,
+    aliexpressTrendingCategories[categoryKey].relevanceQuery,
+    8,
+  );
+
+  const result = responseRoot.result;
+  const totalResultCount = normalizedInteger(result.total_record_count) ?? items.length;
+  const totalPageCount = normalizedInteger(result.total_page_no) ?? Math.ceil(totalResultCount / 50);
+
+  return {
+    categoryKey,
+    categoryLabel: aliexpressTrendingCategories[categoryKey].label,
+    page: requestedPage,
+    hasMore: requestedPage < aliexpressSearchMaximumPage && requestedPage < totalPageCount,
+    items,
+  };
+}
+
 export async function searchAliExpressProducts(query: string, page: number) {
   let admin: ReturnType<typeof createSupabaseAdminClient>;
   try {
@@ -211,13 +302,49 @@ export async function searchAliExpressProducts(query: string, page: number) {
   return { ok: true as const, cacheKey, admin, cached: false as const };
 }
 
+export async function getCachedAliExpressTrendingProducts(
+  categoryKey: AliExpressTrendingCategoryKey,
+  page: number,
+) {
+  let admin: ReturnType<typeof createSupabaseAdminClient>;
+  try {
+    admin = createSupabaseAdminClient();
+  } catch {
+    return { ok: false as const, reason: "storage_unavailable" as const };
+  }
+
+  const cacheKey = createTrendingCacheKey(categoryKey, page);
+  const { data: cached, error } = await admin
+    .from("aliexpress_search_cache")
+    .select("payload")
+    .eq("cache_key", cacheKey)
+    .gt("expires_at", new Date().toISOString())
+    .maybeSingle();
+
+  if (error) return { ok: false as const, reason: "storage_unavailable" as const };
+  if (cached?.payload) {
+    return {
+      ok: true as const,
+      data: {
+        ...(cached.payload as CachedAliExpressTrendingResponse),
+        categoryKey,
+        categoryLabel: aliexpressTrendingCategories[categoryKey].label,
+      },
+      cached: true as const,
+    };
+  }
+
+  return { ok: true as const, cacheKey, admin, cached: false as const };
+}
+
 export async function consumeAliExpressSearchQuota(
   admin: ReturnType<typeof createSupabaseAdminClient>,
   visitorHash: string,
+  hourlyLimit = aliexpressSearchHourlyLimit,
 ) {
   const { data, error } = await admin.rpc("consume_aliexpress_search_quota", {
     p_visitor_hash: visitorHash,
-    p_hourly_limit: aliexpressSearchHourlyLimit,
+    p_hourly_limit: hourlyLimit,
     p_daily_limit: aliexpressSearchDailyLimit,
   });
   const result = Array.isArray(data) ? data[0] : undefined;
@@ -225,6 +352,13 @@ export async function consumeAliExpressSearchQuota(
   return result.allowed
     ? { ok: true as const }
     : { ok: false as const, reason: result.reason === "hourly_limit" ? "hourly_limit" as const : "daily_limit" as const };
+}
+
+export function consumeAliExpressTrendingQuota(
+  admin: ReturnType<typeof createSupabaseAdminClient>,
+  visitorHash: string,
+) {
+  return consumeAliExpressSearchQuota(admin, visitorHash, aliexpressTrendingHourlyLimit);
 }
 
 export async function fetchAndCacheAliExpressProducts(
@@ -271,6 +405,64 @@ export async function fetchAndCacheAliExpressProducts(
       items: data.items,
     };
     const expiresAt = new Date(Date.now() + aliexpressSearchCacheHours * 60 * 60 * 1000).toISOString();
+    const { error } = await admin.from("aliexpress_search_cache").upsert({
+      cache_key: cacheKey,
+      payload: cachePayload,
+      expires_at: expiresAt,
+    }, { onConflict: "cache_key" });
+    if (error) return { ok: false as const, reason: "storage_unavailable" as const };
+
+    return { ok: true as const, data, cached: false as const };
+  } catch {
+    return { ok: false as const, reason: "aliexpress_unavailable" as const };
+  }
+}
+
+export async function fetchAndCacheAliExpressTrendingProducts(
+  categoryKey: AliExpressTrendingCategoryKey,
+  page: number,
+  config: AliExpressConfig,
+  cacheKey: string,
+  admin: ReturnType<typeof createSupabaseAdminClient>,
+) {
+  const category = aliexpressTrendingCategories[categoryKey];
+  const parameters: Record<string, string> = {
+    method: aliexpressMethod,
+    app_key: config.appKey,
+    sign_method: "sha256",
+    timestamp: formatIopTimestamp(),
+    format: "json",
+    simplify: "false",
+    category_ids: category.categoryIds.join(","),
+    keywords: category.keywords,
+    page_no: String(page),
+    page_size: "50",
+    platform_product_type: "ALL",
+    target_language: "EN",
+    tracking_id: config.trackingId,
+  };
+  parameters.sign = signAliExpressTopRequest(parameters, config.appSecret);
+
+  try {
+    const response = await fetch(aliexpressEndpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
+      body: new URLSearchParams(parameters),
+      cache: "no-store",
+      signal: AbortSignal.timeout(12_000),
+    });
+    if (!response.ok) return { ok: false as const, reason: "aliexpress_unavailable" as const };
+
+    const rawResponse: unknown = await response.json();
+    const data = parseAliExpressTrendingResponse(rawResponse, categoryKey, page);
+    if (!data) return { ok: false as const, reason: "aliexpress_unavailable" as const };
+
+    const cachePayload: CachedAliExpressTrendingResponse = {
+      page: data.page,
+      hasMore: data.hasMore,
+      items: data.items,
+    };
+    const expiresAt = new Date(Date.now() + aliexpressTrendingCacheHours * 60 * 60 * 1000).toISOString();
     const { error } = await admin.from("aliexpress_search_cache").upsert({
       cache_key: cacheKey,
       payload: cachePayload,
