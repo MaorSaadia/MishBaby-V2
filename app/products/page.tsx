@@ -112,17 +112,17 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
           dangerouslySetInnerHTML={{ __html: serializeStructuredData(structuredData) }}
         />
       )}
-      <section className="relative isolate overflow-hidden bg-[#f1fbfe] px-5 py-16 sm:px-8 md:py-22">
-        <div className="absolute -right-16 -top-16 -z-10 size-80 rounded-full bg-[#a8e8f5]/65 blur-3xl" />
+      <section className="relative isolate overflow-hidden border-b border-[#063f5b]/8 bg-[#f1fbfe] px-5 py-8 sm:px-8 sm:py-10">
+        <div className="absolute -right-16 -top-28 -z-10 size-72 rounded-full bg-[#a8e8f5]/65 blur-3xl" />
         <div className="mx-auto max-w-6xl">
           <p className="text-sm font-extrabold uppercase tracking-[0.14em] text-[#009dcc]">Shop thoughtful finds</p>
-          <h1 className="mt-3 max-w-3xl font-display text-5xl font-semibold leading-[1.05] tracking-[-0.055em] text-[#063f5b] sm:text-6xl">Products for the little moments that matter.</h1>
-          <p className="mt-5 max-w-2xl text-lg leading-8 text-[#063f5b]/70">Browse our growing collection and compare active offers from trusted marketplaces in one place.</p>
+          <h1 className="mt-2 font-display text-4xl font-semibold leading-tight tracking-[-0.05em] text-[#063f5b] sm:text-5xl">Baby products</h1>
+          <p className="mt-3 max-w-2xl text-base leading-7 text-[#063f5b]/70 sm:text-lg">Browse thoughtful finds and compare active offers from trusted marketplaces.</p>
         </div>
       </section>
 
-      <section className="mx-auto max-w-6xl px-5 py-14 sm:px-8 md:py-20">
-        <div className="flex flex-col gap-5 border-b border-[#063f5b]/10 pb-8">
+      <section className="mx-auto max-w-6xl px-5 py-6 sm:px-8 md:py-8">
+        <div className="rounded-[1.5rem] border border-[#063f5b]/10 bg-[#f7fcfe] p-3 sm:p-4 md:p-5">
           <MobileProductFilters
             categories={categories.map((category) => ({ id: category.slug, name: category.name }))}
             merchants={merchants.map((merchant) => ({ id: merchant.id, name: merchant.name }))}
@@ -132,87 +132,88 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
             selectedSort={selectedSort}
           />
 
-          <div className="hidden md:block">
-            <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-[#063f5b]/45">Filter by category</p>
-            <h2 className="mt-2 text-2xl font-extrabold tracking-[-0.035em] text-[#063f5b]">{selectedCategory?.name ?? "All products"}</h2>
-          </div>
-          <nav className="hidden flex-wrap gap-2 md:flex" aria-label="Filter products by category">
-            <Link
-              href={{
-                pathname: "/products",
-                query: { ...selectedMerchantQuery, ...selectedSearchQuery, ...selectedSortQuery },
-              }}
-              aria-current={!selectedCategory ? "page" : undefined}
-              className={`rounded-full px-4 py-2.5 text-sm font-extrabold transition ${!selectedCategory ? "bg-[#009dcc] text-white" : "border border-[#063f5b]/10 bg-white text-[#063f5b]/70 hover:border-[#009dcc]/40 hover:text-[#009dcc]"}`}
-            >
-              All products
-            </Link>
-            {categories.map((category) => {
-              const isSelected = selectedCategory?.slug === category.slug;
-
-              return (
-                <Link
-                  key={category.slug}
-                  href={{
-                    pathname: "/products",
-                    query: {
-                      category: category.slug,
-                      ...selectedMerchantQuery,
-                      ...selectedSearchQuery,
-                      ...selectedSortQuery,
-                    },
-                  }}
-                  aria-current={isSelected ? "page" : undefined}
-                  className={`rounded-full px-4 py-2.5 text-sm font-extrabold transition ${isSelected ? "bg-[#009dcc] text-white" : "border border-[#063f5b]/10 bg-white text-[#063f5b]/70 hover:border-[#009dcc]/40 hover:text-[#009dcc]"}`}
-                >
-                  {category.name}
-                </Link>
-              );
-            })}
-          </nav>
-
-          {merchants.length > 0 && (
-            <div className="hidden md:block">
-              <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-[#063f5b]/45">Filter by merchant</p>
-              <nav className="mt-3 flex flex-wrap gap-2" aria-label="Filter products by merchant">
+          <div className="hidden space-y-3 md:block">
+            <div className="flex items-start gap-4">
+              <p className="w-20 shrink-0 pt-2.5 text-xs font-extrabold uppercase tracking-[0.12em] text-[#063f5b]/45">Category</p>
+              <nav className="flex flex-wrap gap-2" aria-label="Filter products by category">
                 <Link
                   href={{
                     pathname: "/products",
-                    query: { ...selectedCategoryQuery, ...selectedSearchQuery, ...selectedSortQuery },
+                    query: { ...selectedMerchantQuery, ...selectedSearchQuery, ...selectedSortQuery },
                   }}
-                  aria-current={!selectedMerchant ? "page" : undefined}
-                  className={`rounded-full px-4 py-2.5 text-sm font-extrabold transition ${!selectedMerchant ? "bg-[#009dcc] text-white" : "border border-[#063f5b]/10 bg-white text-[#063f5b]/70 hover:border-[#009dcc]/40 hover:text-[#009dcc]"}`}
+                  aria-current={!selectedCategory ? "page" : undefined}
+                  className={`rounded-full px-3.5 py-2 text-sm font-extrabold transition ${!selectedCategory ? "bg-[#009dcc] text-white" : "border border-[#063f5b]/10 bg-white text-[#063f5b]/70 hover:border-[#009dcc]/40 hover:text-[#009dcc]"}`}
                 >
-                  All merchants
+                  All products
                 </Link>
-                {merchants.map((merchant) => {
-                  const isSelected = selectedMerchant?.id === merchant.id;
+                {categories.map((category) => {
+                  const isSelected = selectedCategory?.slug === category.slug;
 
                   return (
                     <Link
-                      key={merchant.id}
+                      key={category.slug}
                       href={{
                         pathname: "/products",
                         query: {
-                          ...selectedCategoryQuery,
-                          merchant: merchant.id,
+                          category: category.slug,
+                          ...selectedMerchantQuery,
                           ...selectedSearchQuery,
                           ...selectedSortQuery,
                         },
                       }}
                       aria-current={isSelected ? "page" : undefined}
-                      className={`rounded-full px-4 py-2.5 text-sm font-extrabold transition ${isSelected ? "bg-[#009dcc] text-white" : "border border-[#063f5b]/10 bg-white text-[#063f5b]/70 hover:border-[#009dcc]/40 hover:text-[#009dcc]"}`}
+                      className={`rounded-full px-3.5 py-2 text-sm font-extrabold transition ${isSelected ? "bg-[#009dcc] text-white" : "border border-[#063f5b]/10 bg-white text-[#063f5b]/70 hover:border-[#009dcc]/40 hover:text-[#009dcc]"}`}
                     >
-                      {merchant.name}
+                      {category.name}
                     </Link>
                   );
                 })}
               </nav>
             </div>
-          )}
+
+            {merchants.length > 0 && (
+              <div className="flex items-start gap-4 border-t border-[#063f5b]/8 pt-3">
+                <p className="w-20 shrink-0 pt-2 text-xs font-extrabold uppercase tracking-[0.12em] text-[#063f5b]/45">Merchant</p>
+                <nav className="flex flex-wrap gap-2" aria-label="Filter products by merchant">
+                  <Link
+                    href={{
+                      pathname: "/products",
+                      query: { ...selectedCategoryQuery, ...selectedSearchQuery, ...selectedSortQuery },
+                    }}
+                    aria-current={!selectedMerchant ? "page" : undefined}
+                    className={`rounded-full px-3.5 py-2 text-sm font-extrabold transition ${!selectedMerchant ? "bg-[#009dcc] text-white" : "border border-[#063f5b]/10 bg-white text-[#063f5b]/70 hover:border-[#009dcc]/40 hover:text-[#009dcc]"}`}
+                  >
+                    All merchants
+                  </Link>
+                  {merchants.map((merchant) => {
+                    const isSelected = selectedMerchant?.id === merchant.id;
+
+                    return (
+                      <Link
+                        key={merchant.id}
+                        href={{
+                          pathname: "/products",
+                          query: {
+                            ...selectedCategoryQuery,
+                            merchant: merchant.id,
+                            ...selectedSearchQuery,
+                            ...selectedSortQuery,
+                          },
+                        }}
+                        aria-current={isSelected ? "page" : undefined}
+                        className={`rounded-full px-3.5 py-2 text-sm font-extrabold transition ${isSelected ? "bg-[#009dcc] text-white" : "border border-[#063f5b]/10 bg-white text-[#063f5b]/70 hover:border-[#009dcc]/40 hover:text-[#009dcc]"}`}
+                      >
+                        {merchant.name}
+                      </Link>
+                    );
+                  })}
+                </nav>
+              </div>
+            )}
+          </div>
         </div>
 
-        <div className="mt-8 flex flex-wrap items-center justify-between gap-4">
+        <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
           <p className="text-sm font-semibold text-[#063f5b]/55">
             {visibleProducts.length} {visibleProducts.length === 1 ? "product" : "products"}
             {selectedCategory ? ` in ${selectedCategory.name}` : ""}
