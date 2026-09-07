@@ -45,13 +45,19 @@ export default async function GuidesPage({ searchParams }: GuidesPageProps) {
     Object.prototype.hasOwnProperty.call(resolvedSearchParams, key),
   );
   const normalizedSearch = searchQuery.toLocaleLowerCase();
-  const categoryLabels = [...new Set(guides.map((guide) => guide.categoryLabel))]
+  const categoryLabelsByKey = new Map<string, string>();
+  guides.forEach((guide) => {
+    const label = guide.categoryLabel.trim();
+    const key = label.toLocaleLowerCase();
+    if (label && !categoryLabelsByKey.has(key)) categoryLabelsByKey.set(key, label);
+  });
+  const categoryLabels = [...categoryLabelsByKey.values()]
     .sort((first, second) => first.localeCompare(second));
   const selectedCategory = categoryLabels.find(
     (categoryLabel) => categoryLabel.toLocaleLowerCase() === requestedCategory?.toLocaleLowerCase(),
   );
   const matchingGuides = guides.filter((guide) => {
-    if (selectedCategory && guide.categoryLabel !== selectedCategory) return false;
+    if (selectedCategory && guide.categoryLabel.trim().toLocaleLowerCase() !== selectedCategory.toLocaleLowerCase()) return false;
     if (!normalizedSearch) return true;
 
     const searchableValues = [
@@ -91,18 +97,17 @@ export default async function GuidesPage({ searchParams }: GuidesPageProps) {
           dangerouslySetInnerHTML={{ __html: serializeStructuredData(structuredData) }}
         />
       )}
-      <section className="relative isolate overflow-hidden bg-[#f1fbfe] px-5 py-10 sm:px-8 sm:py-14 md:py-22">
-        <div className="absolute -right-20 -top-20 -z-10 size-96 rounded-full bg-[#a8e8f5]/70 blur-3xl" />
-        <div className="absolute -bottom-24 -left-20 -z-10 size-72 rounded-full bg-[#d9f4ee]/70 blur-2xl" />
+      <section className="relative isolate overflow-hidden border-b border-[#063f5b]/8 bg-[#f1fbfe] px-5 py-8 sm:px-8 sm:py-10">
+        <div className="absolute -right-16 -top-28 -z-10 size-72 rounded-full bg-[#a8e8f5]/70 blur-3xl" />
         <div className="mx-auto max-w-6xl">
           <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-[#009dcc] sm:text-sm">MishBaby guides</p>
-          <h1 className="mt-3 max-w-3xl font-display text-4xl font-semibold leading-[1.08] tracking-[-0.05em] text-[#063f5b] sm:text-6xl sm:leading-[1.05]">Practical guidance, minus the noise.</h1>
-          <p className="mt-4 max-w-2xl text-base leading-7 text-[#063f5b]/70 sm:mt-5 sm:text-lg sm:leading-8">Clear buying guides, useful checklists, and friendly ideas to help you make confident choices for your family.</p>
+          <h1 className="mt-2 font-display text-4xl font-semibold leading-tight tracking-[-0.05em] text-[#063f5b] sm:text-5xl">Parenting guides</h1>
+          <p className="mt-3 max-w-2xl text-base leading-7 text-[#063f5b]/70 sm:text-lg">Clear buying guides, useful checklists, and practical ideas for your family.</p>
         </div>
       </section>
 
-      <section className="mx-auto max-w-6xl px-4 pt-10 sm:px-8 sm:pt-12 md:pt-16">
-        <div className="rounded-3xl border border-[#063f5b]/8 bg-white p-4 shadow-[0_18px_40px_-34px_rgba(6,63,91,.4)] sm:rounded-[2rem] sm:p-7">
+      <section className="mx-auto max-w-6xl px-5 pt-6 sm:px-8 md:pt-8">
+        <div className="rounded-[1.5rem] border border-[#063f5b]/10 bg-[#f7fcfe] p-3 sm:p-4 md:p-5">
           <form action="/guides" className="flex flex-col gap-3 sm:flex-row" role="search">
             <label htmlFor="guide-search" className="sr-only">Search guides</label>
             <div className="relative flex-1">
@@ -124,13 +129,13 @@ export default async function GuidesPage({ searchParams }: GuidesPageProps) {
             <button type="submit" className="h-13 w-full rounded-2xl bg-[#009dcc] px-6 text-sm font-extrabold text-white transition hover:bg-[#0784b0] sm:w-auto">Search guides</button>
           </form>
 
-          <div className="mt-6 border-t border-[#063f5b]/8 pt-5">
+          <div className="mt-4 border-t border-[#063f5b]/8 pt-4">
             <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-[#063f5b]/45">Filter by topic</p>
             <nav className="-mx-1 mt-3 flex snap-x gap-2 overflow-x-auto px-1 pb-2 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0" aria-label="Filter guides by topic">
               <Link
                 href={{ pathname: "/guides", query: searchQuery ? { q: searchQuery } : {} }}
                 aria-current={!selectedCategory ? "page" : undefined}
-                className={`min-h-11 shrink-0 snap-start rounded-full px-4 py-2.5 text-sm font-extrabold transition ${!selectedCategory ? "bg-[#009dcc] text-white" : "border border-[#063f5b]/10 bg-white text-[#063f5b]/70 hover:border-[#009dcc]/40 hover:text-[#009dcc]"}`}
+                className={`min-h-10 shrink-0 snap-start rounded-full px-3.5 py-2 text-sm font-extrabold transition ${!selectedCategory ? "bg-[#009dcc] text-white" : "border border-[#063f5b]/10 bg-white text-[#063f5b]/70 hover:border-[#009dcc]/40 hover:text-[#009dcc]"}`}
               >
                 All guides
               </Link>
@@ -145,7 +150,7 @@ export default async function GuidesPage({ searchParams }: GuidesPageProps) {
                       query: { category: categoryLabel, ...(searchQuery ? { q: searchQuery } : {}) },
                     }}
                     aria-current={isSelected ? "page" : undefined}
-                    className={`min-h-11 shrink-0 snap-start rounded-full px-4 py-2.5 text-sm font-extrabold transition ${isSelected ? "bg-[#009dcc] text-white" : "border border-[#063f5b]/10 bg-white text-[#063f5b]/70 hover:border-[#009dcc]/40 hover:text-[#009dcc]"}`}
+                    className={`min-h-10 shrink-0 snap-start rounded-full px-3.5 py-2 text-sm font-extrabold transition ${isSelected ? "bg-[#009dcc] text-white" : "border border-[#063f5b]/10 bg-white text-[#063f5b]/70 hover:border-[#009dcc]/40 hover:text-[#009dcc]"}`}
                   >
                     {categoryLabel}
                   </Link>
@@ -156,8 +161,8 @@ export default async function GuidesPage({ searchParams }: GuidesPageProps) {
         </div>
       </section>
 
-      <section className="mx-auto max-w-6xl px-5 py-10 sm:px-8 sm:py-12 md:py-16">
-        <div className="mb-7 flex flex-wrap items-center justify-between gap-4">
+      <section className="mx-auto max-w-6xl px-5 py-6 sm:px-8 md:py-8">
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
           <p className="text-sm font-semibold text-[#063f5b]/55">
             {matchingGuides.length} {matchingGuides.length === 1 ? "guide" : "guides"}
             {selectedCategory ? ` in ${selectedCategory}` : ""}
@@ -188,7 +193,7 @@ export default async function GuidesPage({ searchParams }: GuidesPageProps) {
         )}
 
         {moreGuides.length > 0 && (
-          <div className={`${featuredGuide ? "mt-8 sm:mt-10" : ""} grid gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3`}>
+          <div className={`${featuredGuide ? "mt-6 sm:mt-8" : ""} grid gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3`}>
             {moreGuides.map((guide) => <GuideCard key={guide.id} guide={guide} />)}
           </div>
         )}
