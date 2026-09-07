@@ -38,6 +38,35 @@ export function Navbar({ products, categories }: { products: ProductSearchItem[]
   const categoriesMenuRef = useRef<HTMLDivElement>(null);
   const findsButtonRef = useRef<HTMLButtonElement>(null);
   const findsMenuRef = useRef<HTMLDivElement>(null);
+  const hoverCloseTimerRef = useRef<number | null>(null);
+
+  function cancelHoverClose() {
+    if (!hoverCloseTimerRef.current) return;
+    window.clearTimeout(hoverCloseTimerRef.current);
+    hoverCloseTimerRef.current = null;
+  }
+
+  function openCategoriesOnHover() {
+    cancelHoverClose();
+    setFindsOpen(false);
+    setCategoriesOpen(true);
+  }
+
+  function openFindsOnHover() {
+    cancelHoverClose();
+    setCategoriesOpen(false);
+    setFindsOpen(true);
+  }
+
+  function closeCategoriesAfterHover() {
+    cancelHoverClose();
+    hoverCloseTimerRef.current = window.setTimeout(() => setCategoriesOpen(false), 180);
+  }
+
+  function closeFindsAfterHover() {
+    cancelHoverClose();
+    hoverCloseTimerRef.current = window.setTimeout(() => setFindsOpen(false), 180);
+  }
 
   function focusFirstFindsLink() {
     window.requestAnimationFrame(() => findsMenuRef.current?.querySelector<HTMLAnchorElement>("a")?.focus());
@@ -55,7 +84,10 @@ export function Navbar({ products, categories }: { products: ProductSearchItem[]
     }
 
     document.addEventListener("pointerdown", closeFindsOnOutsideClick);
-    return () => document.removeEventListener("pointerdown", closeFindsOnOutsideClick);
+    return () => {
+      document.removeEventListener("pointerdown", closeFindsOnOutsideClick);
+      if (hoverCloseTimerRef.current) window.clearTimeout(hoverCloseTimerRef.current);
+    };
   }, []);
 
   function isActive(href: string) {
@@ -140,7 +172,13 @@ export function Navbar({ products, categories }: { products: ProductSearchItem[]
 
             return <Link key={link.label} href={link.href} aria-current={active ? "page" : undefined} className={`rounded-md transition-colors hover:text-[#009dcc] ${active ? "text-[#009dcc]" : ""}`}>{link.label}</Link>;
           })}
-          <div ref={categoriesMenuRef} className="relative" onBlur={handleCategoriesBlur}>
+          <div
+            ref={categoriesMenuRef}
+            className="relative"
+            onMouseEnter={openCategoriesOnHover}
+            onMouseLeave={closeCategoriesAfterHover}
+            onBlur={handleCategoriesBlur}
+          >
             <button
               ref={categoriesButtonRef}
               type="button"
@@ -195,7 +233,13 @@ export function Navbar({ products, categories }: { products: ProductSearchItem[]
               </div>
             )}
           </div>
-          <div ref={findsMenuRef} className="relative" onBlur={handleFindsBlur}>
+          <div
+            ref={findsMenuRef}
+            className="relative"
+            onMouseEnter={openFindsOnHover}
+            onMouseLeave={closeFindsAfterHover}
+            onBlur={handleFindsBlur}
+          >
             <button
               ref={findsButtonRef}
               type="button"
