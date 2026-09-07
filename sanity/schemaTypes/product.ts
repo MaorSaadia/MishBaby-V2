@@ -1,5 +1,6 @@
 import { defineField, defineType } from "sanity";
 import { productOfferArrayMember } from "./product-offer";
+import { isReservedProductSlug } from "@/lib/product-urls";
 
 export const productType = defineType({
   name: "product",
@@ -18,7 +19,10 @@ export const productType = defineType({
       type: "slug",
       description: "Used in the product page URL. Generate it from the product name.",
       options: { source: "name", maxLength: 96 },
-      validation: (rule) => rule.required(),
+      validation: (rule) => rule.required().custom((value) => {
+        const current = (value as { current?: string } | undefined)?.current;
+        return !isReservedProductSlug(current) || `“${current}” is reserved by another MishBaby page. Choose a different product slug.`;
+      }),
     }),
     defineField({
       name: "category",

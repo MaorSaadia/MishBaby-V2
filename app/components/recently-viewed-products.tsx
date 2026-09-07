@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { getProductPath } from "@/lib/product-urls";
 import { useEffect, useMemo, useSyncExternalStore } from "react";
 
 const storageKey = "mishbaby-recently-viewed-products";
@@ -132,7 +133,7 @@ export function RecentlyViewedProducts({ product }: { product?: RecentlyViewedPr
         <div className="mt-9 grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
           {previousProducts.map((historyProduct) => (
             <article key={historyProduct.slug} className="group overflow-hidden rounded-2xl border border-[#063f5b]/8 bg-[#fbfeff] shadow-[0_16px_36px_-28px_rgba(6,63,91,.4)] sm:rounded-[2rem]">
-              <Link href={`/products/${historyProduct.slug}`} className="block focus-visible:outline-offset-[-3px]">
+              <Link href={getProductPath(historyProduct.slug)} className="block focus-visible:outline-offset-[-3px]">
                 <div className="relative grid aspect-[4/3] place-items-center overflow-hidden bg-[#e8f8fc]">
                   {historyProduct.image ? (
                     <Image

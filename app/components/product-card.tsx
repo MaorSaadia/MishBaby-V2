@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Product } from "@/lib/products";
 import { ProductImage } from "./product-image";
 import { CardFavoriteButton } from "./card-favorite-button";
+import { getProductPath } from "@/lib/product-urls";
 
 type ProductCardProps = {
   product: Product;
@@ -15,7 +16,7 @@ export function ProductCard({ product, variant = "default" }: ProductCardProps) 
 
   return (
     <article className={`group relative overflow-hidden rounded-2xl border border-[#063f5b]/8 bg-white shadow-[0_16px_36px_-28px_rgba(6,63,91,.45)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_42px_-26px_rgba(6,63,91,.35)] sm:rounded-[2rem]`}>
-      <Link href={`/products/${product.slug}`} aria-label={`View ${product.name}`} className="absolute inset-0 z-10 rounded-[inherit] focus-visible:outline-3 focus-visible:outline-offset-[-3px] focus-visible:outline-[#009dcc]" />
+      <Link href={getProductPath(product.slug)} aria-label={`View ${product.name}`} className="absolute inset-0 z-10 rounded-[inherit] focus-visible:outline-3 focus-visible:outline-offset-[-3px] focus-visible:outline-[#009dcc]" />
       <div className="relative grid aspect-[4/3] place-items-center overflow-hidden bg-[#e8f8fc]">
         <div className="absolute right-2 top-2 z-20 sm:right-4 sm:top-4"><CardFavoriteButton kind="product" id={product.id} label={product.name} /></div>
         <div className="absolute -right-12 -top-12 size-40 rounded-full bg-[#a8e8f5]/75 transition-transform duration-300 group-hover:scale-110" />

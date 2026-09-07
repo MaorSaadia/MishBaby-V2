@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useFavorites } from "./favorites-provider";
+import { getProductPath } from "@/lib/product-urls";
 
 export function FavoriteProductButton({ productId, productSlug }: { productId: string; productSlug: string }) {
   const { authStatus, isFavorite, isBusy, toggle } = useFavorites();
@@ -13,13 +14,13 @@ export function FavoriteProductButton({ productId, productSlug }: { productId: s
 
   async function toggleFavorite() {
     if (authStatus === "signed-out") {
-      router.push(`/sign-in?next=${encodeURIComponent(`/products/${productSlug}`)}`);
+      router.push(`/sign-in?next=${encodeURIComponent(getProductPath(productSlug))}`);
       return;
     }
     setMessage("");
     const result = await toggle("product", productId);
     if (result.requiresSignIn) {
-      router.push(`/sign-in?next=${encodeURIComponent(`/products/${productSlug}`)}`);
+      router.push(`/sign-in?next=${encodeURIComponent(getProductPath(productSlug))}`);
       return;
     }
     if (!result.ok) {

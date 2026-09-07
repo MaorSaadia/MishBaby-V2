@@ -16,19 +16,24 @@ import { getPublishedGuidesByProductId } from "@/lib/guides";
 import { getProductBySlug, getPublishedProducts } from "@/lib/products";
 import { siteConfig } from "@/lib/site";
 import { createMerchantClickToken } from "@/lib/merchant-clicks";
+import { getProductUrl } from "@/lib/product-urls";
+
+type ProductPageProps = {
+  params: Promise<{ slug: string }>;
+};
 
 export async function generateStaticParams() {
   const products = await getPublishedProducts();
   return products.map((product) => ({ slug: product.slug }));
 }
 
-export async function generateMetadata({ params }: PageProps<"/products/[slug]">): Promise<Metadata> {
+export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
   const { slug } = await params;
   const product = await getProductBySlug(slug);
 
   if (!product) return {};
 
-  const productUrl = `${siteConfig.url}/products/${product.slug}`;
+  const productUrl = getProductUrl(siteConfig.url, product.slug);
   const socialImageUrl = `${productUrl}/opengraph-image`;
   const socialImages = [{
     url: socialImageUrl,
@@ -60,7 +65,7 @@ export async function generateMetadata({ params }: PageProps<"/products/[slug]">
   };
 }
 
-export default async function ProductPage({ params }: PageProps<"/products/[slug]">) {
+export default async function ProductPage({ params }: ProductPageProps) {
   const { slug } = await params;
   const product = await getProductBySlug(slug);
 
@@ -72,7 +77,7 @@ export default async function ProductPage({ params }: PageProps<"/products/[slug
   ]);
   if (!category) notFound();
 
-  const productUrl = `${siteConfig.url}/products/${product.slug}`;
+  const productUrl = getProductUrl(siteConfig.url, product.slug);
   const categoryUrl = `${siteConfig.url}/categories/${category.slug}`;
   const currentAmazonAsin = product.offers.find((offer) => offer.merchant.id === "amazon")?.amazonAsin;
   const currentAliExpressOfferUrl = product.offers.find((offer) => offer.merchant.id === "aliexpress")?.url;

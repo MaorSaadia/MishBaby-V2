@@ -8,6 +8,7 @@ import { getHomepageFeaturedProducts } from "@/lib/homepage";
 import { getPublishedProducts } from "@/lib/products";
 import { siteConfig } from "@/lib/site";
 import { createItemListStructuredData, serializeStructuredData } from "@/lib/structured-data";
+import { getProductUrl } from "@/lib/product-urls";
 
 const productsMetadata: Metadata = {
   title: "Baby Products",
@@ -98,7 +99,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
           type: "Product",
           name: product.name,
           description: product.summary,
-          url: `${siteConfig.url}/products/${product.slug}`,
+          url: getProductUrl(siteConfig.url, product.slug),
           image: product.image?.src,
         })),
       })

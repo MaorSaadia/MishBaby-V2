@@ -10,6 +10,7 @@ import { getCategoryThemeClass } from "@/lib/category-themes";
 import { getPublishedGuidesByCategorySlug } from "@/lib/guides";
 import { getProductsByCategory } from "@/lib/products";
 import { siteConfig } from "@/lib/site";
+import { getProductUrl } from "@/lib/product-urls";
 import { createBreadcrumbStructuredData, createItemListStructuredData, serializeStructuredData } from "@/lib/structured-data";
 
 export async function generateStaticParams() {
@@ -68,7 +69,7 @@ export default async function CategoryPage({ params }: PageProps<"/categories/[s
           type: "Product",
           name: product.name,
           description: product.summary,
-          url: `${siteConfig.url}/products/${product.slug}`,
+          url: getProductUrl(siteConfig.url, product.slug),
           image: product.image?.src,
         })),
       })

@@ -11,6 +11,7 @@ import {
   type ProductSuggestion,
   validateProductSuggestion,
 } from "@/lib/product-assistant";
+import { isReservedProductSlug } from "@/lib/product-urls";
 import type { AmazonSearchItem, AmazonSearchResponse } from "@/lib/amazon-creators";
 import { useStudioSessionToken } from "@/sanity/lib/use-studio-session-token";
 import styles from "./product-assistant.module.css";
@@ -308,6 +309,7 @@ export function ProductAssistant() {
   function validateDraft() {
     const slug = createProductSlug(name);
     if (!slug) return "Enter a product name that can be used in a URL.";
+    if (isReservedProductSlug(slug)) return "This product name creates a URL reserved by another MishBaby page. Adjust the product name before creating the draft.";
     if (!image) return "Upload a product image.";
     if (!suggestion) return "Generate the product copy before creating a draft.";
     if (!validateProductSuggestion({ ...suggestion, suggestedCategorySlug: selectedCategorySlug }, categories.map((item) => item.slug))) {

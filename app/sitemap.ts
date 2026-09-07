@@ -4,6 +4,7 @@ import { getPublishedCollections } from "@/lib/collections";
 import { getPublishedGuides } from "@/lib/guides";
 import { getPublishedProducts } from "@/lib/products";
 import { siteConfig } from "@/lib/site";
+import { getProductUrl } from "@/lib/product-urls";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [categories, collections, publishedProducts, publishedGuides] = await Promise.all([
@@ -31,7 +32,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }));
 
   const productRoutes: MetadataRoute.Sitemap = publishedProducts.map((product) => ({
-    url: `${siteConfig.url}/products/${product.slug}`,
+    url: getProductUrl(siteConfig.url, product.slug),
     changeFrequency: "weekly",
     priority: 0.7,
   }));

@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { getProductPath } from "@/lib/product-urls";
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import type { ProductSearchItem } from "@/lib/products";
 
@@ -140,7 +141,7 @@ export function NavbarSearch({
     setIsOpen(false);
     setActiveSuggestionIndex(-1);
     onNavigate?.();
-    router.push(`/products/${product.slug}`);
+    router.push(getProductPath(product.slug));
   }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
