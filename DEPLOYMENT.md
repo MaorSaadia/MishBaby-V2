@@ -26,7 +26,7 @@ Use the same Sanity project and dataset for Production and Preview unless a sepa
 
 After changing any `NEXT_PUBLIC_` value, create a new deployment because public variables are fixed into the browser bundle at build time.
 
-For Umami Cloud, create a website with the domain `mishbaby.com` and use its website ID. The tracker is restricted to that hostname, excludes query strings and URL hashes, respects Do Not Track, and does not record account, authentication, API, or Studio routes. Verify page views from the production domain after redeploying; localhost and Vercel preview traffic should not appear.
+For Umami Cloud, create a website for MishBaby's production domain and use its website ID. The tracker accepts both `mishbaby.com` and `www.mishbaby.com` so analytics continue working during canonical-domain redirects. It excludes query strings and URL hashes, respects Do Not Track, and does not record account, authentication, API, or Studio routes. Verify page views from the production domain after redeploying; localhost and Vercel preview traffic should not appear.
 
 ## 3. Connect the production domain
 

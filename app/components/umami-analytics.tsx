@@ -32,7 +32,7 @@ export function UmamiAnalytics() {
         src="https://cloud.umami.is/script.js"
         strategy="afterInteractive"
         data-website-id={websiteId}
-        data-domains="mishbaby.com"
+        data-domains="mishbaby.com,www.mishbaby.com"
         data-exclude-search="true"
         data-exclude-hash="true"
         data-do-not-track="true"
