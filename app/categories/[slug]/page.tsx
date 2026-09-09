@@ -107,8 +107,8 @@ export default async function CategoryPage({ params }: PageProps<"/categories/[s
             dangerouslySetInnerHTML={{ __html: serializeStructuredData(guideListStructuredData) }}
           />
         )}
-        <section className="relative isolate overflow-hidden bg-[#f1fbfe] px-5 py-10 sm:px-8 sm:py-14 md:py-20">
-          <div className={`absolute -right-20 -top-24 -z-10 size-96 rounded-full ${getCategoryThemeClass(category.colorTheme)} blur-2xl`} />
+        <section className="relative isolate overflow-hidden border-b border-[#063f5b]/8 bg-[#f1fbfe] px-5 py-7 sm:px-8 sm:py-9">
+          <div className={`absolute -right-20 -top-32 -z-10 size-80 rounded-full ${getCategoryThemeClass(category.colorTheme)} blur-2xl`} />
           <div className="mx-auto max-w-6xl">
           <nav aria-label="Breadcrumb" className="flex min-w-0 items-center gap-2 overflow-hidden text-xs font-bold text-[#063f5b]/55 sm:text-sm">
               <Link href="/" className="shrink-0 hover:text-[#009dcc]">Home</Link>
@@ -117,33 +117,33 @@ export default async function CategoryPage({ params }: PageProps<"/categories/[s
               <span aria-hidden="true">/</span>
               <span aria-current="page" className="min-w-0 truncate text-[#063f5b]">{category.name}</span>
             </nav>
-            <div className="mt-7 grid gap-7 sm:mt-10 sm:gap-10 md:grid-cols-[1fr_auto] md:items-center">
+            <div className="mt-5 grid gap-5 sm:mt-6 md:grid-cols-[1fr_auto] md:items-center md:gap-8">
               <div>
                 <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-[#009dcc] sm:text-sm">MishBaby category</p>
-                <h1 className="mt-3 max-w-3xl break-words font-display text-4xl font-semibold leading-[1.08] tracking-[-0.05em] text-[#063f5b] sm:text-6xl sm:leading-[1.05]">{category.name}</h1>
-                <p className="mt-4 max-w-2xl text-base leading-7 text-[#063f5b]/70 sm:mt-5 sm:text-lg sm:leading-8">{category.introduction}</p>
+                <h1 className="mt-2 max-w-3xl break-words font-display text-4xl font-semibold leading-tight tracking-[-0.05em] text-[#063f5b] sm:text-5xl">{category.name}</h1>
+                <p className="mt-3 max-w-2xl text-base leading-7 text-[#063f5b]/70 sm:text-lg">{category.introduction}</p>
                 {category.topics.length > 0 && (
-                  <div className="mt-5 flex flex-wrap gap-2" aria-label={`${category.name} topics`}>
+                  <div className="mt-4 flex flex-wrap gap-2" aria-label={`${category.name} topics`}>
                     {category.topics.map((topic) => (
                       <span key={topic} className="rounded-full border border-[#063f5b]/8 bg-white px-3 py-1.5 text-xs font-bold text-[#063f5b]/70 shadow-sm">{topic}</span>
                     ))}
                   </div>
                 )}
               </div>
-              <div className={`grid size-24 place-items-center rounded-3xl ${getCategoryThemeClass(category.colorTheme)} text-4xl text-[#009dcc] shadow-[0_20px_45px_-30px_rgba(6,63,91,.4)] sm:size-32 sm:text-5xl md:size-48 md:rounded-[2.5rem] md:text-6xl`} aria-hidden="true">{category.symbol}</div>
+              <div className={`grid size-20 place-items-center rounded-3xl ${getCategoryThemeClass(category.colorTheme)} text-3xl text-[#009dcc] shadow-[0_20px_45px_-30px_rgba(6,63,91,.4)] sm:size-24 sm:text-4xl md:size-28 md:text-5xl`} aria-hidden="true">{category.symbol}</div>
             </div>
           </div>
         </section>
 
         {featuredProducts.length > 0 && (
-          <section className="bg-[#f7fcfe] px-5 py-12 sm:px-8 sm:py-16 md:py-20">
+          <section className="bg-[#f7fcfe] px-5 py-8 sm:px-8 sm:py-10">
             <div className="mx-auto max-w-6xl">
               <div className="max-w-2xl">
                 <p className="text-sm font-extrabold uppercase tracking-[0.14em] text-[#009dcc]">Featured picks</p>
                 <h2 className="mt-3 font-display text-3xl font-semibold leading-tight tracking-[-0.045em] text-[#063f5b] sm:text-4xl">Thoughtful finds for this stage.</h2>
                 <p className="mt-4 text-base leading-7 text-[#063f5b]/65">Explore useful products and compare the merchant options currently available.</p>
               </div>
-              <div className="mt-7 grid grid-cols-2 gap-3 sm:mt-9 sm:gap-5 lg:grid-cols-3">
+              <div className="mt-6 grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
                 {featuredProducts.map((product) => <ProductCard key={product.id} product={product} />)}
               </div>
             </div>

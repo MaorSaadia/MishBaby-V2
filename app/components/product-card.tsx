@@ -30,7 +30,6 @@ export function ProductCard({ product, variant = "default" }: ProductCardProps) 
       </div>
       <div className={compact ? "p-3 sm:p-5" : "p-3 sm:p-6"}>
         <h3 className={`font-extrabold tracking-[-0.03em] text-[#063f5b] ${compact ? "text-sm leading-5 sm:text-lg sm:leading-6" : "text-sm leading-5 sm:text-xl sm:leading-normal"}`}>{product.name}</h3>
-        <p className={compact ? "mt-2 line-clamp-3 text-xs leading-5 text-[#063f5b]/65 sm:text-sm sm:leading-6" : "mt-2 line-clamp-3 text-xs leading-5 text-[#063f5b]/65 sm:line-clamp-none sm:min-h-18 sm:text-sm sm:leading-6"}>{product.summary}</p>
         <div className={`border-t border-[#063f5b]/8 ${compact ? "mt-3 pt-3 sm:mt-4 sm:pt-4" : "mt-3 pt-3 sm:mt-5 sm:pt-5"}`}>
           <p className={`font-extrabold uppercase tracking-[0.12em] text-[#063f5b]/45 ${compact ? "text-[9px] sm:text-[11px]" : "text-[9px] sm:text-xs"}`}>{hasLiveOffers ? "Shop from" : "Offer status"}</p>
           {hasLiveOffers ? (

@@ -91,7 +91,7 @@ export default async function CollectionPage({ params }: PageProps<"/collections
             <h2 className="mt-3 font-display text-4xl font-semibold tracking-[-0.045em] text-[#063f5b]">Explore every thoughtful pick.</h2>
             <p className="mt-4 text-base leading-7 text-[#063f5b]/65">Open a product to learn why it may be useful and compare its available merchant offers.</p>
           </div>
-          <div className="mt-9 grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-3">
+          <div className="mt-9 grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
             {collection.products.map((product) => <ProductCard key={product.id} product={product} variant="compact" />)}
           </div>
         </div>
