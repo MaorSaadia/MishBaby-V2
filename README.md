@@ -35,6 +35,7 @@ Open [http://localhost:3000](http://localhost:3000) for the storefront and [http
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | For accounts | Public | Authorizes public Supabase Auth operations. |
 | `SUPABASE_SECRET_KEY` | For accounts | Server only | Allows authenticated server actions to manage private account data. |
 | `NEXT_PUBLIC_SITE_URL` | For accounts | Public | Absolute origin used in OAuth and authentication email redirects. |
+| `NEXT_PUBLIC_UMAMI_WEBSITE_ID` | For analytics | Public | Enables Umami Cloud analytics for the configured `mishbaby.com` website. |
 | `RESEND_MARKETING_API_KEY` | For marketing contact sync | Server only | Synchronizes opted-in account contacts with Resend. |
 | `RESEND_MARKETING_SEGMENT_ID` | For marketing contact sync | Server only | Identifies the Resend segment used for MishBaby updates. |
 | `RESEND_WEBHOOK_SECRET` | For marketing contact sync | Server only | Verifies Resend contact webhook signatures. |

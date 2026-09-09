@@ -20,10 +20,13 @@ Add these values in Vercel Project Settings → Environment Variables:
 - `NEXT_PUBLIC_SANITY_DATASET`
 - `GEMINI_API_KEY`
 - `GEMINI_MODEL` only when overriding the default model
+- `NEXT_PUBLIC_UMAMI_WEBSITE_ID` to enable production Umami analytics
 
 Use the same Sanity project and dataset for Production and Preview unless a separate test dataset is intentionally introduced later. `GEMINI_API_KEY` must remain server-only.
 
-After changing either `NEXT_PUBLIC_` value, create a new deployment because public variables are fixed into the browser bundle at build time.
+After changing any `NEXT_PUBLIC_` value, create a new deployment because public variables are fixed into the browser bundle at build time.
+
+For Umami Cloud, create a website with the domain `mishbaby.com` and use its website ID. The tracker is restricted to that hostname, excludes query strings and URL hashes, respects Do Not Track, and does not record account, authentication, API, or Studio routes. Verify page views from the production domain after redeploying; localhost and Vercel preview traffic should not appear.
 
 ## 3. Connect the production domain
 
@@ -57,6 +60,7 @@ Confirm the deployment succeeds, then check:
 - A newly published Sanity change appears after the approximately one-minute cache refresh
 - `/robots.txt` and `/sitemap.xml` use the production domain
 - An unknown URL displays the custom 404 page
+- A public page view appears in Umami without its query string, while account and Studio routes do not appear
 
 ## 6. Production checks
 

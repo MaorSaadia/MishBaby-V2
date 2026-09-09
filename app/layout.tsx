@@ -5,6 +5,7 @@ import { getProductSearchItems } from "@/lib/products";
 import { getPublishedCategories } from "@/lib/categories";
 import { siteConfig } from "@/lib/site";
 import { FavoritesProvider } from "./components/favorites-provider";
+import { UmamiAnalytics } from "./components/umami-analytics";
 import "./globals.css";
 
 const themeScript = `(() => {
@@ -61,6 +62,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
     >
       <head><script dangerouslySetInnerHTML={{ __html: themeScript }} /></head>
       <body className="flex min-h-full flex-col">
+        <UmamiAnalytics />
         <FavoritesProvider>
           <a href="#main-content" className="skip-link">Skip to main content</a>
           <Navbar products={productSearchItems} categories={categories} />
