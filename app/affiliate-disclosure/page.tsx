@@ -53,7 +53,7 @@ export default function AffiliateDisclosurePage() {
       <div className="mx-auto max-w-4xl px-5 py-14 sm:px-8 md:py-20">
         <section className="rounded-[2rem] border border-[#009dcc]/15 bg-[#e8f8fc] p-7 sm:p-9">
           <p className="text-sm font-extrabold uppercase tracking-[0.14em] text-[#009dcc]">Amazon Associates disclosure</p>
-          <p className="mt-4 font-display text-3xl font-semibold leading-tight text-[#063f5b]">As an Amazon Associate I earn from qualifying purchases.</p>
+          <p className="mt-4 font-display text-3xl font-semibold leading-tight text-[#063f5b]">As an Amazon Associate We earn from qualifying purchases.</p>
         </section>
 
         <div className="mt-12 grid gap-10">

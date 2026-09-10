@@ -1,6 +1,7 @@
 export const reservedProductSlugs = [
   "about",
   "account",
+  "advertise",
   "affiliate-disclosure",
   "aliexpress-finds",
   "amazon-finds",

@@ -64,15 +64,40 @@ export function Footer() {
             Explore
           </h2>
           <div className="mt-3 grid text-sm text-[#063f5b]/70 sm:mt-4">
-            <Link className="flex min-h-10 items-center" href="/categories">Product categories</Link>
-            <Link className="flex min-h-10 items-center" href="/amazon-finds">Amazon Finds</Link>
-            <Link className="flex min-h-10 items-center" href="/aliexpress-finds">AliExpress Finds</Link>
+            <Link className="flex min-h-10 items-center" href="/categories">
+              Product categories
+            </Link>
+            <Link className="flex min-h-10 items-center" href="/amazon-finds">
+              Amazon Finds
+            </Link>
+            <Link
+              className="flex min-h-10 items-center"
+              href="/aliexpress-finds"
+            >
+              AliExpress Finds
+            </Link>
             {/* <Link href="/collections">Curated collections</Link> */}
-            <Link className="flex min-h-10 items-center" href="/guides">Parenting guides</Link>
-            <Link className="flex min-h-10 items-center" href="/about">Our approach</Link>
-            <Link className="flex min-h-10 items-center" href="/affiliate-disclosure">Affiliate disclosure</Link>
-            <Link className="flex min-h-10 items-center" href="/privacy">Privacy policy</Link>
-            <Link className="flex min-h-10 items-center" href="/terms">Terms of use</Link>
+            <Link className="flex min-h-10 items-center" href="/guides">
+              Parenting guides
+            </Link>
+            <Link className="flex min-h-10 items-center" href="/about">
+              Our approach
+            </Link>
+            <Link className="flex min-h-10 items-center" href="/advertise">
+              Affiliate partnerships
+            </Link>
+            <Link
+              className="flex min-h-10 items-center"
+              href="/affiliate-disclosure"
+            >
+              Affiliate disclosure
+            </Link>
+            <Link className="flex min-h-10 items-center" href="/privacy">
+              Privacy policy
+            </Link>
+            <Link className="flex min-h-10 items-center" href="/terms">
+              Terms of use
+            </Link>
           </div>
         </div>
         <div>
@@ -83,7 +108,7 @@ export function Footer() {
             MishBaby may earn a commission when you shop through eligible links.
           </p>
           <p className="mt-3 text-xs leading-5 text-[#063f5b]/55">
-            As an Amazon Associate I earn from qualifying purchases.
+            As an Amazon Associate We earn from qualifying purchases.
           </p>
         </div>
       </div>
