@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import type { Product } from "@/lib/products";
-import { ProductCard } from "./product-card";
+import { BestSellerCard } from "./best-seller-card";
 
 type HomepageProductRailProps = {
   products: Product[];
@@ -59,12 +59,12 @@ export function HomepageProductRail({ products, label }: HomepageProductRailProp
         className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:gap-5"
         aria-label={label}
       >
-        {products.map((product) => (
+        {products.map((product, index) => (
           <div
             key={product.id}
             className="w-[calc((100%_-_0.75rem)/2)] shrink-0 snap-start [&>article]:h-full sm:w-[calc((100%_-_2.5rem)/3)] lg:w-[calc((100%_-_5rem)/5)]"
           >
-            <ProductCard product={product} variant="compact" />
+            <BestSellerCard product={product} rank={index + 1} />
           </div>
         ))}
       </div>
@@ -77,7 +77,7 @@ export function HomepageProductRail({ products, label }: HomepageProductRailProp
             disabled={!canMoveBackward}
             aria-controls={railId}
             aria-label={`Show previous ${label.toLowerCase()}`}
-            className="absolute left-2 top-1/2 z-30 hidden size-11 -translate-y-1/2 items-center justify-center rounded-full border border-[#063f5b]/10 bg-white/95 text-xl font-bold text-[#063f5b] shadow-lg transition hover:scale-105 hover:text-[#009dcc] focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[#009dcc] disabled:pointer-events-none disabled:opacity-40 sm:flex"
+            className="absolute left-1 top-1/2 z-30 hidden size-10 -translate-y-1/2 items-center justify-center rounded-full border border-[#063f5b]/10 bg-white/95 text-lg font-bold text-[#063f5b] shadow-lg transition hover:scale-105 hover:text-[#009dcc] focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[#009dcc] disabled:pointer-events-none disabled:opacity-40 sm:flex lg:-left-5"
           >
             <span aria-hidden="true">←</span>
           </button>
@@ -87,7 +87,7 @@ export function HomepageProductRail({ products, label }: HomepageProductRailProp
             disabled={!canMoveForward}
             aria-controls={railId}
             aria-label={`Show more ${label.toLowerCase()}`}
-            className="absolute right-2 top-1/2 z-30 hidden size-11 -translate-y-1/2 items-center justify-center rounded-full border border-[#063f5b]/10 bg-white/95 text-xl font-bold text-[#063f5b] shadow-lg transition hover:scale-105 hover:text-[#009dcc] focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[#009dcc] disabled:pointer-events-none disabled:opacity-40 sm:flex"
+            className="absolute right-1 top-1/2 z-30 hidden size-10 -translate-y-1/2 items-center justify-center rounded-full border border-[#063f5b]/10 bg-white/95 text-lg font-bold text-[#063f5b] shadow-lg transition hover:scale-105 hover:text-[#009dcc] focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[#009dcc] disabled:pointer-events-none disabled:opacity-40 sm:flex lg:-right-5"
           >
             <span aria-hidden="true">→</span>
           </button>

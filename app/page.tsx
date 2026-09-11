@@ -59,14 +59,14 @@ export default async function Home() {
         </section>
 
         {bestSellerProducts.length > 0 && (
-          <section id="best-sellers" className="relative isolate scroll-mt-20 overflow-hidden bg-[#e2f7fc] px-4 py-10 sm:px-8 sm:py-12 md:py-14">
+          <section id="best-sellers" className="relative isolate scroll-mt-20 overflow-hidden bg-[#e2f7fc] px-4 py-8 sm:px-8 sm:py-9 md:py-10">
             <div className="absolute -right-24 -top-24 -z-10 size-72 rounded-full bg-[#a8e8f5]/70 blur-3xl" />
             <div className="absolute -bottom-28 -left-24 -z-10 size-64 rounded-full bg-white/60 blur-3xl" />
             <div className="relative mx-auto max-w-6xl">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                 <div className="max-w-xl">
                   <p className="text-sm font-extrabold uppercase tracking-[0.14em] text-[#009dcc]">Popular picks</p>
-                  <h2 className="mt-2 font-display text-3xl font-semibold leading-tight tracking-[-0.045em] text-[#063f5b] sm:text-4xl">
+                  <h2 className="mt-1.5 font-display text-3xl font-semibold leading-tight tracking-[-0.045em] text-[#063f5b] sm:text-4xl">
                     <span className="relative isolate inline-block">Best Sellers<span className="absolute inset-x-0 bottom-0 -z-10 h-2 rounded-full bg-[#a8e8f5]" aria-hidden="true" /></span>
                   </h2>
                 </div>
