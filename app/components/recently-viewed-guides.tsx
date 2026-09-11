@@ -92,7 +92,7 @@ function saveHistory(guides: RecentlyViewedGuide[]) {
   }
 }
 
-export function RecentlyViewedGuides({ guide }: { guide?: RecentlyViewedGuide }) {
+export function RecentlyViewedGuides({ guide, compact = false }: { guide?: RecentlyViewedGuide; compact?: boolean }) {
   const historySnapshot = useSyncExternalStore(subscribeToHistory, getHistorySnapshot, () => "[]");
   const history = useMemo(() => parseHistory(historySnapshot), [historySnapshot]);
   const previousGuides = history
@@ -123,19 +123,19 @@ export function RecentlyViewedGuides({ guide }: { guide?: RecentlyViewedGuide })
   if (previousGuides.length === 0) return null;
 
   return (
-    <section className="border-t border-[#063f5b]/6 bg-[#f7fcfe] px-5 py-14 sm:px-8 md:py-20">
+    <section className={`border-t border-[#063f5b]/6 bg-[#f7fcfe] px-5 sm:px-8 ${compact ? "py-10 md:py-14" : "py-14 md:py-20"}`}>
       <div className="mx-auto max-w-6xl">
         <div className="flex items-end justify-between gap-5">
           <div>
             <p className="text-sm font-extrabold uppercase tracking-[0.14em] text-[#009dcc]">Continue exploring</p>
-            <h2 className="mt-3 font-display text-4xl font-semibold tracking-[-0.045em] text-[#063f5b]">Recently viewed guides.</h2>
+            <h2 className={`${compact ? "mt-2 text-3xl" : "mt-3 text-4xl"} font-display font-semibold tracking-[-0.045em] text-[#063f5b]`}>Recently viewed guides.</h2>
           </div>
           <button type="button" onClick={clearHistory} className="shrink-0 text-xs font-extrabold text-[#063f5b]/50 transition-colors hover:text-[#009dcc]">
             Clear history
           </button>
         </div>
 
-        <div className="mt-9 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className={`${compact ? "mt-6 sm:mt-8" : "mt-9"} grid gap-5 sm:grid-cols-2 lg:grid-cols-3`}>
           {previousGuides.map((historyGuide) => (
             <article key={historyGuide.slug} className="group overflow-hidden rounded-[2rem] border border-[#063f5b]/8 bg-white shadow-[0_16px_36px_-28px_rgba(6,63,91,.4)]">
               <Link href={`/guides/${historyGuide.slug}`} className="block focus-visible:outline-offset-[-3px]">

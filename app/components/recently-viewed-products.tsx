@@ -83,7 +83,7 @@ function saveHistory(products: RecentlyViewedProduct[]) {
   }
 }
 
-export function RecentlyViewedProducts({ product }: { product?: RecentlyViewedProduct }) {
+export function RecentlyViewedProducts({ product, compact = false }: { product?: RecentlyViewedProduct; compact?: boolean }) {
   const historySnapshot = useSyncExternalStore(subscribeToHistory, getHistorySnapshot, () => "[]");
   const history = useMemo(() => parseHistory(historySnapshot), [historySnapshot]);
   const previousProducts = history
@@ -114,12 +114,12 @@ export function RecentlyViewedProducts({ product }: { product?: RecentlyViewedPr
   if (previousProducts.length === 0) return null;
 
   return (
-    <section className="border-t border-[#063f5b]/6 bg-white px-5 py-14 sm:px-8 md:py-20">
+    <section className={`border-t border-[#063f5b]/6 bg-white px-5 sm:px-8 ${compact ? "py-10 md:py-14" : "py-14 md:py-20"}`}>
       <div className="mx-auto max-w-6xl">
         <div className="flex items-end justify-between gap-5">
           <div>
             <p className="text-sm font-extrabold uppercase tracking-[0.14em] text-[#009dcc]">Pick up where you left off</p>
-            <h2 className="mt-3 font-display text-4xl font-semibold tracking-[-0.045em] text-[#063f5b]">Recently viewed products.</h2>
+            <h2 className={`${compact ? "mt-2 text-3xl" : "mt-3 text-4xl"} font-display font-semibold tracking-[-0.045em] text-[#063f5b]`}>Recently viewed products.</h2>
           </div>
           <button
             type="button"
@@ -130,7 +130,7 @@ export function RecentlyViewedProducts({ product }: { product?: RecentlyViewedPr
           </button>
         </div>
 
-        <div className="mt-9 grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
+        <div className={`${compact ? "mt-6 sm:mt-8" : "mt-9"} grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4`}>
           {previousProducts.map((historyProduct) => (
             <article key={historyProduct.slug} className="group overflow-hidden rounded-2xl border border-[#063f5b]/8 bg-[#fbfeff] shadow-[0_16px_36px_-28px_rgba(6,63,91,.4)] sm:rounded-[2rem]">
               <Link href={getProductPath(historyProduct.slug)} className="block focus-visible:outline-offset-[-3px]">

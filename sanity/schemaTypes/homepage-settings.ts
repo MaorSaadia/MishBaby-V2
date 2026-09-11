@@ -7,9 +7,9 @@ export const homepageSettingsType = defineType({
   fields: [
     defineField({
       name: "featuredProducts",
-      title: "Featured products",
+      title: "Best sellers",
       type: "array",
-      description: "Choose up to 12 published products and drag them into the order shown on the homepage.",
+      description: "Choose up to 12 published products and drag them into the order shown in the homepage Best Sellers rail.",
       of: [
         defineArrayMember({
           type: "reference",
@@ -21,7 +21,7 @@ export const homepageSettingsType = defineType({
   ],
   preview: {
     prepare() {
-      return { title: "Homepage featured products" };
+      return { title: "Homepage best sellers" };
     },
   },
 });

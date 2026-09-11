@@ -209,6 +209,33 @@ body {
 
 :root[data-theme="dark"] ::selection { background: #27758a; color: #ffffff; }
 
+@keyframes homepage-hero-rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes homepage-hero-image-in {
+  from { opacity: 0; transform: translateY(10px) scale(.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes homepage-accent-float {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(-8px, 7px, 0); }
+}
+
+.homepage-hero-copy {
+  animation: homepage-hero-rise 600ms cubic-bezier(.22, 1, .36, 1) both;
+}
+
+.homepage-hero-product {
+  animation: homepage-hero-image-in 700ms 100ms cubic-bezier(.22, 1, .36, 1) both;
+}
+
+.homepage-float-accent {
+  animation: homepage-accent-float 9s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
