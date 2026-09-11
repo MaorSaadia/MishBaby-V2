@@ -1,4 +1,5 @@
 import { cache } from "react";
+import { contentRevalidateSeconds } from "@/lib/content-cache";
 import { getPublishedProducts, type Product } from "@/lib/products";
 import { sanityClient } from "@/sanity/lib/client";
 
@@ -36,7 +37,7 @@ const publishedCollectionsQuery = `
 
 export const getPublishedCollections = cache(async () => {
   const [records, products] = await Promise.all([
-    sanityClient.fetch<CollectionRecord[]>(publishedCollectionsQuery, {}, { next: { revalidate: 60 } }),
+    sanityClient.fetch<CollectionRecord[]>(publishedCollectionsQuery, {}, { next: { revalidate: contentRevalidateSeconds } }),
     getPublishedProducts(),
   ]);
   const productsById = new Map(products.map((product) => [product.id, product]));

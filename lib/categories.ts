@@ -1,4 +1,5 @@
 import { cache } from "react";
+import { contentRevalidateSeconds } from "@/lib/content-cache";
 import type { CategoryTheme } from "@/lib/category-themes";
 import { sanityClient } from "@/sanity/lib/client";
 
@@ -37,7 +38,7 @@ const publishedCategoriesQuery = `
 `;
 
 export const getPublishedCategories = cache(async () => {
-  return sanityClient.fetch<Category[]>(publishedCategoriesQuery, {}, { next: { revalidate: 60 } });
+  return sanityClient.fetch<Category[]>(publishedCategoriesQuery, {}, { next: { revalidate: contentRevalidateSeconds } });
 });
 
 export async function getCategoryBySlug(slug: string) {

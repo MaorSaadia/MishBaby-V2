@@ -53,6 +53,14 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
     getProductSearchItems(),
     getPublishedCategories(),
   ]);
+  // Only serialize fields the client navigation uses into every page's RSC payload.
+  const navigationCategories = categories.map(({ id, slug, name, symbol, colorTheme }) => ({
+    id,
+    slug,
+    name,
+    symbol,
+    colorTheme,
+  }));
 
   return (
     <html
@@ -65,7 +73,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         <UmamiAnalytics />
         <FavoritesProvider>
           <a href="#main-content" className="skip-link">Skip to main content</a>
-          <Navbar products={productSearchItems} categories={categories} />
+          <Navbar products={productSearchItems} categories={navigationCategories} />
           <main id="main-content" tabIndex={-1} className="flex-1">{children}</main>
           <Footer />
         </FavoritesProvider>

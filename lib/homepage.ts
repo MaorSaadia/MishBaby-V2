@@ -1,4 +1,5 @@
 import { cache } from "react";
+import { contentRevalidateSeconds } from "@/lib/content-cache";
 import { getPublishedProducts, type Product } from "@/lib/products";
 import { sanityClient } from "@/sanity/lib/client";
 
@@ -9,7 +10,7 @@ export const getHomepageFeaturedProducts = cache(async () => {
     sanityClient.fetch<string[] | null>(
       `*[_type == "homepageSettings" && _id == "homepageSettings"][0].featuredProducts[]._ref`,
       {},
-      { next: { revalidate: 60 } },
+      { next: { revalidate: contentRevalidateSeconds } },
     ),
     getPublishedProducts(),
   ]);

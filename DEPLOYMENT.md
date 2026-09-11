@@ -57,7 +57,7 @@ Confirm the deployment succeeds, then check:
 - A guide page and its related content load
 - `/studio` requires Sanity authentication
 - Product and Guide Assistants generate drafts
-- A newly published Sanity change appears after the approximately one-minute cache refresh
+- A newly published Sanity change appears after the hourly cache lifetime expires and a visit triggers background revalidation; subsequent visits should show the update after it succeeds
 - `/robots.txt` and `/sitemap.xml` use the production domain
 - An unknown URL displays the custom 404 page
 - A public page view appears in Umami without its query string, while account and Studio routes do not appear
@@ -71,3 +71,15 @@ Confirm the deployment succeeds, then check:
 - Rotate the Gemini key immediately if it is ever exposed.
 
 A strict Content Security Policy is intentionally deferred. The embedded Sanity Studio loads several external resources, so its policy should be tested separately before enforcement rather than added broadly and risk breaking editorial access.
+
+## 7. ISR usage
+
+Published CMS fetches share the one-hour lifetime in `lib/content-cache.ts`. This includes the categories and product search index used by the root layout. A shorter lifetime on a shared fetch can lower the revalidation interval of every prerendered route that uses it. Revalidation is request-driven, so an unvisited page does not refresh on an hourly timer. Live Amazon and AliExpress API caches are managed separately.
+
+The root layout passes only the category fields used by navigation to the client. Keep client props small: serializing the full catalog or editorial content into a shared component increases the payload stored with every affected page.
+
+After deploying, filter Vercel's ISR usage to this project (the team overview can include other projects). Compare daily read/write units alongside traffic and publishing activity over several days. If available, use route-level ISR observability to identify pages with poor write utilization. Units measure 8 KB of data, not page views or regenerations. Unchanged regeneration output does not incur ISR write units, so a longer interval does not imply proportional billing savings.
+
+For faster publishing with fewer scheduled revalidations, a future improvement is a signature-verified Sanity webhook with tagged, on-demand revalidation and a longer fallback lifetime. Configure and test the webhook before relying on it for freshness; there is no Sanity revalidation webhook configured in this repository today.
+
+See [Vercel's ISR optimization guidance](https://vercel.com/docs/incremental-static-regeneration/limits-and-pricing#optimizing-isr-reads-and-writes).

@@ -1,4 +1,5 @@
 import { cache } from "react";
+import { contentRevalidateSeconds } from "@/lib/content-cache";
 import type { CategoryTheme } from "@/lib/category-themes";
 import { getPublishedProducts, type Product } from "@/lib/products";
 import { sanityClient } from "@/sanity/lib/client";
@@ -85,7 +86,7 @@ const guidesQuery = `
 `;
 
 export const getGuides = cache(async () => {
-  return sanityClient.fetch<Guide[]>(guidesQuery, {}, { next: { revalidate: 60 } });
+  return sanityClient.fetch<Guide[]>(guidesQuery, {}, { next: { revalidate: contentRevalidateSeconds } });
 });
 
 export async function getPublishedGuides() {
