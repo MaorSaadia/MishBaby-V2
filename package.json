@@ -12,6 +12,7 @@
     "postinstall": "npm run build:creators-api-sdk",
     "start": "next start",
     "lint": "eslint",
+    "test:sanity-webhook": "node --experimental-vm-modules --test tests/sanity-webhook.test.mjs",
     "sync:marketing-contacts": "node --env-file=.env.local scripts/sync-resend-marketing-contacts.mjs",
     "test:aliexpress-api": "node --env-file=.env.local scripts/test-aliexpress-api.mjs",
     "compare:aliexpress-api": "node --env-file=.env.local scripts/compare-aliexpress-advanced-api.mjs"

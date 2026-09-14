@@ -1,5 +1,5 @@
 import { cache } from "react";
-import { contentRevalidateSeconds } from "@/lib/content-cache";
+import { contentCacheTags, contentRevalidateSeconds } from "@/lib/content-cache";
 import { getPublishedProducts, type Product } from "@/lib/products";
 import { sanityClient } from "@/sanity/lib/client";
 
@@ -28,7 +28,7 @@ export const getHomepageProductSections = cache(async (): Promise<HomepageProduc
         "bestSellerProductIds": featuredProducts[]._ref
       }`,
       {},
-      { next: { revalidate: contentRevalidateSeconds } },
+      { next: { revalidate: contentRevalidateSeconds, tags: [contentCacheTags.homepageSettings] } },
     ),
     getPublishedProducts(),
   ]);

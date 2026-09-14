@@ -1,5 +1,5 @@
 import { cache } from "react";
-import { contentRevalidateSeconds } from "@/lib/content-cache";
+import { contentCacheTags, contentRevalidateSeconds } from "@/lib/content-cache";
 import { sanityClient } from "@/sanity/lib/client";
 
 export type Merchant = {
@@ -98,7 +98,12 @@ const publishedProductsQuery = `
 `;
 
 export const getPublishedProducts = cache(async () => {
-  return sanityClient.fetch<Product[]>(publishedProductsQuery, {}, { next: { revalidate: contentRevalidateSeconds } });
+  return sanityClient.fetch<Product[]>(publishedProductsQuery, {}, {
+    next: {
+      revalidate: contentRevalidateSeconds,
+      tags: [contentCacheTags.product, contentCacheTags.category, contentCacheTags.merchant, contentCacheTags["sanity.imageAsset"]],
+    },
+  });
 });
 
 const productSearchItemsQuery = `
@@ -120,7 +125,12 @@ const productSearchItemsQuery = `
 `;
 
 export const getProductSearchItems = cache(async () => {
-  return sanityClient.fetch<ProductSearchItem[]>(productSearchItemsQuery, {}, { next: { revalidate: contentRevalidateSeconds } });
+  return sanityClient.fetch<ProductSearchItem[]>(productSearchItemsQuery, {}, {
+    next: {
+      revalidate: contentRevalidateSeconds,
+      tags: [contentCacheTags.product, contentCacheTags["sanity.imageAsset"]],
+    },
+  });
 });
 
 export async function getProductsByCategory(categorySlug: string) {
